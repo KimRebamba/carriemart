@@ -8,6 +8,7 @@
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
     <style>
+
     .hero-row {
         align-items: stretch;
     }
@@ -261,6 +262,8 @@
         opacity: 1;
         transform: scale(1.02);
     }
+
+    
     </style>
 </head>
 
@@ -313,7 +316,7 @@
                     Add to the mood with your own musical instrument. Whether it be a piano, guitar, or just your voice!
                     Make your own vibe here, in CarrieMart. :)</p>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-                    <button type="button" class="btn btn-primary btn-lg px-4 me-md-2">Sign in</button>
+                    <a href="./login.php"><button type="button" class="btn btn-primary btn-lg px-4 me-md-2">Sign in</button></a>
                     <button type="button" class="btn btn-outline-secondary btn-lg px-4">Look around :P</button>
                 </div>
             </div>
@@ -397,7 +400,7 @@
     <!-- partnerships -->
     <section class="mt-4 mt-lg-4 pt-0 mb-0">
         <div class="container col-xxl-8 px-4">
-            <h2 class="pb-3 border-bottom display-0 mb-1" style="text-align:center;">Trusted PH Distributor by Companies such as:</h2>
+            <h2 class="pb-3 border-bottom display-0 mb-1" style="text-align:center;">Trusted by musicians and major brands across the Philippines</h2>
             <div class="row justify-content-center text-center g-4 border-bottom">
                 <div class="col-6 col-sm-4 col-md-3 pt-3 pb-4 d-flex justify-content-center">
                     <img src="./assets/me.jfif" alt="Partner 1" class="brand-logo">
