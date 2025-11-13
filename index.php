@@ -39,7 +39,12 @@
         flex: 0 1 420px;
     }
 
-    @media (max-width: 991.98px) { /*to make avatar and search share line on <lg*/
+    .avatar-dropdown {
+        flex-shrink: 0;
+    }
+
+    /* make search and avatar share line on <lg */
+    @media (max-width: 991.98px) {
         .search-form {
             flex-basis: 70%;
             max-width: 70%;
@@ -112,7 +117,6 @@
     <!-- hero -->
     <div class="container col-xxl-8 px-4 pt-3 pb-4 pt-lg-5 pb-lg-1">
         <div class="row hero-row g-4 g-lg-5">
-
             <div class="col-lg-6">
                 <h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">The Best Music Store in Taguig</h1>
                 <p class="lead">Listening to Clair De Lune as you gaze at the beautiful moon outside your window?
