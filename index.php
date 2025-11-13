@@ -1,0 +1,219 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carriemart: Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <style>
+
+    .hero-row {
+        align-items: stretch;
+    }
+
+    .hero-carousel {
+        width: 100%;
+        max-width: 640px;
+        aspect-ratio: 640 / 427;
+        /* because its items won't stay fixed size for some reason */
+    }
+
+    @media (min-width: 1400px) { /* for return xxl */
+        .hero-carousel {
+            width: 640px;
+        }
+    }
+
+
+    .hero-carousel .carousel-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        /* fills 640×427 - idk its the size of that pexel pic */
+    }
+
+    /*to center search and avatar*/
+    .search-form {
+        flex: 0 1 420px;
+    }
+
+    @media (max-width: 991.98px) { /*to make avatar and search share line on <lg*/
+        .search-form {
+            flex-basis: 70%;
+            max-width: 70%;
+        }
+    }
+
+    @media (min-width: 992px) {
+        .search-form {
+            flex-basis: 420px;
+        }
+    }
+    
+    .feature-icon-small {
+        width: 3rem;
+        height: 3rem;
+        padding: .25rem;
+    }
+
+    .feature-icon-small img {
+        display: block;
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+        filter: brightness(0) invert(1);
+        /* turn black SVGs white */
+    }
+    </style>
+</head>
+
+<body>
+    <header class="p-3 mb-3 border-bottom">
+        <div class="container">
+
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"> <a
+                    href="#" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
+                    <img src="./assets/Header-Logo-01.svg" alt="Carriemart logo" width="40" height="40" class="me-2">
+                </a>
+                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                    <li><a href="#" class="nav-link px-2 link-secondary">Home</a></li>
+                    <li><a href="#" class="nav-link px-2 link-body-emphasis">Categories</a></li>
+                    <li><a href="#" class="nav-link px-2 link-body-emphasis">Products</a></li>
+                    <li><a href="#" class="nav-link px-2 link-body-emphasis">Vouchers</a></li>
+                </ul>
+
+                <form class="search-form d-flex mb-0 me-2 me-lg-3" role="search">
+                    <input type="search" class="form-control w-100" placeholder="Search..." aria-label="Search">
+                </form>
+
+                <!-- profile pic user dropdown -->
+                <div class="dropdown text-end avatar-dropdown align-self-center">
+                    <a href="#"
+                        class="d-inline-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="./assets/me.jfif" alt="mdo" width="32" height="32" class="rounded-circle">
+                    </a>
+                    <ul class="dropdown-menu text-small">
+                        <li><a class="dropdown-item" href="#">New project...</a></li>
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="#">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- hero -->
+    <div class="container col-xxl-8 px-4 pt-3 pb-4 pt-lg-5 pb-lg-1">
+        <div class="row hero-row g-4 g-lg-5">
+
+            <div class="col-lg-6">
+                <h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">The Best Music Store in Taguig</h1>
+                <p class="lead">Listening to Clair De Lune as you gaze at the beautiful moon outside your window?
+                    Add to the mood with your own musical instrument. Whether it be a piano, guitar, or just your voice!
+                    Make your own vibe here, in CarrieMart. :)</p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    <button type="button" class="btn btn-primary btn-lg px-4 me-md-2">Sign in</button>
+                    <button type="button" class="btn btn-outline-secondary btn-lg px-4">Look around :P</button>
+                </div>
+            </div>
+
+            <!-- carousel column second -->
+            <div class="col-12 col-lg-6 d-flex">
+                <div class="hero-carousel mx-auto mx-lg-0">
+                    <div id="carouselExampleIndicators" class="carousel slide">
+                        <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0"
+                                class="active" aria-current="true" aria-label="Slide 1"></button>
+                            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
+                                aria-label="Slide 2"></button>
+                            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
+                                aria-label="Slide 3"></button>
+                        </div>
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="./assets/guitar.jpg" alt="...">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="./assets/piano.jpg" alt="...">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="./assets/mic.jpg" alt="...">
+                            </div>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
+                            data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
+                            data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- features -->
+    <div class="container px-4 pt-2 pb-4 pt-lg-5 pb-lg-5">
+        <h2 class="pb-3 border-bottom">What to expect <em>(Spoilers: a lot)</em></h2>
+        <div class="row row-cols-1 row-cols-md-2 align-items-md-center g-4 g-lg-5 pt-4">
+            
+            <div class="col d-flex flex-column align-items-start gap-2">
+                <h2 class="fw-bold text-body-emphasis">Register now for more features! No tracking. Shop safely, as you should. <em>- our web dev guy</em></h2>
+                <p class="text-body-secondary">You probably won't be able to checkout items when you don't have an account but hey that's security, baby!</p> <a
+                    href="#" class="btn btn-primary btn-lg">Create an account</a>
+            </div>
+            <div class="col">
+                <div class="row row-cols-1 row-cols-sm-2 g-4">
+                    <div class="col d-flex flex-column gap-2">
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
+                            <img src="./assets/bug.svg" alt="Admin Panel icon">
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-body-emphasis">Admin Panel</h4>
+                        <p class="text-body-secondary">CRUD transactions, website info, and more.</p>
+                    </div>
+
+                    <div class="col d-flex flex-column gap-2">
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
+                            <img src="./assets/bag-fill.svg" alt="Cart System icon">
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-body-emphasis">Cart System</h4>
+                        <p class="text-body-secondary">Register, add-to-cart, and checkout your items today.</p>
+                    </div>
+
+                    <div class="col d-flex flex-column gap-2">
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
+                            <img src="./assets/briefcase.svg" alt="Employee Panel icon">
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-body-emphasis">Employee Panel</h4>
+                        <p class="text-body-secondary">If you're an employee here, hello fellow carriemite!</p>
+                    </div>
+
+                    <div class="col d-flex flex-column gap-2">
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
+                            <img src="./assets/box-seam.svg" alt="Refunds icon">
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-body-emphasis">Refunds!!!</h4>
+                        <p class="text-body-secondary">In case something goes wrong, return products before shipping.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
+    </script>
+</body>
+
+</html>
