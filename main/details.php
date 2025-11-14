@@ -209,9 +209,9 @@
                         </svg>
                     </span>
                 </div>
-                <div class="mb-2">
-                    <span class="badge text-bg-success">In stock</span>
-                </div>
+                <div class="mb-2 d-flex align-items-center">
+    <span class="badge text-bg-success fw-normal">Stock: 120</span>
+</div>
                 <div class="h4 mb-3">$129.99</div>
 
                 <div class="qty-wrap mb-2">
@@ -351,7 +351,7 @@
     <div class="section-divider"><hr></div>
 
     <!-- SECTION 3 -->
-    <section class="container section">
+    <section class="container section rating-reviews">
         <div class="row g-4">
            
             <div class="col-12 col-lg-4">
@@ -363,6 +363,18 @@
                     </svg>
                 </div>
                 <div class="text-muted">1,245 reviews</div>
+
+                <div class="d-flex align-items-center gap-2 mt-3">
+                    
+                <select class="form-select form-select-sm" aria-label="Sort by" style="width: 180px;">
+                    <option selected>Sort by</option>
+                    <option value="popular">Most Popular</option>
+                    <option value="rating">Highest Rated</option>
+                    <option value="priceLow">Price: Low to High</option>
+                    <option value="priceHigh">Price: High to Low</option>
+                    <option value="newest">Newest</option>
+                </select>
+            </div>
             </div>
 
             <!-- List + pagination -->
@@ -393,7 +405,7 @@
                 <nav class="d-flex justify-content-end" aria-label="Reviews pagination">
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item disabled"><span class="page-link">Previous</span></li>                        
-                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                        <li class="page-item"><a class="page-link" href="#rating-reviews">Next</a></li>
                     </ul>
                 </nav>
             </div>
