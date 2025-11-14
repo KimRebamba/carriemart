@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carriemart: Home</title>
+    <title>CarrieMart: Home</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
@@ -421,8 +421,7 @@
                 <h2 class="fw-semibold text-body-emphasis">Register now for more features! No tracking. Shop safely, as you
                     should. <em>- our web dev guy</em></h2>
                 <p class="text-body-secondary">You probably won't be able to checkout items when you don't have an
-                    account but hey that's security, baby!</p> <a href="#" class="btn btn-primary btn-lg">Create an
-                    account</a>
+                    account but hey that's security, baby!</p> 
             </div>
             <div class="col">
                 <div class="row row-cols-1 row-cols-sm-2 g-4">
@@ -459,7 +458,7 @@
                             <img src="./assets/box-seam.svg" alt="Refunds icon">
                         </div>
                         <h4 class="fw-semibold mb-0 text-body-emphasis">Refunds!!!</h4>
-                        <p class="text-body-secondary">In case something goes wrong, return products before shipping.
+                        <p class="text-body-secondary">In case something goes wrong, return products upon arrival.
                         </p>
                     </div>
                 </div>
@@ -495,7 +494,7 @@
 
     <!--footer-->
     <hr>
-    <footer class="container py-5">
+     <footer class="container py-lg-5 py-md-4 py-3">
         <div class="row">
             <div class="col-12 col-md">
                 <img src="./assets/Header-Logo-01.svg" width="50" height="50" class="d-block mb-2"

@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrieart: Login</title>
+    <title>CarrieMart: Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
     .form-signin {
-        background-color: #ffffff;
         border-radius: 1rem;
         max-width: 430px;
         padding: 1rem;
@@ -68,10 +67,10 @@
 
             <div class="row g-2">
                 <div class="col-8">
-                    <button type="button" class="btn btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-2 btn-icon">
+                    <a href="./register.php"><button type="button" class="btn btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-2 btn-icon">
                         Create an account
                         <img src="./assets/plus-circle.svg" alt="" aria-hidden="true">
-                    </button>
+                    </button></a>
                 </div>
                 <div class="col-4">
                     <button type="button" class="btn btn-outline-secondary w-100 d-inline-flex align-items-center justify-content-center gap-2 btn-icon-inverted " onclick="history.back()">
