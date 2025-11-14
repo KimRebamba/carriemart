@@ -414,10 +414,10 @@
 
     
     <div class="section-divider"><hr></div>
-    <footer class="container py-lg-5 py-md-4 py-3">
+    <footer class="container py-lg-2 py-md-4 py-3">
         <div class="row">
             <div class="col-12 col-md">
-                <img src="./assets/Header-Logo-01.svg" width="50" height="50" class="d-block mb-2"
+                <img src="../assets/Header-Logo-01.svg" width="50" height="50" class="d-block mb-2"
                     alt="Carriemart logo">
                 <small class="d-block mb-3 text-body-secondary">© CarrieMart - 2025 <br>
                     <br> Made by: <br>
