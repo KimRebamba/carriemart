@@ -109,17 +109,18 @@
 
     <!-- Go Back line -->
     <div class="container mb-3">
-        <a href="./index.php" class="back-line rounded-2">
-            <svg class="icons" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
-</svg>
+        <a href="#" class="back-line rounded-2"
+           onclick="history.back(); return false;">
+            <svg class="icons" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+            </svg>
             <span>Go Back</span>
         </a>
     </div>
 
     <!-- Filters toolbar -->
     <div class="container mb-3">
-        <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center justify-content-start">
             <div class="d-flex align-items-center gap-2">
                 <button class="btn btn-outline-secondary btn-sm"
                         type="button" data-bs-toggle="offcanvas"
@@ -139,7 +140,7 @@
                     <option value="newest">Newest</option>
                 </select>
             </div>
-            <small class="text-muted">Showing 25 products</small>
+            <small class="text-muted" style="margin-left: 1rem;">Showing 25 products</small>
         </div>
     </div>
 
@@ -212,12 +213,13 @@
                     <button class="btn btn-primary btn-sm flex-grow-1">Buy Now</button>
                     <button class="btn btn-outline-secondary btn-sm flex-grow-1">Add to Cart</button>
                 </div>
-            
-                <a href="product-details.php?id=1" class="stretched-link" aria-label="View Wireless Headphones"></a>
+                <a href="./details.php" class="stretched-link" aria-label="View Wireless Headphones"></a>
             </div>
 
         </div>
     </div>
+
+    
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
