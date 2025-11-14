@@ -270,7 +270,6 @@
 <body>
     <header class="p-3 mb-3 border-bottom">
         <div class="container">
-
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"> <a
                     href="#" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
                     <img src="./assets/Header-Logo-01.svg" alt="Carriemart logo" width="40" height="40" class="me-2">
@@ -278,7 +277,7 @@
                 <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                     <li><a href="#" class="nav-link px-2 link-secondary">Home</a></li>
                     <li><a href="#" class="nav-link px-2 link-body-emphasis">Categories</a></li>
-                    <li><a href="#" class="nav-link px-2 link-body-emphasis">Products</a></li>
+                    <li><a href="./main/index.php" class="nav-link px-2 link-body-emphasis">Products</a></li>
                     <li><a href="#" class="nav-link px-2 link-body-emphasis">Vouchers</a></li>
                 </ul>
 
@@ -403,10 +402,16 @@
             <h2 class="pb-3 border-bottom display-0 mb-1" style="text-align:center;">Trusted by musicians and major brands across the Philippines</h2>
             <div class="row justify-content-center text-center g-4 border-bottom">
                 <div class="col-6 col-sm-4 col-md-3 pt-3 pb-4 d-flex justify-content-center">
-                    <img src="./assets/me.jfif" alt="Partner 1" class="brand-logo">
+                    <img src="./assets/yamaha.png" alt="Partner 1" class="brand-logo">
                 </div>
                 <div class="col-6 col-sm-4 col-md-3 pt-3 pb-4 d-flex justify-content-center">
-                    <img src="./assets/me.jfif" alt="Partner 1" class="brand-logo">
+                    <img src="./assets/roland.png" alt="Partner 1" class="brand-logo">
+                </div>
+                <div class="col-6 col-sm-4 col-md-3 pt-3 pb-4 d-flex justify-content-center">
+                    <img src="./assets/fifine.png" alt="Partner 1" class="brand-logo" style="opacity: 1;">
+                </div>
+                <div class="col-6 col-sm-4 col-md-3 pt-3 pb-4 d-flex justify-content-center">
+                    <img src="./assets/fender.png" alt="Partner 1" class="brand-logo">
                 </div>
                 <!-- add more logos, db-->
             </div>
