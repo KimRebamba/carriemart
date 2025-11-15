@@ -98,10 +98,9 @@
         </a>
     </div>
 
-    <div class="container mb-3">
-        <div class="d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">All Vouchers</h5>
-            <small class="text-muted">Showing 8 vouchers</small>
+   <div class="container mb-3">
+        <div class="d-flex align-items-center justify-content-start">
+            <small class="text-muted" style="">Showing 8 vouchers</small>
         </div>
     </div>
     

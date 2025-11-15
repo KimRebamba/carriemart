@@ -168,7 +168,7 @@
                         <div class="desc">Manage brand profiles and assets.</div>
                     </div>
                 </a>
-                <a href="#carriecart" class="tile tile--cart" style="background-image:url('../assets/cart.jpg');">
+                <a href="/carriemart/main/cart.php" class="tile tile--cart" style="background-image:url('../assets/cart.jpg');">
                     <div class="caption">
                         <div class="title">CarrieCart</div>
                         <div class="desc">View and recover active carts.</div>
@@ -223,5 +223,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-</body>
+
+    <!-- The / means start from the web root, lets use this later so that we
+     dont have to put the header and footer each time. COOOOOLL -->
+    </body>
+
+
 </html>
