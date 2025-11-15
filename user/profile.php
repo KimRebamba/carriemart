@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CarrieMart: Account Overview</title>
+    <title>CarrieMart: Profile</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
@@ -123,12 +123,12 @@
 
                     <hr class="">
 
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 mb-3">
                         <a href="/carriemart/user/settings.php"
                            class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2 btn-icon"
                            style="flex:2 1 0%;">
                             Edit Account Information
-                            <img src="/carriemart/assets/person-gear.svg" alt="" aria-hidden="true">
+                            <img src="/carriemart/assets/person-fill-gear.svg" alt="" aria-hidden="true">
                         </a>
                         <button type="button"
                             class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center justify-content-center gap-2 btn-icon-inverted"
@@ -142,6 +142,7 @@
         </main>
     </div>
 
+    <!-- thank you https://www.bootdey.com/snippets/view/account-settings#css - used some code lol -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>

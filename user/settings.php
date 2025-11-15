@@ -130,7 +130,7 @@
 
                         <hr class="my-4">
 
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 mb-3">
                             <button class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2 btn-icon"
                                 type="submit" style="flex: 2 1 0%;">
                                 Save changes

@@ -295,8 +295,8 @@
                     <ul class="dropdown-menu text-small">                
                         <li><a class="dropdown-item" href="/carriemart/user/profile.php">Profile</a></li>
                          <li><a class="dropdown-item" href="/carriemart/main/cart.php">CarrieCart</a></li>
-                        <li><a class="dropdown-item" href="#">Orders</a></li>
-                        <li><a class="dropdown-item" href="#">Reviews</a></li>
+                        <li><a class="dropdown-item" href="/carriemart/user/orders.php">Orders</a></li>
+                        <li><a class="dropdown-item" href="/carriemart/user/reviews.php">Reviews</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>

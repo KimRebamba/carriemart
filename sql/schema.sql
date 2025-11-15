@@ -1,4 +1,3 @@
-
 SET FOREIGN_KEY_CHECKS=0;
 
 CREATE DATABASE IF NOT EXISTS carriemart DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
@@ -44,13 +43,11 @@ CREATE TABLE suppliers (
 CREATE TABLE categories (
   category_id INT AUTO_INCREMENT PRIMARY KEY,
   category_name VARCHAR(100) NOT NULL UNIQUE,
-  url_name VARCHAR(120) NOT NULL UNIQUE, -- slug, name for urls
   description TEXT,
   photo_url VARCHAR(500),
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_categories_name (category_name),
-  INDEX idx_categories_slug (url_name)
+  INDEX idx_categories_name (category_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE brands (
@@ -176,10 +173,8 @@ CREATE TABLE orders (
   delivery_recipient VARCHAR(100) DEFAULT NULL,
   delivery_address VARCHAR(255) DEFAULT NULL,
   delivery_phone VARCHAR(30) DEFAULT NULL,
-  subtotal DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-  discount_amount DECIMAL(12,2) DEFAULT 0.00,
+  percent_sale INT DEFAULT 0,  
   delivery_fee DECIMAL(12,2) DEFAULT 0.00,
-  total_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
   completed_at TIMESTAMP NULL DEFAULT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_orders_user (user_id),
@@ -194,6 +189,7 @@ CREATE TABLE product_order (
   product_id INT NOT NULL,
   quantity INT NOT NULL DEFAULT 1,
   unit_price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  item_status ENUM('pending','processing','shipped','delivered','returned','refunded','cancelled') DEFAULT 'pending',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_product_order_order (order_id),
   INDEX idx_product_order_product (product_id),
@@ -201,29 +197,18 @@ CREATE TABLE product_order (
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE returns (
-  return_id INT AUTO_INCREMENT PRIMARY KEY,
-  order_id INT DEFAULT NULL,
-  return_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE product_return (
+  product_return_id INT AUTO_INCREMENT PRIMARY KEY,
+  product_order_id INT NOT NULL,
+  quantity_returned INT NOT NULL DEFAULT 1,
+  reason VARCHAR(255) DEFAULT NULL,
+  cond ENUM('new','opened','damaged','other') DEFAULT 'other',
   return_status ENUM('requested','approved','rejected','processed') DEFAULT 'requested',
   refund_amount DECIMAL(12,2) DEFAULT 0.00,
   processed_at TIMESTAMP NULL DEFAULT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_returns_order (order_id),
-  FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE product_return (
-  product_return_id INT AUTO_INCREMENT PRIMARY KEY,
-  return_id INT NOT NULL,
-  product_id INT NOT NULL,
-  quantity_returned INT NOT NULL DEFAULT 1,
-  reason VARCHAR(255) DEFAULT NULL,
-  cond ENUM('new','opened','damaged','other') DEFAULT 'other',
-  INDEX idx_product_return_return (return_id),
-  INDEX idx_product_return_product (product_id),
-  FOREIGN KEY (return_id) REFERENCES returns(return_id) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE RESTRICT ON UPDATE CASCADE
+  INDEX idx_product_return_po (product_order_id),
+  FOREIGN KEY (product_order_id) REFERENCES product_order(product_order_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE expenses (
@@ -241,22 +226,19 @@ CREATE TABLE expenses (
 
 CREATE TABLE product_review (
   review_id INT AUTO_INCREMENT PRIMARY KEY,
-  product_id INT NOT NULL,
+  product_order_id INT NOT NULL,
   user_id INT DEFAULT NULL,
-  order_id INT DEFAULT NULL,
   rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
   review_title VARCHAR(150),
   review_text TEXT,
-  is_verified_purchase TINYINT(1) DEFAULT 0,
+  is_verified TINYINT(1) DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_product_review_product (product_id),
   INDEX idx_product_review_user (user_id),
-  INDEX idx_product_review_order (order_id),
+  INDEX idx_product_review_po (product_order_id),
   INDEX idx_product_review_rating (rating),
-  UNIQUE KEY ux_product_review_user_product (user_id, product_id),
-  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES accounts(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
-  FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE SET NULL ON UPDATE CASCADE
+  UNIQUE KEY ux_product_review_user_line (user_id, product_order_id),
+  FOREIGN KEY (product_order_id) REFERENCES product_order(product_order_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES accounts(user_id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS=1;
