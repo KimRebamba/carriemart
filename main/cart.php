@@ -172,7 +172,7 @@
                 <li><a class="dropdown-item" href="#" data-action="checkout">Checkout</a></li>
             </ul>
         </div>
-        <button type="button" class="btn btn-primary px-5" id="confirmActionBtn">Confirm</button>
+        <a href="/carriemart/main/checkout.php"><button type="button" class="btn btn-primary px-5" id="confirmActionBtn">Confirm</button></a>
     </div>
 </div>
 
