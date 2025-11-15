@@ -82,6 +82,8 @@
 .order-list { display: grid; grid-template-columns: 1fr; gap: 1rem; }
 .order-card { background: #fff; border-radius: .5rem; border:1px solid transparent; transition:border-color .15s ease; }
 .order-card:hover { border-color: rgba(0,0,0,.2); }
+/* make each order less wide */
+.order-card { max-width: 900px; margin: 0 auto; }
 
 .order-header {
     display: flex; justify-content: space-between; align-items: center;
@@ -114,23 +116,17 @@
 .product-list { display: grid; gap: .5rem; }
 .product-row {
     display: grid;
-    grid-template-columns: 2fr 1.2fr 110px 80px 220px; /* Title | Brand | Price | Qty | Actions */
+    grid-template-columns: 2fr 1.2fr 110px 80px 180px; /* Title | Brand | Price | Qty | Actions */
     column-gap: .75rem;
     row-gap: .25rem;
     padding: .5rem .75rem; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: .375rem;
     align-items: center;
 }
-.product-row .label { color: var(--bs-secondary-color); font-size: .85rem; }
 .product-row .price { font-weight: 600; text-align: right; }
 .product-row .qty { text-align: right; white-space: nowrap; }
-.product-row .title, .product-row .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-
-/* Per-line actions */
-.product-actions { display: flex; flex-direction: column; align-items: stretch; gap: .5rem; width: 100%; }
-.product-actions .btn { width: 100%; }
 
 @media (max-width: 768px) {
-  .product-row { grid-template-columns: 1.7fr 1.2fr 90px 60px 200px; column-gap: .5rem; }
+  .product-row { grid-template-columns: 1.6fr 1.1fr 90px 60px 160px; column-gap:.5rem; }
 }
 @media (max-width: 576px) {
   .product-row { grid-template-columns: 1fr; }
@@ -138,6 +134,7 @@
   .product-row .price, .product-row .qty { text-align: left; }
 }
 
+/* Key-value pairs in order details */
 .kv {
     display: grid; grid-template-columns: 180px 1fr; gap: .5rem;
     padding: .5rem .75rem; border: 1px solid #e9ecef; border-radius: .375rem; background: #fcfcfd;
@@ -209,7 +206,8 @@
                 <div class="order-left">
                     <div class="order-id">Order #1001</div>
                     <div class="order-actions">
-                        <button class="btn btn-primary btn-sm">Edit Delivery Details</button>
+                        <a href="/carriemart/user/order-details.php" class="btn btn-primary btn-sm">Edit Delivery Details</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Return/Refund</a>
                         <button class="btn btn-outline-danger btn-sm">Cancel Order</button>
                     </div>
                 </div>
@@ -226,8 +224,7 @@
                                 <div class="price">₱3,495</div>
                                 <div class="qty">Qty: 1</div>
                                 <div class="product-actions">
-                                    <a class="btn btn-outline-secondary btn-sm w-100" href="/carriemart/user/review-details.php?mode=edit&product_order_id=1001-1">Edit Review</a>
-                                    <a class="btn btn-outline-danger btn-sm w-100" href="#" onclick="/* TODO: link to return/refund flow */ return false;">Return/Refund</a>
+                                    <a class="btn btn-outline-secondary btn-sm w-100 my-1" href="">Edit Review</a>
                                 </div>
                             </div>
                             <div class="product-row">
@@ -236,8 +233,7 @@
                                 <div class="price">₱899</div>
                                 <div class="qty">Qty: 2</div>
                                 <div class="product-actions">
-                                    <a class="btn btn-outline-secondary btn-sm w-100" href="/carriemart/user/review-details.php?mode=write&product_order_id=1001-2">Add Review</a>
-                                    <a class="btn btn-outline-danger btn-sm w-100" href="#" onclick="/* TODO: link to return/refund flow */ return false;">Return/Refund</a>
+                                    <a class="btn btn-outline-secondary btn-sm w-100 my-1" href="">Add Review</a>
                                 </div>
                             </div>
                         </div>
@@ -261,7 +257,7 @@
                             <div class="section-title">Summary</div>
                             <div class="summary">
                                 <div class="line"><span>Delivery Fee</span><span>₱85</span></div>
-                                <div class="line"><span>Discount Amount <span class="muted">(USED VOUCHER: SAVE500)</span></span><span>-₱500</span></div>
+                                <div class="line"><span>Percent Sale</span><span>10%</span></div>
                                 <div class="line"><span>SubTotal</span><span>₱4,793</span></div>
                             </div>
                         </div>
@@ -270,62 +266,7 @@
             </div>
         </div>
 
-        <!-- Order #1002 -->
-        <div class="order-card">
-            <div class="order-header">
-                <div class="order-left">
-                    <div class="order-id">Order #1002</div>
-                    <div class="order-actions">
-                        <button class="btn btn-primary btn-sm">Edit Delivery Details</button>
-                        <button class="btn btn-outline-danger btn-sm">Cancel Order</button>
-                    </div>
-                </div>
-                <div class="order-date">Date Ordered: 2025-11-13 09:15</div>
-            </div>
-            <div class="order-grid">
-                <div class="info-sections">
-                    <div>
-                        <div class="section-title">Products</div>
-                        <div class="product-list">
-                            <div class="product-row">
-                                <div class="title">Mechanical Keyboard 87-Key</div>
-                                <div class="label">KeyForge</div>
-                                <div class="price">₱4,250</div>
-                                <div class="qty">Qty: 1</div>
-                                <div class="product-actions">
-                                    <a class="btn btn-outline-secondary btn-sm w-100" href="/carriemart/user/review-details.php?mode=write&product_order_id=1002-1">Add Review</a>
-                                    <a class="btn btn-outline-danger btn-sm w-100" href="#" onclick="/* TODO: link to return/refund flow */ return false;">Return/Refund</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="section-title">Delivery</div>
-                        <div class="kv"><div class="k">Recipient</div><div class="v">John Smith</div></div>
-                        <div class="kv"><div class="k">Address</div><div class="v">742 Evergreen Terrace, Manila</div></div>
-                        <div class="kv"><div class="k">Phone</div><div class="v">0908-765-4321</div></div>
-                    </div>
-
-                    <div class="split-two">
-                        <div>
-                            <div class="section-title">Payment</div>
-                            <div class="kv"><div class="k">Payment Option</div><div class="v">Cash on Delivery</div></div>
-                            <div class="kv"><div class="k">Payment Status</div><div class="v text-warning">Pending</div></div>
-                            <div class="kv"><div class="k">Order Status</div><div class="v">Processing</div></div>
-                        </div>
-                        <div>
-                            <div class="section-title">Summary</div>
-                            <div class="summary">
-                                <div class="line"><span>Delivery Fee</span><span>₱120</span></div>
-                                <div class="line"><span>Discount Amount <span class="muted">(USED VOUCHER: None)</span></span><span>₱0</span></div>
-                                <div class="line"><span>SubTotal</span><span>₱4,250</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
     </div>
 </div>
 

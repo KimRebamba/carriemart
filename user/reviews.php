@@ -95,6 +95,78 @@
     </a>
 </div>
 
+<!-- Filters toolbar -->
+<div class="container mb-3">
+    <div class="d-flex align-items-center justify-content-start">
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-secondary btn-sm"
+                    type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="me-1" aria-hidden="true">
+                    <path d="M1.5 1.5h13a.5.5 0 0 1 .39.812L10 8v5.5a.5.5 0 0 1-.79.407l-2-1.333A.5.5 0 0 1 7 12.167V8L1.11 2.312A.5.5 0 0 1 1.5 1.5z"/>
+                </svg>
+                Filters
+            </button>
+            <select class="form-select form-select-sm" aria-label="Sort by" style="width: 180px;">
+                <option selected>Sort by</option>
+                <option value="recent">Most Recent</option>
+                <option value="ratingHigh">Highest Rating</option>
+                <option value="ratingLow">Lowest Rating</option>
+                <option value="productAZ">Product A–Z</option>
+                <option value="productZA">Product Z–A</option>
+            </select>
+        </div>
+        <small class="text-muted" style="margin-left: 1rem;">Showing 2 reviews</small>
+    </div>
+</div>
+
+<!-- Offcanvas: Filters -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Reviews</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form class="vstack gap-3">
+            <div>
+                <label class="form-label">Minimum rating</label>
+                <select class="form-select">
+                    <option value="">Any</option>
+                    <option value="5">5 stars</option>
+                    <option value="4">4+ stars</option>
+                    <option value="3">3+ stars</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Product title</label>
+                <input type="text" class="form-control" placeholder="Search product">
+            </div>
+            <div>
+                <label class="form-label">Brand</label>
+                <input type="text" class="form-control" placeholder="Search brand">
+            </div>
+            <div>
+                <label class="form-label">Date range</label>
+                <div class="d-flex gap-2">
+                    <input type="date" class="form-control">
+                    <input type="date" class="form-control">
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Has text review</label>
+                <select class="form-select">
+                    <option value="">Any</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+            <div class="d-grid">
+                <button type="button" class="btn btn-primary">Apply Filters</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="container">
     <div class="order-list">
 
@@ -104,7 +176,7 @@
                 <div class="order-left">
                     <div class="order-id">Review • Order #1001</div>
                      <div class="order-actions">
-                        <a class="btn btn-primary btn-sm" href="/carriemart/user/review-details.php?mode=edit&product_order_id=1001-1">Edit Review</a>
+                        <a class="btn btn-primary btn-sm" href="/carriemart/user/review-details.php?mode=edit&product_order_id=1001-1">Edit Review Details</a>
                     </div>
                 </div>
                 <div class="order-date">Date: 2025-11-14 10:22</div>

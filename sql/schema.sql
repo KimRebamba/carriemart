@@ -154,7 +154,6 @@ CREATE TABLE cart_product (
   cart_id INT NOT NULL,
   product_id INT NOT NULL,
   quantity INT NOT NULL DEFAULT 1,
-  added_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_cart_product_cart (cart_id),
   INDEX idx_cart_product_product (product_id),
   UNIQUE KEY ux_cart_product_cart_product (cart_id, product_id),
@@ -168,7 +167,7 @@ CREATE TABLE orders (
   voucher_code VARCHAR(20) DEFAULT NULL,
   date_ordered TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   payment_status ENUM('pending','paid','refunded') DEFAULT 'pending',
-  order_status ENUM('pending','processing','shipped','completed','cancelled') DEFAULT 'pending',
+  order_status ENUM('pending','processing','shipped','completed','cancelled','requested_refund','returned') DEFAULT 'pending',
   payment_option VARCHAR(100) DEFAULT NULL,
   delivery_recipient VARCHAR(100) DEFAULT NULL,
   delivery_address VARCHAR(255) DEFAULT NULL,
@@ -189,7 +188,6 @@ CREATE TABLE product_order (
   product_id INT NOT NULL,
   quantity INT NOT NULL DEFAULT 1,
   unit_price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-  item_status ENUM('pending','processing','shipped','delivered','returned','refunded','cancelled') DEFAULT 'pending',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_product_order_order (order_id),
   INDEX idx_product_order_product (product_id),
@@ -197,18 +195,17 @@ CREATE TABLE product_order (
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE product_return (
-  product_return_id INT AUTO_INCREMENT PRIMARY KEY,
-  product_order_id INT NOT NULL,
-  quantity_returned INT NOT NULL DEFAULT 1,
+CREATE TABLE order_return (
+  order_return_id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id INT NOT NULL,
   reason VARCHAR(255) DEFAULT NULL,
   cond ENUM('new','opened','damaged','other') DEFAULT 'other',
   return_status ENUM('requested','approved','rejected','processed') DEFAULT 'requested',
   refund_amount DECIMAL(12,2) DEFAULT 0.00,
   processed_at TIMESTAMP NULL DEFAULT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_product_return_po (product_order_id),
-  FOREIGN KEY (product_order_id) REFERENCES product_order(product_order_id) ON DELETE CASCADE ON UPDATE CASCADE
+  INDEX idx_order_return_order (order_id),
+  FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE expenses (
