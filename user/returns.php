@@ -32,19 +32,69 @@
 .status-approved {background:#d1e7dd;color:#0f5132;border:1px solid #badbcc;}
 .status-rejected {background:#f8d7da;color:#842029;border:1px solid #f5c2c7;}
 .status-processed {background:#cfe2ff;color:#084298;border:1px solid #b6d4fe;}
+
+.product-list {display:grid;gap:.5rem;}
+.product-row {
+  display:grid;
+  grid-template-columns: 2fr 1.1fr 90px 1.4fr 140px 130px 110px; 
+  column-gap:.75rem; row-gap:.25rem;
+  padding:.5rem .75rem; background:#f8f9fa; border:1px solid #e9ecef; border-radius:.375rem; align-items:center;
+}
+.product-row .qty {text-align:center; white-space:nowrap;}
+.product-row .amount {text-align:right; font-weight:600;}
+.product-row .title,.product-row .label,.product-row .reason {min-width:0; overflow:hidden; text-overflow:ellipsis;}
+
+.order-items { display:grid; gap:.5rem; }
+.order-item {
+  display:grid;
+  grid-template-columns: 2fr 1fr 80px; 
+  column-gap:.75rem; row-gap:.25rem;
+  padding:.5rem .75rem; background:#f8f9fa; border:1px solid #e9ecef; border-radius:.375rem; align-items:center;
+}
+.order-item .title, .order-item .label { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.order-item .qty { text-align:right; white-space:nowrap; }
+
+.order-items-header{
+  display:grid;
+  grid-template-columns: 2fr 1fr 80px; 
+  column-gap:.75rem;
+  padding:.25rem .75rem;
+  color: var(--bs-secondary-color);
+  font-size:.75rem; text-transform:uppercase; letter-spacing:.5px; font-weight:600;
+}
+
+@media (max-width:576px){
+  .order-item{ grid-template-columns:1fr; }
+  .order-item .qty{ text-align:left; }
+  .order-items-header{ display:none; }
+  .order-item [data-label]::before{
+    content: attr(data-label) ": ";
+    display:block;
+    color: var(--bs-secondary-color);
+    font-size:.8em;
+    margin-bottom:2px;
+    font-weight:600;
+    letter-spacing:.3px;
+  }
+}
+
+@media (max-width: 768px){
+  .product-row {grid-template-columns: 1.8fr 1fr 70px 1.2fr 130px 120px 100px; column-gap:.5rem;}
+}
+@media (max-width: 576px){
+  .product-row {grid-template-columns: 1fr; }
+  .product-row .amount {text-align:left;}
+}
 </style>
 </head>
 <body>
 <header class="p-3 mb-2 border-bottom">
     <div class="container">
-        <div class="d-flex flex-wrap align-items-center justify-content-center">
+        <div class="d-flex flex-wrap align-items-center justify-content-between" style="min-height: 48px;">
             <a href="#" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
                 <img src="../assets/Header-Logo-01.svg" alt="Carriemart logo" width="40" height="40" class="me-2">
             </a>
-            <form class="search-form d-flex mb-0 me-2 me-lg-3 flex-grow-1" role="search" style="max-width:540px;">
-                <input type="search" class="form-control w-100" placeholder="Search..." aria-label="Search">
-            </form>
-            <div class="dropdown text-end avatar-dropdown align-self-center">
+            <div class="dropdown text-end avatar-dropdown">
                 <a href="#" class="d-inline-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     <img src="../assets/me.jfif" alt="" width="32" height="32" class="rounded-circle">
                 </a>
@@ -68,48 +118,133 @@
     </a>
 </div>
 
+<!-- Filters toolbar -->
+<div class="container mb-3">
+    <div class="d-flex align-items-center justify-content-start">
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-secondary btn-sm"
+                    type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="me-1" aria-hidden="true">
+                    <path d="M1.5 1.5h13a.5.5 0 0 1 .39.812L10 8v5.5a.5.5 0 0 1-.79.407l-2-1.333A.5.5 0 0 1 7 12.167V8L1.11 2.312A.5.5 0 0 1 1.5 1.5z"/>
+                </svg>
+                Filters
+            </button>
+            <select class="form-select form-select-sm" aria-label="Sort by" style="width: 180px;">
+                <option selected>Sort by</option>
+                <option value="recent">Most Recent</option>
+                <option value="amountHigh">Amount: High to Low</option>
+                <option value="amountLow">Amount: Low to High</option>
+                <option value="status">Status</option>
+                <option value="orderAZ">Order # A–Z</option>
+            </select>
+        </div>
+        <small class="text-muted" style="margin-left: 1rem;">Showing 2 returns</small>
+    </div>
+</div>
+
+<!-- Offcanvas: Filters -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Returns</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form class="vstack gap-3">
+            <div>
+                <label class="form-label">Return status</label>
+                <select class="form-select">
+                    <option value="">Any</option>
+                    <option value="requested">Requested</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="processed">Processed</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Order number</label>
+                <input type="text" class="form-control" placeholder="#1001">
+            </div>
+            <div>
+                <label class="form-label">Brand</label>
+                <input type="text" class="form-control" placeholder="Search brand">
+            </div>
+            <div>
+                <label class="form-label">Date range</label>
+                <div class="d-flex gap-2">
+                    <input type="date" class="form-control">
+                    <input type="date" class="form-control">
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Min return amount</label>
+                <input type="number" class="form-control" step="0.01" placeholder="0.00">
+            </div>
+            <div class="d-grid">
+                <button type="button" class="btn btn-primary">Apply Filters</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="container">
     <div class="order-list">
-
-        <!-- Return #R-2001 (requested) -->
         <div class="order-card">
             <div class="order-header">
                 <div class="order-left">
-                    
                     <div class="order-id">Return • Order #1001</div>
                     <div class="order-actions">
                         <a class="btn btn-primary btn-sm" href="/carriemart/user/return-details.php?mode=edit&product_return_id=2001">Edit Return Details</a>
-                        
+                        <a class="btn btn-danger btn-sm" href="/carriemart/user/return-details.php?mode=edit&product_return_id=2001">Cancel Return</a>
                     </div>
-                    <a class="btn btn-danger btn-sm" href="/carriemart/user/return-details.php?mode=edit&product_return_id=2001">Cancel Return</a>
                 </div>
                 <div class="order-date">Date: 2025-11-15 09:40</div>
             </div>
             <div class="order-grid">
                 <div class="info-sections">
-                    <div class="section-title">Return details</div>
+                    <div class="order-items-header py-0">Return details</div>
 
                     <div class="kv"><div class="k">Order number</div><div class="v">#1001</div></div>
-                    <div class="kv"><div class="k">Product</div><div class="v">Wireless Earbuds Pro</div></div>
-                    <div class="kv"><div class="k">Brand</div><div class="v">SoundMax</div></div>
-                    <div class="kv"><div class="k">Quantity returned</div><div class="v">1</div></div>
-                    <div class="kv"><div class="k">Reason</div><div class="v">Left earbud not charging</div></div>
+
+                    <div>    
+                    
+                        <div class="order-items-header mb-1">
+                            <div>Product</div>
+                            <div>Brand</div>
+                            <div class="text-end">Qty</div>
+                        </div>
+                        <div class="order-items">
+                            <div class="order-item">
+                                <div class="title" data-label="Product">Wireless Earbuds Pro</div>
+                                <div class="label" data-label="Brand">SoundMax</div>
+                                <div class="qty" data-label="Qty returned">x1</div>
+                            </div>
+                            <div class="order-item">
+                                <div class="title" data-label="Product">USB-C Fast Charger 30W</div>
+                                <div class="label" data-label="Brand">Voltix</div>
+                                <div class="qty" data-label="Qty returned">x1</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="kv"><div class="k">Reason</div><div class="v">Items arrived with defects; wrong model for charger</div></div>
                     <div class="kv">
                         <div class="k">Condition</div>
                         <div class="v">
                             <select class="form-select form-select-sm" disabled>
-                                <option selected>damaged</option>
-                                <option>opened</option>
                                 <option>new</option>
+                                <option>opened</option>
+                                <option selected>damaged</option>
                                 <option>other</option>
                             </select>
                         </div>
                     </div>
                     <div class="kv">
                         <div class="k">Return status</div>
-                        <div class="v"><span class="status-badge status-requested">Requested</span></div>
+                        <div class="v"><span class="status-badge status-approved">Approved</span></div>
                     </div>
-                    <div class="kv"><div class="k">Return amount</div><div class="v">₱3,495.00</div></div>
+                    <div class="kv"><div class="k">Return amount</div><div class="v">₱4,394.00</div></div>
+
                     <div class="kv"><div class="k">Date</div><div class="v">2025-11-15 09:40</div></div>
                 </div>
             </div>

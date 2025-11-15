@@ -82,7 +82,7 @@
 .order-list { display: grid; grid-template-columns: 1fr; gap: 1rem; }
 .order-card { background: #fff; border-radius: .5rem; border:1px solid transparent; transition:border-color .15s ease; }
 .order-card:hover { border-color: rgba(0,0,0,.2); }
-/* make each order less wide */
+
 .order-card { max-width: 900px; margin: 0 auto; }
 
 .order-header {
@@ -92,11 +92,11 @@
 }
 .order-id { font-weight: 600; }
 .order-date { color: var(--bs-secondary-color); font-size: .875rem; }
-/* Header actions (beside Order #...) */
+
 .order-left { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
 .order-actions { display:flex; gap:.5rem; flex-wrap:wrap; }
 .order-actions .btn-sm { padding:.25rem .5rem; }
-/* Grid: remove right actions column */
+
 .order-grid {
      display: grid;
     grid-template-columns: 1fr;
@@ -116,7 +116,7 @@
 .product-list { display: grid; gap: .5rem; }
 .product-row {
     display: grid;
-    grid-template-columns: 2fr 1.2fr 110px 80px 180px; /* Title | Brand | Price | Qty | Actions */
+    grid-template-columns: 2fr 1.2fr 110px 80px 180px; 
     column-gap: .75rem;
     row-gap: .25rem;
     padding: .5rem .75rem; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: .375rem;
@@ -134,7 +134,7 @@
   .product-row .price, .product-row .qty { text-align: left; }
 }
 
-/* Key-value pairs in order details */
+
 .kv {
     display: grid; grid-template-columns: 180px 1fr; gap: .5rem;
     padding: .5rem .75rem; border: 1px solid #e9ecef; border-radius: .375rem; background: #fcfcfd;
@@ -163,20 +163,15 @@
 <body>
 <header class="p-3 mb-2 border-bottom">
     <div class="container">
-        <div class="d-flex flex-wrap align-items-center justify-content-center">
+        <div class="d-flex flex-wrap align-items-center justify-content-between">
             <a href="#" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
                 <img src="../assets/Header-Logo-01.svg" alt="Carriemart logo" width="40" height="40" class="me-2">
             </a>
-            <form class="search-form d-flex mb-0 me-2 me-lg-3 flex-grow-1" role="search" style="max-width:540px;">
-                <input type="search" class="form-control w-100" placeholder="Search..." aria-label="Search">
-            </form>
             <div class="dropdown text-end avatar-dropdown align-self-center">
-                <a href="#" class="d-inline-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle"
-                   data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="../assets/me.jfif" alt="mdo" width="32" height="32" class="rounded-circle">
+                <a href="#" class="d-inline-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="../assets/me.jfif" alt="" width="32" height="32" class="rounded-circle">
                 </a>
                 <ul class="dropdown-menu text-small">
-                    <li><a class="dropdown-item" href="#">New project...</a></li>
                     <li><a class="dropdown-item" href="#">Settings</a></li>
                     <li><a class="dropdown-item" href="#">Profile</a></li>
                     <li><hr class="dropdown-divider"></li>
@@ -195,6 +190,81 @@
         </svg>
         <span>Go Back</span>
     </a>
+</div>
+
+<!-- Filters toolbar -->
+<div class="container mb-3">
+    <div class="d-flex align-items-center justify-content-start">
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-secondary btn-sm"
+                    type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="me-1" aria-hidden="true">
+                    <path d="M1.5 1.5h13a.5.5 0 0 1 .39.812L10 8v5.5a.5.5 0 0 1-.79.407l-2-1.333A.5.5 0 0 1 7 12.167V8L1.11 2.312A.5.5 0 0 1 1.5 1.5z"/>
+                </svg>
+                Filters
+            </button>
+            <select class="form-select form-select-sm" aria-label="Sort by" style="width: 180px;">
+                <option selected>Sort by</option>
+                <option value="recent">Most Recent</option>
+                <option value="status">Status</option>
+                <option value="subtotalHigh">Subtotal: High to Low</option>
+                <option value="subtotalLow">Subtotal: Low to High</option>
+                <option value="recipientAZ">Recipient A–Z</option>
+            </select>
+        </div>
+        <small class="text-muted" style="margin-left: 1rem;">Showing 1 order</small>
+    </div>
+</div>
+
+<!-- Offcanvas: Filters -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Orders</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form class="vstack gap-3">
+            <div>
+                <label class="form-label">Order status</label>
+                <select class="form-select">
+                    <option value="">Any</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Payment status</label>
+                <select class="form-select">
+                    <option value="">Any</option>
+                    <option value="pending">Pending</option>
+                    <option value="paid">Paid</option>
+                    <option value="refunded">Refunded</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Recipient</label>
+                <input type="text" class="form-control" placeholder="Search recipient">
+            </div>
+            <div>
+                <label class="form-label">Date range</label>
+                <div class="d-flex gap-2">
+                    <input type="date" class="form-control">
+                    <input type="date" class="form-control">
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Min subtotal</label>
+                <input type="number" step="0.01" class="form-control" placeholder="0.00">
+            </div>
+            <div class="d-grid">
+                <button type="button" class="btn btn-primary">Apply Filters</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <div class="container">
@@ -257,7 +327,7 @@
                             <div class="section-title">Summary</div>
                             <div class="summary">
                                 <div class="line"><span>Delivery Fee</span><span>₱85</span></div>
-                                <div class="line"><span>Percent Sale</span><span>10%</span></div>
+                                <div class="line"><span>Percent Sale</span><span>10% (-₱85)</span></div>
                                 <div class="line"><span>SubTotal</span><span>₱4,793</span></div>
                             </div>
                         </div>
