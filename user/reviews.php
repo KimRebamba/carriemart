@@ -187,7 +187,9 @@
                     <div class="kv"><div class="k">Review description</div>
                         <div class="v">Bass is punchy, battery lasts all day, and pairing is instant. Case feels a bit plasticky.</div>
                     </div>
-                    <div class="kv"><div class="k">Rating</div><div class="v">★★★★☆ (4/5)</div></div>
+                    <div class="kv"><div class="k">Rating</div><div class="v">4/5<svg class="star" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                            <path d="M3.612 15.443 4.6 9.97.825 6.765l5.059-.736L8 1.5l2.116 4.529 5.059.736L11.4 9.97l.988 5.473L8 12.897l-4.388 2.546z"/>
+                        </svg></div></div>
                     <div class="kv"><div class="k">Date</div><div class="v">2025-11-14 10:22</div></div>
                 </div>
 

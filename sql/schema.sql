@@ -1,3 +1,5 @@
+
+
 SET FOREIGN_KEY_CHECKS=0;
 
 CREATE DATABASE IF NOT EXISTS carriemart DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
@@ -132,7 +134,6 @@ CREATE TABLE vouchers (
   min_purchase_amount DECIMAL(12,2) DEFAULT 0.00,
   max_discount_amount DECIMAL(12,2) DEFAULT NULL,
   max_uses INT DEFAULT NULL,
-  times_used INT DEFAULT 0,
   from_date DATE DEFAULT NULL,
   to_date DATE DEFAULT NULL,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
