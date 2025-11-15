@@ -116,7 +116,7 @@
 <header class="p-3 mb-2 border-bottom">
         <div class="container">
             <div class="d-flex flex-wrap align-items-center justify-content-center">
-                <a href="#" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
+                <a href="/carriemart/index.php" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
                     <img src="../assets/Header-Logo-01.svg" alt="Carriemart logo" width="40" height="40" class="me-2">
                 </a>
                 <form class="search-form d-flex mb-0 me-2 me-lg-3 flex-grow-1" role="search" style="max-width:540px;">

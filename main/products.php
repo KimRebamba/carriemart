@@ -5,6 +5,7 @@
     <title>CarrieMart: Products</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="icon" href="/carriemart/assets/Header-Logo-01.svg" type="image/svg+xml">
     <style>
         /* Back line */
         .back-line {
@@ -210,7 +211,6 @@
                     <span class="price">$129.99</span>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-primary btn-sm flex-grow-1">Buy Now</button>
                     <button class="btn btn-outline-secondary btn-sm flex-grow-1">Add to Cart</button>
                 </div>
                 <a href="./details.php" class="stretched-link" aria-label="View Wireless Headphones"></a>

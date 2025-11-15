@@ -316,7 +316,7 @@
                     Make your own vibe here, in CarrieMart. :)</p>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-start">
                     <a href="./login.php"><button type="button" class="btn btn-primary btn-lg px-4 me-md-2">Sign in</button></a>
-                    <button type="button" class="btn btn-outline-secondary btn-lg px-4">Look around :P</button>
+                    <a href="/carriemart/main/index.php"><button type="button" class="btn btn-outline-secondary btn-lg px-4">Look around :P</button></a>
                 </div>
             </div>
 
