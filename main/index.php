@@ -150,19 +150,19 @@
                         <div class="desc">Browse and manage product listings.</div>
                     </div>
                 </a>
-                <a href="#vouchers" class="tile tile--vouchers" style="background-image:url('../assets/vouchers.jpg');">
+                <a href="./vouchers.php" class="tile tile--vouchers" style="background-image:url('../assets/vouchers.jpg');">
                     <div class="caption">
                         <div class="title">Vouchers</div>
                         <div class="desc">Create and track discount vouchers.</div>
                     </div>
                 </a>
-                <a href="#categories" class="tile tile--categories" style="background-image:url('../assets/categories.jpg');">
+                <a href="./categories.php" class="tile tile--categories" style="background-image:url('../assets/categories.jpg');">
                     <div class="caption">
                         <div class="title">Categories</div>
                         <div class="desc">Organize products by category.</div>
                     </div>
                 </a>
-                <a href="#brands" class="tile tile--brands" style="background-image:url('../assets/brands.jpg');">
+                <a href="./brands.php" class="tile tile--brands" style="background-image:url('../assets/brands.jpg');">
                     <div class="caption">
                         <div class="title">Brands</div>
                         <div class="desc">Manage brand profiles and assets.</div>
