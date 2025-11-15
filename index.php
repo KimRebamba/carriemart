@@ -292,10 +292,11 @@
                         data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="./assets/me.jfif" alt="mdo" width="32" height="32" class="rounded-circle">
                     </a>
-                    <ul class="dropdown-menu text-small">
-                        <li><a class="dropdown-item" href="#">New project...</a></li>
-                        <li><a class="dropdown-item" href="#">Settings</a></li>
-                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                    <ul class="dropdown-menu text-small">                
+                        <li><a class="dropdown-item" href="/carriemart/user/profile.php">Profile</a></li>
+                         <li><a class="dropdown-item" href="/carriemart/main/cart.php">CarrieCart</a></li>
+                        <li><a class="dropdown-item" href="#">Orders</a></li>
+                        <li><a class="dropdown-item" href="#">Reviews</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
