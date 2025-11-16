@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CarrieMart: Edit Salary</title>
+    <title>CarrieMart: Edit Employee</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
@@ -51,88 +51,99 @@
 
             <div class="row g-5">
                 <div class="col-md-8 col-lg-7 mx-auto">
-                    <h4 class="mb-3">Edit Salary</h4>
+                    <h4 class="mb-3">View Order</h4>
 
-                    <form class="needs-validation" method="post" novalidate>
-                        <!-- IDs & timestamps (read-only display) -->
+                    <form class="needs-validation" novalidate>
+                        <!-- Order IDs & timestamps (read-only display) -->
                         <div class="row g-3">
-                            <div class="col-sm-6">
-                                <label class="form-label">Salary ID</label>
+                            <div class="col-6">
+                                <label class="form-label">Order ID</label>
                                 <input type="text" class="form-control" value="" disabled>
                             </div>
-                            <div class="col-sm-6">
-                                <label class="form-label">Created at</label>
+                            <div class="col-6">
+                                <label class="form-label">Date ordered</label>
                                 <input type="text" class="form-control" value="" disabled>
                             </div>
                         </div>
 
                         <hr class="my-4">
 
-                        <!-- Employee reference -->
+                        <!-- Account (read-only) & voucher -->
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="emp_id" class="form-label">Employee</label>
-                                <select id="emp_id" name="emp_id" class="form-select" required>
-                                    <option value="" selected>Emp ID – First Last</option>
-                                </select>
-                                <div class="invalid-feedback">Employee is required.</div>
+                            <div class="col-md-3">
+                                <label class="form-label">User ID</label>
+                                <input type="text" class="form-control" value="" disabled>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" value="" disabled>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Employee Name</label>
-                                <input type="text" class="form-control" value="" placeholder="First Last" disabled>
-                            </div>
-                        </div>
-
-                        <!-- Pay details -->
-                        <div class="row g-3 mt-0">
-                            <div class="col-md-6">
-                                <label for="pay_date" class="form-label">Pay date</label>
-                                <input type="date" id="pay_date" name="pay_date" class="form-control" required>
-                                <div class="invalid-feedback">Pay date is required.</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="rate_used" class="form-label">Rate used (Monthly)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">₱</span>
-                                    <input type="number" step="0.01" min="0" id="rate_used" name="rate_used" class="form-control" placeholder="0.00" required>
-                                </div>
-                                <div class="invalid-feedback">Rate is required.</div>
+                                <label class="form-label">Voucher code</label>
+                                <input type="text" class="form-control" value="" disabled>
                             </div>
                         </div>
 
-                        <!-- Period -->
+                        <!-- Status & payment -->
                         <div class="row g-3 mt-0">
                             <div class="col-md-6">
-                                <label for="from_date" class="form-label">From date</label>
-                                <input type="date" id="from_date" name="from_date" class="form-control">
+                                <label class="form-label">Payment status</label>
+                                <input type="text" class="form-control" value="" disabled>
                             </div>
                             <div class="col-md-6">
-                                <label for="to_date" class="form-label">To date</label>
-                                <input type="date" id="to_date" name="to_date" class="form-control">
+                                <label class="form-label">Order status</label>
+                                <input type="text" class="form-control" value="" disabled>
                             </div>
                         </div>
 
-                        <!-- Status -->
+                        <!-- Payment option & fee -->
                         <div class="row g-3 mt-0">
                             <div class="col-md-6">
-                                <label for="status" class="form-label">Status</label>
-                                <select id="status" name="status" class="form-select" required>
-                                    <option value="pending" selected>pending</option>
-                                    <option value="paid">paid</option>
-                                    <option value="cancelled">cancelled</option>
-                                </select>
+                                <label class="form-label">Payment option</label>
+                                <input type="text" class="form-control" value="" disabled>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="percent_sale" class="form-label">% Sale</label>
+                                <input type="text" class="form-control" value="" disabled>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="delivery_fee" class="form-label">Delivery fee</label>
+                                <input type="text" class="form-control" value="" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Delivery details -->
+                        <div class="row g-3 mt-0">
+                            <div class="col-md-6">
+                                <label class="form-label">Recipient name</label>
+                                <input type="text" class="form-control" value="" disabled>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Recipient phone</label>
+                                <input type="text" class="form-control" value="" disabled>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Delivery address</label>
+                                <input type="text" class="form-control" value="" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Completion (read-only) -->
+                        <div class="row g-3 mt-0">
+                            <div class="col-md-6">
+                                <label class="form-label">Completed at</label>
+                                <input type="text" class="form-control" value="" disabled>
                             </div>
                         </div>
 
                         <hr class="my-4">
 
                         <div class="d-flex gap-2 mb-3">
-                            <button class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2 btn-icon"
-                                type="submit" style="flex: 2 1 0%;">
-                                Save changes
+                            <a class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2 btn-icon"
+                               style="flex: 2 1 0%;" href="order-form.php">
+                                Edit Order
                                 <img src="/carriemart/assets/person-check-fill.svg" alt="" aria-hidden="true">
-                            </button>
-
+                            </a>
                             <button type="button"
                                 class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center justify-content-center gap-2 btn-icon-inverted"
                                 style="flex: 1 1 0%;" onclick="history.back()">

@@ -101,6 +101,11 @@ CREATE TABLE product_photos (
 
 CREATE TABLE employees (
   emp_id INT AUTO_INCREMENT PRIMARY KEY,
+  first_name VARCHAR(50) NOT NULL,
+  last_name VARCHAR(50) NOT NULL,
+  email VARCHAR(100),
+  phone_number VARCHAR(20),
+  address VARCHAR(255),
   birth_date DATE DEFAULT NULL,
   gender ENUM('male','female','other') DEFAULT NULL,
   employment_status ENUM('active','inactive','terminated','on_leave') DEFAULT 'active',
@@ -108,6 +113,7 @@ CREATE TABLE employees (
   current_position_id INT DEFAULT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_employees_position (current_position_id),
+  INDEX idx_employees_name (last_name, first_name),
   FOREIGN KEY (current_position_id) REFERENCES positions(position_id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -130,7 +136,6 @@ CREATE TABLE vouchers (
   percent_sale INT DEFAULT NULL,
   min_purchase_amount DECIMAL(12,2) DEFAULT 0.00,
   max_discount_amount DECIMAL(12,2) DEFAULT NULL,
-  max_uses INT DEFAULT NULL,
   from_date DATE DEFAULT NULL,
   to_date DATE DEFAULT NULL,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
