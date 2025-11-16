@@ -51,73 +51,68 @@
 
             <div class="row g-5">
                 <div class="col-md-8 col-lg-7 mx-auto">
-                    <h4 class="mb-3">Review Information</h4>
-
-                    <form class="needs-validation" method="post" novalidate>
-                        <!-- Review IDs & timestamps (read-only) -->
+                    <h4 class="mb-3">View Return</h4>
+                    <form class="needs-validation" novalidate>
+                        <!-- IDs (read-only) -->
                         <div class="row g-3">
-                            <div class="col-6">
-                                <label class="form-label">Review ID</label>
+                            <div class="col-md-4">
+                                <label class="form-label">Return ID</label>
                                 <input type="text" class="form-control" value="" disabled>
                             </div>
-                            <div class="col-6">
-                                <label class="form-label">Created at</label>
+                            <div class="col-md-4">
+                                <label class="form-label">Order ID</label>
                                 <input type="text" class="form-control" value="" disabled>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Condition</label>
+                                <input type="text" class="form-control" value="opened" disabled>
                             </div>
                         </div>
 
                         <hr class="my-4">
 
-                        <!-- Core review fields -->
+                        <!-- Read-only details -->
                         <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Reason</label>
+                                <textarea class="form-control" rows="4" disabled></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Status</label>
+                                <input type="text" class="form-control" value="approved" disabled>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Refund amount</label>
+                                <input type="text" class="form-control" value="₱0.00" disabled>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Processed at</label>
+                                <input type="text" class="form-control" value="—" disabled>
+                            </div>
                             <div class="col-md-6">
-                                <label class="form-label">Product Order ID</label>
+                                <label class="form-label">Created at</label>
                                 <input type="text" class="form-control" value="" disabled>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">User ID</label>
-                                <input type="text" class="form-control" value="" disabled>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Rating</label>
-                                <input type="text" class="form-control" value="" disabled>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="is_verified" class="form-label">Verified</label>
-                                <select id="is_verified" name="is_verified" class="form-select">
-                                    <option value="0" selected>no</option>
-                                    <option value="1">yes</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Review Title</label>
-                                <input type="text" class="form-control" value="" disabled>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Review Text</label>
-                                <textarea class="form-control" rows="5" disabled></textarea>
-                            </div>
-                            <div class="col-12">
-                                <small class="text-muted">All fields are read-only except Verified.</small>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <small class="text-muted">All fields are read-only.</small>
                             </div>
                         </div>
 
                         <hr class="my-4">
 
                         <div class="d-flex gap-2 mb-3">
-                            <button class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2 btn-icon"
-                                type="submit" style="flex: 2 1 0%;">
-                                Save changes
+                            <a class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2"
+                               style="flex:2 1 0%;" href="return-form.php">
+                                Edit Return
                                 <img src="/carriemart/assets/person-check-fill.svg" alt="" aria-hidden="true">
-                            </button>
-
+                            </a>
                             <button type="button"
-                                class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center justify-content-center gap-2 btn-icon-inverted"
-                                style="flex: 1 1 0%;" onclick="history.back()">
-                                Go back
-                                <img src="/carriemart/assets/caret-right-square.svg" alt="" aria-hidden="true">
-                            </button>
-                        </div>
+                                 class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center justify-content-center gap-2"
+                                 style="flex:1 1 0%;" onclick="history.back()">
+                                 Go back
+                                 <img src="/carriemart/assets/caret-right-square.svg" alt="" aria-hidden="true">
+                             </button>
+                         </div>
                      </form>
                 </div>
             </div>

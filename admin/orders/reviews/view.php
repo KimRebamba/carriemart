@@ -51,9 +51,9 @@
 
             <div class="row g-5">
                 <div class="col-md-8 col-lg-7 mx-auto">
-                    <h4 class="mb-3">Review Information</h4>
+                    <h4 class="mb-3">View Review</h4>
 
-                    <form class="needs-validation" method="post" novalidate>
+                    <form class="needs-validation" novalidate>
                         <!-- Review IDs & timestamps (read-only) -->
                         <div class="row g-3">
                             <div class="col-6">
@@ -83,11 +83,8 @@
                                 <input type="text" class="form-control" value="" disabled>
                             </div>
                             <div class="col-md-4">
-                                <label for="is_verified" class="form-label">Verified</label>
-                                <select id="is_verified" name="is_verified" class="form-select">
-                                    <option value="0" selected>no</option>
-                                    <option value="1">yes</option>
-                                </select>
+                                <label class="form-label">Verified</label>
+                                <input type="text" class="form-control" value="" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Review Title</label>
@@ -98,19 +95,18 @@
                                 <textarea class="form-control" rows="5" disabled></textarea>
                             </div>
                             <div class="col-12">
-                                <small class="text-muted">All fields are read-only except Verified.</small>
+                                <small class="text-muted">All fields are read-only.</small>
                             </div>
                         </div>
 
                         <hr class="my-4">
 
                         <div class="d-flex gap-2 mb-3">
-                            <button class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2 btn-icon"
-                                type="submit" style="flex: 2 1 0%;">
-                                Save changes
+                            <a class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2 btn-icon"
+                               style="flex: 2 1 0%;" href="review-form.php">
+                                Edit Review
                                 <img src="/carriemart/assets/person-check-fill.svg" alt="" aria-hidden="true">
-                            </button>
-
+                            </a>
                             <button type="button"
                                 class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center justify-content-center gap-2 btn-icon-inverted"
                                 style="flex: 1 1 0%;" onclick="history.back()">

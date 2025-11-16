@@ -179,8 +179,8 @@
             <div class="container-fluid">
 
                 <h3 class="mb-3 d-flex align-items-center gap-2">
-                    <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/box-seam.svg" alt="" width="22" height="22" class="mt-1">
-                    Items
+                    <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/folder.svg" alt="" width="22" height="22" class="mt-1">
+                    Categories
                 </h3>
 
                 <div class="card mb-4 table-card">
@@ -192,7 +192,7 @@
                                       <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85ZM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                                     </svg>
                                 </span>
-                                <input type="text" class="form-control" placeholder="Search product ID / name">
+                                <input type="text" class="form-control" placeholder="Search category ID / name">
                             </div>
                             <button class="btn btn-outline-secondary btn-sm"
                                     type="button" data-bs-toggle="offcanvas"
@@ -202,74 +202,81 @@
                                 </svg>
                                 Filters
                             </button>
-                            <select class="form-select form-select-sm" aria-label="Sort by" style="width:220px;">
+                            <select class="form-select form-select-sm" aria-label="Sort by" style="width:180px;">
                                 <option selected>Sort by</option>
-                                <option value="qtyDesc">Most sold (qty)</option>
-                                <option value="qtyAsc">Least sold (qty)</option>
-                                <option value="revDesc">Highest revenue</option>
-                                <option value="revAsc">Lowest revenue</option>
-                                <option value="retDesc">Most returns</option>
+                                <option value="newest">Newest</option>
+                                <option value="oldest">Oldest</option>
+                                <option value="nameAZ">Name A–Z</option>
+                                <option value="nameZA">Name Z–A</option>
+                                <option value="active">Active first</option>
                             </select>
                         </div>
                         <div class="d-flex align-items-center gap-3">
-                            <small class="text-muted">Showing 5 items</small>
+                            <small class="text-muted">Showing 3 categories</small>
+                            <a href="create.php" class="btn btn-primary btn-sm">Add Category</a>
                         </div>
                     </div>
                     <div class="card-body p-0">
                         <style>
                             .table thead th { white-space:nowrap; }
-                            .amount-cell { font-variant-numeric: tabular-nums; }
-                            @media (max-width: 992px){
+                            .actions-cell .btn { padding:.25rem .55rem; }
+                            .status-badge { font-size:.65rem; letter-spacing:.5px; font-weight:600; padding:.35rem .55rem; border-radius:.35rem; text-transform:uppercase; }
+                            .cat-active { background:#d1e7dd; color:#0f5132; border:1px solid #badbcc; }
+                            .cat-inactive { background:#f8d7da; color:#842029; border:1px solid #f5c2c7; }
+                             @media (max-width: 992px){
                                 .table-responsive { font-size:.85rem; }
+                                .actions-cell .btn { font-size:.65rem; }
                             }
                         </style>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Product ID</th>
-                                        <th>Product name</th>
-                                        <th class="text-end">Total qty sold</th>
-                                        <th class="text-end">Total revenue (₱)</th>
-                                        <th class="text-end">Return count</th>
+                                        <th>Category ID</th>
+                                        <th>Name</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th class="text-center" style="width:160px;">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Example rows; replace with server data (JOIN products, product_order; LEFT JOIN orders/order_return) -->
+                                    <!-- Example rows; replace with server data -->
                                     <tr>
-                                        <td>2001</td>
-                                        <td>Alpha Smartphone X</td>
-                                        <td class="text-end">320</td>
-                                        <td class="text-end amount-cell">₱7,999,680.00</td>
-                                        <td class="text-end">5</td>
+                                        <td>4001</td>
+                                        <td>Mobiles</td>
+                                        <td><span class="small text-muted">Smartphones & accessories</span></td>
+                                        <td><span class="status-badge cat-active">active</span></td>
+                                        <td><span class="small text-muted">2025-11-10</span></td>
+                                        <td class="text-center actions-cell">
+                                            <a href="view.php?id=4001" class="btn btn-outline-primary btn-sm my-1">View</a>
+                                            <a href="edit.php?id=4001" class="btn btn-outline-secondary btn-sm">Edit</a>
+                                            <button class="btn btn-outline-danger btn-sm mb-1">Delete</button>
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td>2002</td>
-                                        <td>Omega Laptop Pro</td>
-                                        <td class="text-end">140</td>
-                                        <td class="text-end amount-cell">₱7,630,000.00</td>
-                                        <td class="text-end">2</td>
+                                        <td>4002</td>
+                                        <td>Computers</td>
+                                        <td><span class="small text-muted">Laptops, desktops, parts</span></td>
+                                        <td><span class="status-badge cat-active">active</span></td>
+                                        <td><span class="small text-muted">2025-11-12</span></td>
+                                        <td class="text-center actions-cell">
+                                            <a href="view.php?id=4002" class="btn btn-outline-primary btn-sm my-1">View</a>
+                                            <a href="edit.php?id=4002" class="btn btn-outline-secondary btn-sm">Edit</a>
+                                            <button class="btn btn-outline-danger btn-sm mb-1">Delete</button>
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td>2005</td>
-                                        <td>Gamma Smartwatch S</td>
-                                        <td class="text-end">480</td>
-                                        <td class="text-end amount-cell">₱2,880,000.00</td>
-                                        <td class="text-end">1</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2010</td>
-                                        <td>Delta Headphones Lite</td>
-                                        <td class="text-end">520</td>
-                                        <td class="text-end amount-cell">₱675,480.00</td>
-                                        <td class="text-end">0</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2015</td>
-                                        <td>Echo Bluetooth Speaker</td>
-                                        <td class="text-end">410</td>
-                                        <td class="text-end amount-cell">₱533,000.00</td>
-                                        <td class="text-end">3</td>
+                                        <td>4003</td>
+                                        <td>Audio</td>
+                                        <td><span class="small text-muted">Headphones & speakers</span></td>
+                                        <td><span class="status-badge cat-inactive">inactive</span></td>
+                                        <td><span class="small text-muted">2025-11-14</span></td>
+                                        <td class="text-center actions-cell">
+                                            <a href="view.php?id=4003" class="btn btn-outline-primary btn-sm my-1">View</a>
+                                            <a href="edit.php?id=4003" class="btn btn-outline-secondary btn-sm">Edit</a>
+                                            <button class="btn btn-outline-danger btn-sm mb-1">Delete</button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -277,11 +284,48 @@
                     </div>
                 </div>
 
-                <!-- Offcanvas: Filters (Items) -->
+                <!-- Offcanvas: Filters (Categories) -->
                 <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
                     <div class="offcanvas-header">
-                        <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Items</h5>
+                        <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Categories</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                     </div>
                     <div class="offcanvas-body">
-                        <form class="vstack
+                        <form class="vstack gap-3">
+                            <div>
+                                <label class="form-label">Active status</label>
+                                <select class="form-select">
+                                    <option value="">Any</option>
+                                    <option value="1">active</option>
+                                    <option value="0">inactive</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Created date range</label>
+                                <div class="d-flex gap-2">
+                                    <input type="date" class="form-control">
+                                    <input type="date" class="form-control">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label">Name contains</label>
+                                <input type="text" class="form-control" placeholder="Keyword">
+                            </div>
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-primary btn-sm">Apply Filters</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
+    </script>
+
+    <script src="sidebars.js"></script>
+</body>
+
+</html>
