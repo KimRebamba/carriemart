@@ -277,7 +277,14 @@ session_start();
 <?php
 include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/main-header.php');
 ?>
+<?php
 
+if (!empty($_SESSION['warning'])) {
+    echo '<div class="alert alert-warning mt-0">'.$_SESSION['warning'].'</div>';
+    $_SESSION['warning'] = NULL;
+    unset($_SESSION['warning']); 
+}
+?>
     <!-- hero -->
     <div class="container col-xxl-8 px-4 pt-3 pb-0 pt-lg-4 pb-lg-0">
         <div class="row hero-row g-4 g-lg-5">

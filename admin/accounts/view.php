@@ -1,3 +1,40 @@
+<?php
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+
+$account = [];
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($id <= 0) {
+    header('Location: index.php?error=invalid_id');
+    exit;
+}
+
+$stmt = $conn->prepare("SELECT user_id, username, email, address, phone_number, role, first_name, last_name, profile_photo_url, created_at, is_active FROM accounts WHERE user_id = ?");
+$stmt->bind_param('i', $id);
+$stmt->execute();
+$stmt->bind_result($user_id, $username, $email, $address, $phone_number, $role, $first_name, $last_name, $profile_photo_url, $created_at, $is_active);
+if ($stmt->fetch()) {
+    $account = [
+        'user_id' => $user_id,
+        'username' => $username,
+        'email' => $email,
+        'address' => $address,
+        'phone_number' => $phone_number,
+        'role' => $role,
+        'first_name' => $first_name,
+        'last_name' => $last_name,
+        'profile_photo_url' => $profile_photo_url,
+        'created_at' => $created_at,
+        'is_active' => (int)$is_active,
+    ];
+} else {
+    $stmt->close();
+    header('Location: index.php?error=not_found');
+    exit;
+}
+$stmt->close();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 

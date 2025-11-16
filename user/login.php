@@ -47,12 +47,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['username'] = $username;
                 $_SESSION['role']     = $role;
                 $_SESSION['profile_pic'] = $profile_photo_url; 
+                 $_SESSION['is_active'] = (int)$is_active;
 
                 $success = true;
 
                 if ($remember) {
                     setcookie(session_name(), session_id(), time() + 60*60*24*30, "/");
                 }
+
+                 
             }
         }
         $stmt->close();
@@ -105,11 +108,11 @@ mysqli_close($conn);
                     <?php endforeach; ?>
                 </div>
             <?php elseif ($success): ?>
-                <div class="alert alert-success d-flex justify-content-between align-items-center mb-3">
-                    <span><?php echo empty($_SESSION['user_id']) ? 'Already logged in.' : 'Login successful!'; ?></span>
-                    <a class="btn btn-success btn-sm" href="/carriemart/index.php">Continue</a>
-                </div>
-            <?php endif; ?>
+    <div class="alert alert-success d-flex justify-content-between align-items-center mb-3">
+        <span><?php echo empty($_SESSION['user_id']) ? 'Already logged in.' : 'Login successful!'; ?></span>
+        <a class="btn btn-success btn-sm" href="<?php echo ($_SESSION['role'] ?? '') === 'admin' ? '/carriemart/admin/index.php' : '/carriemart/index.php'; ?>">Continue</a>
+    </div>
+<?php endif; ?>
 
             <div class="row g-2 align-items-center mb-3">
                 <label for="inputEmail" class="col-12 col-sm-3 col-form-label text-sm-start">Email</label>

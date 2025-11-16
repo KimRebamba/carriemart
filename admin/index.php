@@ -1,4 +1,6 @@
-
+<?php
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
+?>
 
 <html lang="en">
 
@@ -121,7 +123,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                     </div>
                     <div class="card-body">
                         <div class="d-flex flex-wrap gap-2">
-                            <a href="#" class="btn btn-outline-primary btn-sm">Add Account</a>
+                            <a href="/carriemart/admin/accounts/account-form.php" class="btn btn-outline-primary btn-sm">Add Account</a>
                             <a href="#" class="btn btn-outline-primary btn-sm">Add Employee</a>
                             <a href="#" class="btn btn-outline-primary btn-sm">Add Expense</a>
                             <a href="#" class="btn btn-outline-primary btn-sm">Add Product</a>

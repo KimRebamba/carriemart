@@ -36,18 +36,25 @@ if (!empty($_SESSION['user_id'])) {
                     <img src="<?= $profilePic ?>" alt="User" width="32" height="32" class="rounded-circle">
                 </a>
                 <ul class="dropdown-menu text-small">                
-                    <?php if ($isLoggedIn): ?>
-                        <li><a class="dropdown-item" href="/carriemart/user/profile/profile.php">Profile</a></li>
-                        <li><a class="dropdown-item" href="/carriemart/user/cart/cart.php">CarrieCart</a></li>
-                        <li><a class="dropdown-item" href="/carriemart/user/orders/orders.php">Orders</a></li>
-                        <li><a class="dropdown-item" href="/carriemart/user/reviews/reviews.php">Reviews</a></li>
-                        <li><a class="dropdown-item" href="/carriemart/user/returns/returns.php">Returns</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/carriemart/user/logout.php">Log out</a></li>
-                    <?php else: ?>
-                        <li><a class="dropdown-item" href="/carriemart/user/login.php">Sign in</a></li>
-                    <?php endif; ?>
-                </ul>
+    <?php if ($isLoggedIn): ?>
+        <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
+            <!-- Admin menu -->
+            <li><a class="dropdown-item" href="/carriemart/admin/index.php">Admin Panel</a></li>
+        
+        <?php else: ?>
+            <!-- Customer menu -->
+            <li><a class="dropdown-item" href="/carriemart/user/profile/profile.php">Profile</a></li>
+            <li><a class="dropdown-item" href="/carriemart/user/cart/cart.php">CarrieCart</a></li>
+            <li><a class="dropdown-item" href="/carriemart/user/orders/orders.php">Orders</a></li>
+            <li><a class="dropdown-item" href="/carriemart/user/reviews/reviews.php">Reviews</a></li>
+            <li><a class="dropdown-item" href="/carriemart/user/returns/returns.php">Returns</a></li>
+        <?php endif; ?>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="/carriemart/user/logout.php">Log out</a></li>
+    <?php else: ?>
+        <li><a class="dropdown-item" href="/carriemart/user/login.php">Sign in</a></li>
+    <?php endif; ?>
+</ul>
             </div>
         </div>
     </div>

@@ -4,7 +4,6 @@
 
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-$conn = mysqli_connect($host, $user, $pass, $db);
 if (!$conn) {
     die('Database connection failed.');
 }
@@ -79,7 +78,7 @@ $stmt->fetch();
     }
 
     
-    $photo_url = NULL;
+    $photo_url = '/carriemart/uploads/profile_photos/default.jpg';
     if (empty($errors) && !empty($_FILES['profile_photo']['tmp_name'])) {
         $file = $_FILES['profile_photo'];
         

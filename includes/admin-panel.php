@@ -1,4 +1,5 @@
 <!-- side panel -->
+
     <div class="d-flex"> <!-- DO NOT REMOVE - for flex items -->
         <div class="flex-shrink-0 p-3 border" style="width:280px; min-height:100vh;"> <!-- side panel-->
             <a href="/carriemart/admin/index.php" class="d-flex align-items-start pb-3 mb-3 link-body-emphasis text-decoration-none border-bottom gap-2">
@@ -118,7 +119,7 @@
                 <li class="border-top my-3"></li>
 
                 <li class="mb-1">
-                    <a href="/carriemart/index.php" class="btn btn-toggle d-flex w-100 align-items-center rounded border-0" aria-expanded="false">
+                    <a href="/carriemart/user/logout.php" class="btn btn-toggle d-flex w-100 align-items-center rounded border-0" aria-expanded="false">
                         <small class="fw-normal">Log out</small>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                              fill="currentColor" class="caret bi bi-caret-right-fill ms-2" viewBox="0 0 16 16">

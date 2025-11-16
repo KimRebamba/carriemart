@@ -23,15 +23,7 @@
                     <li><a class="link-secondary text-decoration-none" href="/carriemart/main/vouchers.php">Vouchers</a></li>
                 </ul>
             </div>
-            <div class="col-6 col-md">
-                <h5>Settings</h5>
-                <ul class="list-unstyled text-small">
-                    <li><a class="link-secondary text-decoration-none" href="/carriemart/user/profile/profile.php">Profile</a></li>
-                    <li><a class="link-secondary text-decoration-none" href="/carriemart/user/orders/orders.php">Orders</a></li>
-                    <li><a class="link-secondary text-decoration-none" href="/carriemart/user/reviews/reviews.php">Reviews</a></li>
-                    <li><a class="link-secondary text-decoration-none" href="/carriemart/user/returns/returns.php">Returns</a></li>
-                </ul>
-            </div>
+            
             <div class="col-6 col-md">
                 <h5>More on</h5>
                 <ul class="list-unstyled text-small">
