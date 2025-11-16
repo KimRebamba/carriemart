@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CarrieMart: Edit Employee</title>
+    <title>CM: View Product</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
@@ -30,7 +30,7 @@
     .avatar-lg {
         width: 96px;
         height: 96px;
-        border-radius: 50%;
+        border-radius: 8px;
         object-fit: cover;
         background: #f1f3f5;
     }
@@ -58,70 +58,101 @@
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="form-label">Product ID</label>
-                                <input type="text" class="form-control" value="" disabled>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($product['product_id'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Created at</label>
-                                <input type="text" class="form-control" value="" disabled>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($product['created_at'] ?? '') ?>" disabled>
                             </div>
                         </div>
 
                         <hr class="my-4">
 
-                        <!-- Core product fields (all read-only) -->
+                        <!-- Core product fields (read-only) -->
                         <div class="row g-3">
                             <div class="col-md-8">
                                 <label class="form-label">Product name</label>
-                                <input type="text" class="form-control" value="" disabled>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($product['product_name'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Model</label>
-                                <input type="text" class="form-control" value="" disabled>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($product['model'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Brand</label>
-                                <input type="text" class="form-control" value="" disabled>
+                                <input type="text" class="form-control"
+                                    value="<?= htmlspecialchars($product['brand_name'] ?? $product['brand_id'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Category</label>
-                                <input type="text" class="form-control" value="" disabled>
+                                <input type="text" class="form-control"
+                                    value="<?= htmlspecialchars($product['category_name'] ?? $product['category_id'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Supplier</label>
-                                <input type="text" class="form-control" value="" disabled>
+                                <input type="text" class="form-control"
+                                    value="<?= htmlspecialchars($product['supplier_name'] ?? $product['supplier_id'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Retail price (₱)</label>
-                                <input type="text" class="form-control" value="" disabled>
+                                <input type="text" class="form-control"
+                                    value="<?= isset($product['retail_price']) ? number_format((float)$product['retail_price'], 2) : '' ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Cost price (₱)</label>
-                                <input type="text" class="form-control" value="" disabled>
+                                <input type="text" class="form-control"
+                                    value="<?= isset($product['cost_price']) ? number_format((float)$product['cost_price'], 2) : '' ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Stock level</label>
-                                <input type="text" class="form-control" value="" disabled>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars((string)($product['stock_level'] ?? '')) ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Condition</label>
-                                <input type="text" class="form-control" value="new" disabled>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($product['product_condition'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Warranty (months)</label>
-                                <input type="text" class="form-control" value="12" disabled>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars((string)($product['warranty_months'] ?? '')) ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Status</label>
-                                <input type="text" class="form-control" value="active" disabled>
+                                <input type="text" class="form-control" value="<?= (isset($product['is_active']) && (int)$product['is_active'] === 1) ? 'active' : 'inactive' ?>" disabled>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Description</label>
-                                <textarea class="form-control" rows="4" disabled></textarea>
+                                <textarea class="form-control" rows="4" disabled><?= htmlspecialchars($product['description'] ?? '') ?></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Specifications</label>
-                                <textarea class="form-control" rows="4" disabled></textarea>
+                                <textarea class="form-control" rows="4" disabled><?= htmlspecialchars($product['specifications'] ?? '') ?></textarea>
                             </div>
+
+                            <!-- Product photos (read-only) -->
+                            <?php $product_photos = $product_photos ?? []; ?>
+                            <div class="col-12">
+                                <label class="form-label d-block">Product photos</label>
+                                <?php if (!empty($product_photos)): ?>
+                                    <div class="row g-2">
+                                        <?php foreach ($product_photos as $p): ?>
+                                            <div class="col-6 col-sm-4 col-md-3">
+                                                <div class="border rounded p-2 h-100 text-center">
+                                                    <img src="<?= htmlspecialchars($p['photo_url'] ?? '') ?>" class="img-fluid rounded mb-2" alt="photo">
+                                                    <?php if (!empty($p['is_primary'])): ?>
+                                                        <span class="badge text-bg-primary">Primary</span>
+                                                    <?php endif; ?>
+                                                    <?php if (isset($p['sort_order'])): ?>
+                                                        <div class="small text-muted mt-1">Order: <?= (int)$p['sort_order'] ?></div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="text-muted">No photos available.</div>
+                                <?php endif; ?>
+                            </div>
+
                             <div class="col-12">
                                 <small class="text-muted">All fields are read-only.</small>
                             </div>
@@ -130,18 +161,18 @@
                         <hr class="my-4">
                         <div class="d-flex gap-2 mb-3">
                             <a class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2 btn-icon"
-                               style="flex: 2 1 0%;" href="product-form.php">
+                               style="flex: 2 1 0%;" href="/carriemart/admin/products/product-form.php?id=<?= urlencode($product['product_id'] ?? '') ?>">
                                 Edit Product
                                 <img src="/carriemart/assets/person-check-fill.svg" alt="" aria-hidden="true">
                             </a>
-                             <button type="button"
-                                 class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center justify-content-center gap-2 btn-icon-inverted"
-                                 style="flex: 1 1 0%;" onclick="history.back()">
-                                 Go back
-                                 <img src="/carriemart/assets/caret-right-square.svg" alt="" aria-hidden="true">
-                             </button>
+                            <button type="button"
+                                class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center justify-content-center gap-2 btn-icon-inverted"
+                                style="flex: 1 1 0%;" onclick="history.back()">
+                                Go back
+                                <img src="/carriemart/assets/caret-right-square.svg" alt="" aria-hidden="true">
+                            </button>
                         </div>
-                     </form>
+                    </form>
                 </div>
             </div>
         </main>

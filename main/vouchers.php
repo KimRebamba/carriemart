@@ -58,6 +58,10 @@
             border-radius: .9rem;
             display: block;
         }
+
+        .toast {
+    box-shadow: none !important;
+}
     </style>
 </head>
 <body>

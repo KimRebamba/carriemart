@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CarrieMart: Edit Employee</title>
+    <title>CM: Product-Form</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
@@ -53,7 +53,7 @@
                 <div class="col-md-8 col-lg-7 mx-auto">
                     <h4 class="mb-3">Edit Product</h4>
 
-                    <form class="needs-validation" method="post" novalidate>
+                    <form class="needs-validation" method="post" novalidate enctype="multipart/form-data">
                         <!-- Product IDs & timestamps (read-only) -->
                         <div class="row g-3">
                             <div class="col-6">
@@ -136,6 +136,58 @@
                                 <label for="specifications" class="form-label">Specifications</label>
                                 <textarea id="specifications" name="specifications" class="form-control" rows="4"></textarea>
                             </div>
+
+                            <!-- Product photos: upload multiple -->
+                            <div class="col-12">
+                                <label class="form-label d-block">Product photos</label>
+                                <div class="mb-2">
+                                    <input class="form-control" type="file" id="photos_new" name="photos_new[]" accept="image/*" multiple>
+                                    <small class="text-body-secondary d-block">Select multiple images (JPG, PNG, GIF). Max 5MB each.</small>
+                                </div>
+                                <div id="photosNewPreview" class="d-flex flex-wrap gap-2"></div>
+                            </div>
+
+                            <!-- Existing photos (if editing) -->
+                            <?php $product_photos = $product_photos ?? []; if (!empty($product_photos)): ?>
+                            <div class="col-12">
+                                <label class="form-label d-block">Existing photos</label>
+                                <div class="row g-2">
+                                    <?php foreach ($product_photos as $p): ?>
+                                    <div class="col-6 col-sm-4 col-md-3">
+                                        <div class="border rounded p-2 h-100">
+                                            <img src="<?= htmlspecialchars($p['photo_url'] ?? '') ?>" class="img-fluid rounded mb-2" alt="photo">
+                                            <div class="d-flex align-items-center justify-content-between gap-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio"
+                                                           name="primary_photo_id"
+                                                           value="<?= (int)($p['product_photo_id'] ?? 0) ?>"
+                                                           <?= !empty($p['is_primary']) ? 'checked' : '' ?>>
+                                                    <label class="form-check-label small">Primary</label>
+                                                </div>
+                                                <div class="ms-auto">
+                                                    <label class="form-label small mb-0 me-1">Order</label>
+                                                    <input type="number" class="form-control form-control-sm d-inline-block"
+                                                           style="width:72px;"
+                                                           name="photos_existing[<?= (int)($p['product_photo_id'] ?? 0) ?>][sort_order]"
+                                                           value="<?= (int)($p['sort_order'] ?? 0) ?>">
+                                                </div>
+                                            </div>
+                                            <div class="form-check mt-2">
+                                                <input class="form-check-input" type="checkbox"
+                                                       name="photos_existing[<?= (int)($p['product_photo_id'] ?? 0) ?>][remove]"
+                                                       value="1" id="remove<?= (int)($p['product_photo_id'] ?? 0) ?>">
+                                                <label class="form-check-label small text-danger"
+                                                       for="remove<?= (int)($p['product_photo_id'] ?? 0) ?>">Remove</label>
+                                            </div>
+                                            <input type="hidden"
+                                                   name="photos_existing[<?= (int)($p['product_photo_id'] ?? 0) ?>][photo_url]"
+                                                   value="<?= htmlspecialchars($p['photo_url'] ?? '') ?>">
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
                         </div>
 
                         <hr class="my-4">
@@ -160,6 +212,31 @@ Save Product
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script>
+    // Preview newly selected product photos
+    const photosInput = document.getElementById('photos_new');
+    const photosPreview = document.getElementById('photosNewPreview');
+    photosInput?.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files || []);
+        photosPreview.innerHTML = '';
+        files.forEach(file => {
+            const url = URL.createObjectURL(file);
+            const wrap = document.createElement('div');
+            wrap.className = 'border rounded';
+            wrap.style.width = '96px';
+            wrap.style.height = '96px';
+            wrap.style.overflow = 'hidden';
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = file.name;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'cover';
+            wrap.appendChild(img);
+            photosPreview.appendChild(wrap);
+        });
+    });
+    </script>
 </body>
 
 </html>

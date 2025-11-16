@@ -1,9 +1,14 @@
+<?php
+session_start();
+
+?>
+
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CarrieMart: Home</title>
+    <title>CM: Home</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
@@ -268,45 +273,10 @@
 </head>
 
 <body>
-    <header class="p-3 mb-3 border-bottom">
-        <div class="container">
-            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"> <a
-                    href="#" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
-                    <img src="./assets/Header-Logo-01.svg" alt="Carriemart logo" width="40" height="40" class="me-2">
-                </a>
-                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                    <li><a href="#" class="nav-link px-2 link-secondary">Home</a></li>
-                    <li><a href="#" class="nav-link px-2 link-body-emphasis">Categories</a></li>
-                    <li><a href="./main/index.php" class="nav-link px-2 link-body-emphasis">Products</a></li>
-                    <li><a href="#" class="nav-link px-2 link-body-emphasis">Vouchers</a></li>
-                </ul>
-
-                <form class="search-form d-flex mb-0 me-2 me-lg-3" role="search">
-                    <input type="search" class="form-control w-100" placeholder="Search..." aria-label="Search">
-                </form>
-
-                <!-- profile pic user dropdown -->
-                <div class="dropdown text-end avatar-dropdown align-self-center">
-                    <a href="#"
-                        class="d-inline-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="./assets/me.jfif" alt="mdo" width="32" height="32" class="rounded-circle">
-                    </a>
-                    <ul class="dropdown-menu text-small">                
-                        <li><a class="dropdown-item" href="/carriemart/user/profile.php">Profile</a></li>
-                         <li><a class="dropdown-item" href="/carriemart/main/cart.php">CarrieCart</a></li>
-                        <li><a class="dropdown-item" href="/carriemart/user/orders.php">Orders</a></li>
-                        <li><a class="dropdown-item" href="/carriemart/user/reviews.php">Reviews</a></li>
-                        <li><a class="dropdown-item" href="/carriemart/user/returns.php">Returns</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" href="#">Sign out</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </header>
+    
+<?php
+include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/main-header.php');
+?>
 
     <!-- hero -->
     <div class="container col-xxl-8 px-4 pt-3 pb-0 pt-lg-4 pb-lg-0">
@@ -317,8 +287,20 @@
                     Add to the mood with your own musical instrument. Whether it be a piano, guitar, or just your voice!
                     Make your own vibe here, in CarrieMart. :)</p>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-                    <a href="./login.php"><button type="button" class="btn btn-primary btn-lg px-4 me-md-2">Sign in</button></a>
-                    <a href="/carriemart/main/index.php"><button type="button" class="btn btn-outline-secondary btn-lg px-4">Look around :P</button></a>
+                     <?php if (empty($_SESSION['user_id'])): ?>
+        <a href="/carriemart/user/login.php">
+            <button type="button" class="btn btn-primary btn-lg px-4 me-md-2">Sign in</button>
+        </a>
+
+        <a href="/carriemart/main/products.php">
+            <button type="button" class="btn btn-outline-secondary btn-lg px-4">Shop Now</button>
+        </a>
+    <?php else: ?>
+        <a href="/carriemart/main/products.php">
+            <button type="button" class="btn btn-primary btn-lg px-4 me-md-2">Shop Now</button>
+        </a>
+    <?php endif; ?>
+    
                 </div>
             </div>
 

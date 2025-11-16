@@ -1,7 +1,7 @@
 <!-- side panel -->
     <div class="d-flex"> <!-- DO NOT REMOVE - for flex items -->
         <div class="flex-shrink-0 p-3 border" style="width:280px; min-height:100vh;"> <!-- side panel-->
-            <a href="/" class="d-flex align-items-start pb-3 mb-3 link-body-emphasis text-decoration-none border-bottom gap-2">
+            <a href="/carriemart/admin/index.php" class="d-flex align-items-start pb-3 mb-3 link-body-emphasis text-decoration-none border-bottom gap-2">
                 <img src="/carriemart/assets/Logo.svg" alt="logo icon" height="40">
                 <div class="d-flex flex-column lh-1">
                     <small class="fw-normal">CarrieMart</small>
