@@ -138,7 +138,7 @@
                             </div>
                         </div>
 
-                        <!-- Note: Front-end only; no PHP bindings yet. -->
+                    
 
                         <hr class="my-4">
 
