@@ -101,16 +101,13 @@ CREATE TABLE product_photos (
 
 CREATE TABLE employees (
   emp_id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT DEFAULT NULL,
   birth_date DATE DEFAULT NULL,
   gender ENUM('male','female','other') DEFAULT NULL,
   employment_status ENUM('active','inactive','terminated','on_leave') DEFAULT 'active',
   hire_date DATE DEFAULT NULL,
   current_position_id INT DEFAULT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_employees_user (user_id),
   INDEX idx_employees_position (current_position_id),
-  FOREIGN KEY (user_id) REFERENCES accounts(user_id) ON DELETE SET NULL ON UPDATE CASCADE,
   FOREIGN KEY (current_position_id) REFERENCES positions(position_id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
