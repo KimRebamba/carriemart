@@ -37,7 +37,7 @@
                 <li class="mb-1">
                     <button class="btn btn-toggle d-flex w-100 align-items-center rounded border-0 collapsed"
                         data-bs-toggle="collapse" data-bs-target="#employees-collapse" aria-expanded="false">
-                        <img class="icon" src="../assets/briefcase.svg" alt="">
+                        <img class="icon" src="/carriemart/assets/briefcase.svg" alt="">
                         <span>Employees</span>
                         <img class="caret ms-auto"
                             src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/caret-right.svg" alt="">

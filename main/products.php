@@ -5,7 +5,7 @@
     <title>CarrieMart: Products</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="icon" href="/carriemart/assets/Header-Logo-01.svg" type="image/svg+xml">
+    <link rel="icon" href="/carriemart/assets/Logo.svg" type="image/svg+xml">
     <style>
         /* Back line */
         .back-line {
