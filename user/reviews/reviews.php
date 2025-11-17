@@ -1,3 +1,9 @@
+<?php
+session_start();
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,26 +65,7 @@
     </style>
 </head>
 <body>
-<header class="p-3 mb-2 border-bottom">
-    <div class="container">
-        <div class="d-flex flex-wrap align-items-center justify-content-between" style="min-height: 48px;">
-            <a href="#" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
-                <img src="../assets/Header-Logo-01.svg" alt="Carriemart logo" width="40" height="40" class="me-2">
-            </a>
-            <div class="dropdown text-end avatar-dropdown">
-                <a href="#" class="d-inline-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="../assets/me.jfif" alt="" width="32" height="32" class="rounded-circle">
-                </a>
-                <ul class="dropdown-menu text-small">
-                    <li><a class="dropdown-item" href="#">Settings</a></li>
-                    <li><a class="dropdown-item" href="#">Profile</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#">Sign out</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</header>
+<?php include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/third-header.php'); ?>
 
 <!-- Go Back line -->
 <div class="container mb-3">
@@ -197,41 +184,9 @@
 
     </div>
 </div>
-
-<hr>
-<footer class="container py-lg-4 py-md-4 py-3">
-    <div class="row">
-        <div class="col-12 col-md">
-            <img src="../assets/Header-Logo-01.svg" width="50" height="50" class="d-block mb-2" alt="Carriemart logo">
-            <small class="d-block mb-3 text-body-secondary">© CarrieMart - 2025 <br><br> Made by: <br> Kim Rebamba <br> JM Carutcho</small>
-        </div>
-        <div class="col-6 col-md"><!-- empty --></div>
-        <div class="col-6 col-md">
-            <h5>Shortcuts</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="link-secondary text-decoration-none" href="#">Resource name</a></li>
-                <li><a class="link-secondary text-decoration-none" href="#">Resource</a></li>
-                <li><a class="link-secondary text-decoration-none" href="#">Another resource</a></li>
-                <li><a class="link-secondary text-decoration-none" href="#">Final resource</a></li>
-            </ul>
-        </div>
-        <div class="col-6 col-md">
-            <h5>Resources</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="link-secondary text-decoration-none" href="#">Business</a></li>
-                <li><a class="link-secondary text-decoration-none" href="#">Education</a></li>
-                <li><a class="link-secondary text-decoration-none" href="#">Government</a></li>
-                <li><a class="link-secondary text-decoration-none" href="#">Gaming</a></li>
-            </ul>
-        </div>
-        <div class="col-6 col-md">
-            <h5>More on</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="link-secondary text-decoration-none" href="https://github.com/KimRebamba">Github :P</a></li>
-            </ul>
-        </div>
-    </div>
-</footer>
+ <?php
+include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/footer.php');
+?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>

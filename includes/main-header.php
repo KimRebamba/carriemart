@@ -14,7 +14,7 @@ if (!empty($_SESSION['user_id'])) {
 <header class="p-3 mb-3 border-bottom">
     <div class="container">
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-            <a href="#" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
+            <a href="/carriemart/index.php" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
                 <img src="/carriemart/assets/Logo.svg" alt="Carriemart logo" width="40" height="40" class="me-2">
             </a>
 
@@ -25,9 +25,9 @@ if (!empty($_SESSION['user_id'])) {
                 <li><a href="/carriemart/main/vouchers.php" class="nav-link px-2 link-body-emphasis">Vouchers</a></li>
             </ul>
 
-            <form class="search-form d-flex mb-0 me-2 me-lg-3" role="search">
-                <input type="search" class="form-control w-100" placeholder="Search..." aria-label="Search">
-            </form>
+            <form class="search-form d-flex mb-0 me-2 me-lg-3" role="search" method="GET" action="/carriemart/main/search.php">
+    <input type="search" class="form-control w-100" name="q" placeholder="Search..." aria-label="Search">
+</form>
 
             <div class="dropdown text-end avatar-dropdown align-self-center">
                 <a href="#"
