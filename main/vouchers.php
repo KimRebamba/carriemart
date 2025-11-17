@@ -1,3 +1,32 @@
+<?php
+session_start();
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+if (!$conn) { die('DB error'); }
+
+// Load active vouchers (schema: vouchers)
+$vouchers = [];
+$st = $conn->prepare("
+    SELECT voucher_code, percent_sale, min_purchase_amount, max_discount_amount, from_date, to_date, is_active
+    FROM vouchers
+    WHERE is_active = 1
+    ORDER BY voucher_code ASC
+");
+$st->execute();
+$st->bind_result($code, $percent, $minAmt, $maxAmt, $fromDate, $toDate, $active);
+while ($st->fetch()) {
+    $vouchers[] = [
+        'voucher_code' => $code,
+        'percent_sale' => ($percent !== null ? (int)$percent : 0),
+        'min_purchase_amount' => (string)$minAmt,
+        'max_discount_amount' => ($maxAmt !== null ? (string)$maxAmt : ''),
+        'from_date' => $fromDate,
+        'to_date' => $toDate,
+        'is_active' => (int)$active
+    ];
+}
+$st->close();
+$voucher_count = count($vouchers);
+?>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -80,7 +109,7 @@
 
    <div class="container mb-3">
         <div class="d-flex align-items-center justify-content-start">
-            <small class="text-muted" style="">Showing 8 vouchers</small>
+            <small class="text-muted" style="">Showing <?php echo $voucher_count; ?> vouchers</small>
         </div>
     </div>
     
@@ -89,30 +118,22 @@
         <div class="product-grid">
 
             <!-- Voucher: SAVE10 -->
-            <div class="product-card">
-              
-                <h6 class="mt-2 mb-1 fw-bold display-5">SAVE10</h6>
-                <p class="small mb-1"><strong>10% OFF</strong></p>
-                <p class="text-muted small mb-0">
-                    Min purchase: 500<br>
-                    Max discount: 100<br>
-                    Until: 2025-12-31
-                </p>
-                <a href="#" class="stretched-link" onclick="copyVoucher('SAVE10'); return false;" aria-label="Copy voucher SAVE10"></a>
-            </div>
+            <?php foreach ($vouchers as $v): ?>
+                <div class="product-card">
+                    <h6 class="mt-2 mb-1 fw-bold display-5"><?php echo $v['voucher_code']; ?></h6>
+                    <p class="small mb-1"><strong><?php echo $v['percent_sale']; ?>% OFF</strong></p>
+                    <p class="text-muted small mb-0">
+                        Min purchase: <?php echo $v['min_purchase_amount']; ?><br>
+                        Max discount: <?php echo ($v['max_discount_amount'] !== '' ? $v['max_discount_amount'] : '—'); ?><br>
+                        Until: <?php echo ($v['to_date'] ? $v['to_date'] : '—'); ?>
+                    </p>
+                    <a href="#" class="stretched-link" onclick="copyVoucher('<?php echo $v['voucher_code']; ?>'); return false;" aria-label="Copy voucher"></a>
+                </div>
+            <?php endforeach; ?>
 
-            <!-- Voucher: YOUS -->
-            <div class="product-card">
-              
-                <h6 class="mt-2 mb-1 fw-bold display-5">YOUS</h6>
-                <p class="small mb-1"><strong>10% OFF</strong></p>
-                <p class="text-muted small mb-0">
-                    Min purchase: 500<br>
-                    Max discount: 100<br>
-                    Until: 2025-12-31
-                </p>
-                <a href="#" class="stretched-link" onclick="copyVoucher('YOUS'); return false;" aria-label="Copy voucher SAVE10"></a>
-            </div>
+            <?php if (empty($vouchers)): ?>
+                <div class="text-muted small">No active vouchers.</div>
+            <?php endif; ?>
         </div>
     </div>
 

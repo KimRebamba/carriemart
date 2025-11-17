@@ -1,10 +1,16 @@
 <?php
 session_start();
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
-
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 if (!$conn) { die('DB error'); }
+
+// If someone lands here via GET with codes from cart.php, forward them to checkout-form with same codes
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /carriemart/user/cart/checkout-form.php');
+    $params = [];
+    if (isset($_GET['error']) && $_GET['error'] !== '') $params['error'] = $_GET['error'];
+    if (isset($_GET['status']) && $_GET['status'] !== '') $params['status'] = $_GET['status'];
+    $qs = !empty($params) ? ('?' . http_build_query($params)) : '';
+    header('Location: /carriemart/user/cart/checkout-form.php' . $qs);
     exit;
 }
 if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) {
@@ -105,7 +111,7 @@ try {
     $voucher_code = null;
     $percent_sale = 0;
     $discount = 0.00;
-    $delivery_fee = 0.00;
+    $delivery_fee = 50.00;
 
     if ($voucher_code_raw !== '') {
         $v = $conn->prepare("
@@ -140,49 +146,38 @@ try {
         }
     }
 
-    // Insert order
+    // Get current timestamp for date_ordered
+    $currentTimestamp = date('Y-m-d H:i:s');
+
+    // Insert order - NOW INCLUDING date_ordered and created_at
     $ord = $conn->prepare("
         INSERT INTO orders
-            (user_id, voucher_code, payment_status, order_status, payment_option,
-             delivery_recipient, delivery_address, delivery_phone, percent_sale, delivery_fee)
-        VALUES (?, ?, 'pending', 'pending', ?, ?, ?, ?, ?, ?)
+            (user_id, voucher_code, date_ordered, payment_status, order_status, payment_option,
+             delivery_recipient, delivery_address, delivery_phone, percent_sale, delivery_fee, created_at)
+        VALUES (?, ?, ?, 'pending', 'pending', ?, ?, ?, ?, ?, ?, ?)
     ");
     if (!$ord) { throw new Exception('prep_order'); }
 
-    // Null handling for voucher_code
-    if ($voucher_code === null) {
-        $null = null;
-        $ord->bind_param(
-            'isssssdd',
-            $userId,
-            $null,
-            $payment_option,
-            $delivery_recipient,
-            $delivery_address,
-            $delivery_phone,
-            $percent_sale,
-            $delivery_fee
-        );
-    } else {
-        $ord->bind_param(
-            'isssssdd',
-            $userId,
-            $voucher_code,
-            $payment_option,
-            $delivery_recipient,
-            $delivery_address,
-            $delivery_phone,
-            $percent_sale,
-            $delivery_fee
-        );
-    }
+    $ord->bind_param(
+        'issssssids',
+        $userId,
+        $voucher_code,
+        $currentTimestamp,
+        $payment_option,
+        $delivery_recipient,
+        $delivery_address,
+        $delivery_phone,
+        $percent_sale,
+        $delivery_fee,
+        $currentTimestamp
+    );
 
     if (!$ord->execute()) { $ord->close(); throw new Exception('exec_order'); }
     $orderId = $ord->insert_id;
     $ord->close();
 
-    // Insert lines and update stock
-    $line = $conn->prepare("INSERT INTO product_order (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)");
+    // Insert lines and update stock - NOW INCLUDING created_at
+    $line = $conn->prepare("INSERT INTO product_order (order_id, product_id, quantity, unit_price, created_at) VALUES (?, ?, ?, ?, ?)");
     if (!$line) { throw new Exception('prep_line'); }
 
     $updStock = $conn->prepare("UPDATE products SET stock_level = stock_level - ? WHERE product_id = ?");
@@ -190,7 +185,7 @@ try {
 
     foreach ($items as $pid => $qty) {
         $unit = $snap[$pid]['price'];
-        $line->bind_param('iiid', $orderId, $pid, $qty, $unit);
+        $line->bind_param('iiids', $orderId, $pid, $qty, $unit, $currentTimestamp);
         if (!$line->execute()) { $line->close(); $updStock->close(); throw new Exception('exec_line'); }
 
         $updStock->bind_param('ii', $qty, $pid);
@@ -334,6 +329,7 @@ try {
         }
     }
 
+    // On success, redirect back to cart with a success status and order id
     header('Location: /carriemart/user/cart/cart.php?status=order_placed&order_id=' . $orderId);
     exit;
 
@@ -343,3 +339,4 @@ try {
     header('Location: /carriemart/user/cart/checkout-form.php?ids='.$ids.'&error=server');
     exit;
 }
+?>

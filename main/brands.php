@@ -1,3 +1,30 @@
+<?php
+session_start();
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+if (!$conn) { die('DB error'); }
+
+// Fetch active brands
+$brands = [];
+$st = $conn->prepare("
+    SELECT brand_id, brand_name, logo_url, website, description
+    FROM brands
+    WHERE is_active = 1
+    ORDER BY brand_name ASC
+");
+$st->execute();
+$st->bind_result($bid, $bname, $logo, $site, $desc);
+while ($st->fetch()) {
+    $brands[] = [
+        'brand_id' => $bid,
+        'brand_name' => $bname,
+        'logo_url' => ($logo && $logo !== '' ? $logo : '/carriemart/assets/default-product.png'),
+        'website' => $site,
+        'description' => $desc
+    ];
+}
+$st->close();
+$brand_count = count($brands);
+?>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -76,22 +103,29 @@
 
     <div class="container mb-3">
         <div class="d-flex align-items-center justify-content-start">
-            <small class="text-muted" style="">Showing 8 brands</small>
+            <small class="text-muted" style="">Showing <?php echo $brand_count; ?> brands</small>
         </div>
     </div>
     
     <!-- Brands grid -->
     <div class="container pb-2">
         <div class="product-grid">
-            <!-- Brand: Apple -->
-            <div class="product-card">
-                <img class="product-img" src="https://picsum.photos/seed/apple/600/400" alt="Apple brand image">
-                <h6 class="mt-2 mb-1">Apple</h6>
-                <a class="small text-decoration-none" href="https://www.apple.com" target="_blank" rel="noopener">https://www.apple.com</a>
-                <p class="text-muted small mb-0 mt-1">Consumer electronics, software, and services.</p>
-                <a href="./products.php" class="stretched-link" rel="noopener" aria-label="Visit Apple"></a>
-            </div>
-        
+            <?php foreach ($brands as $b): ?>
+                <div class="product-card">
+                    <img class="product-img" src="<?php echo $b['logo_url']; ?>" alt="<?php echo $b['brand_name']; ?>">
+                    <h6 class="mt-2 mb-1"><?php echo $b['brand_name']; ?></h6>
+                    <?php if ($b['website']): ?>
+                        <a class="small text-decoration-none" href="<?php echo $b['website']; ?>" target="_blank" rel="noopener">
+                            <?php echo $b['website']; ?>
+                        </a>
+                    <?php endif; ?>
+                    <p class="text-muted small mb-0 mt-1"><?php echo ($b['description'] !== '' ? $b['description'] : ''); ?></p>
+                    <a href="./products.php?brand_id=<?php echo $b['brand_id']; ?>" class="stretched-link" rel="noopener" aria-label="View products"></a>
+                </div>
+            <?php endforeach; ?>
+            <?php if (empty($brands)): ?>
+                <div class="text-muted small">No active brands.</div>
+            <?php endif; ?>
         </div>
     </div>
 

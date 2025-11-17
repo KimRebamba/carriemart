@@ -4,13 +4,14 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
 if (!$conn) { die('DB error'); }
 
-$q          = isset($_GET['q']) ? trim($_GET['q']) : '';
-$categoryId = isset($_GET['category']) ? trim($_GET['category']) : '';
-$brandId    = isset($_GET['brand']) ? trim($_GET['brand']) : '';
-$minPrice   = isset($_GET['min_price']) ? trim($_GET['min_price']) : '';
-$maxPrice   = isset($_GET['max_price']) ? trim($_GET['max_price']) : '';
-$minRating  = isset($_GET['min_rating']) ? trim($_GET['min_rating']) : '';
-$sort       = isset($_GET['sort']) ? trim($_GET['sort']) : '';
+// Accept both legacy and new param names from brands/categories pages
+$q            = isset($_GET['q']) ? trim($_GET['q']) : '';
+$categoryId   = isset($_GET['category_id']) ? trim($_GET['category_id']) : (isset($_GET['category']) ? trim($_GET['category']) : '');
+$brandId      = isset($_GET['brand_id']) ? trim($_GET['brand_id']) : (isset($_GET['brand']) ? trim($_GET['brand']) : '');
+$minPrice     = isset($_GET['min_price']) ? trim($_GET['min_price']) : '';
+$maxPrice     = isset($_GET['max_price']) ? trim($_GET['max_price']) : '';
+$minRating    = isset($_GET['min_rating']) ? trim($_GET['min_rating']) : '';
+$sort         = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 
 $conditions = [];
 $params = [];
@@ -79,6 +80,8 @@ $sql = "
 SELECT
   p.product_id,
   p.product_name,
+  p.brand_id,
+  p.category_id,
   p.retail_price,
   b.brand_name,
   COALESCE(ph.photo_url,'/carriemart/assets/default-product.png') AS photo_url,
@@ -118,17 +121,19 @@ if ($stmt) {
         $stmt->bind_param($types, ...$params);
     }
     $stmt->execute();
-    $stmt->bind_result($pid, $pname, $price, $brandName, $photoUrl, $avgRating, $ratingCount, $totalSold);
+    $stmt->bind_result($pid, $pname, $p_brand_id, $p_category_id, $price, $brandName, $photoUrl, $avgRating, $ratingCount, $totalSold);
     while ($stmt->fetch()) {
         $products[] = [
-            'product_id' => $pid,
+            'product_id'   => $pid,
             'product_name' => $pname,
+            'brand_id'     => $p_brand_id,
+            'category_id'  => $p_category_id,
             'retail_price' => (float)$price,
-            'brand_name' => $brandName,
-            'photo_url' => $photoUrl,
-            'avg_rating' => (float)$avgRating,
+            'brand_name'   => $brandName,
+            'photo_url'    => $photoUrl ?: '/carriemart/assets/default-product.png',
+            'avg_rating'   => (float)$avgRating,
             'rating_count' => (int)$ratingCount,
-            'total_sold' => (int)$totalSold
+            'total_sold'   => (int)$totalSold
         ];
     }
     $stmt->close();
@@ -275,18 +280,18 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
                 </button>
                 <form method="get" class="d-inline-block mb-0">
                     <input type="hidden" name="q" value="<?php echo $q; ?>">
-                    <input type="hidden" name="category" value="<?php echo $categoryId; ?>">
-                    <input type="hidden" name="brand" value="<?php echo $brandId; ?>">
+                    <input type="hidden" name="category_id" value="<?php echo $categoryId; ?>">
+                    <input type="hidden" name="brand_id" value="<?php echo $brandId; ?>">
                     <input type="hidden" name="min_price" value="<?php echo $minPrice; ?>">
                     <input type="hidden" name="max_price" value="<?php echo $maxPrice; ?>">
                     <input type="hidden" name="min_rating" value="<?php echo $minRating; ?>">
                     <select name="sort" class="form-select form-select-sm" style="width:180px;" onchange="this.form.submit()">
                         <option value="">Sort by</option>
-                        <option value="popular" <?php if($sort==='popular') echo 'selected'; ?>>Most Popular</option>
-                        <option value="rating" <?php if($sort==='rating') echo 'selected'; ?>>Highest Rated</option>
-                        <option value="priceLow" <?php if($sort==='priceLow') echo 'selected'; ?>>Price: Low to High</option>
+                        <option value="popular"   <?php if($sort==='popular')   echo 'selected'; ?>>Most Popular</option>
+                        <option value="rating"    <?php if($sort==='rating')    echo 'selected'; ?>>Highest Rated</option>
+                        <option value="priceLow"  <?php if($sort==='priceLow')  echo 'selected'; ?>>Price: Low to High</option>
                         <option value="priceHigh" <?php if($sort==='priceHigh') echo 'selected'; ?>>Price: High to Low</option>
-                        <option value="newest" <?php if($sort==='newest') echo 'selected'; ?>>Newest</option>
+                        <option value="newest"    <?php if($sort==='newest')    echo 'selected'; ?>>Newest</option>
                     </select>
                 </form>
             </div>
@@ -306,7 +311,7 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
                 <input type="hidden" name="sort" value="<?php echo $sort; ?>">
                 <div>
                     <label class="form-label">Category</label>
-                    <select class="form-select" name="category">
+                    <select class="form-select" name="category_id">
                         <option value="">All</option>
                         <?php foreach ($categories as $c): ?>
                             <option value="<?php echo $c['id']; ?>" <?php if($categoryId!=='' && (int)$categoryId===$c['id']) echo 'selected'; ?>><?php echo $c['name']; ?></option>
@@ -315,7 +320,7 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
                 </div>
                 <div>
                     <label class="form-label">Brand</label>
-                    <select class="form-select" name="brand">
+                    <select class="form-select" name="brand_id">
                         <option value="">All</option>
                         <?php foreach ($brands as $b): ?>
                             <option value="<?php echo $b['id']; ?>" <?php if($brandId!=='' && (int)$brandId===$b['id']) echo 'selected'; ?>><?php echo $b['name']; ?></option>
@@ -359,7 +364,7 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
                 <h6 class="mt-2 mb-1"><?php echo $p['product_name']; ?></h6>
                 <div class="d-flex align-items-center justify-content-between mb-2 small">
                     <span class="text-muted">Brand:
-                        <a href="?brand=<?php echo $p['brand_name']!==null ? $p['product_id'] : ''; ?>" class="brand-link"><?php echo $brandDisp; ?></a>
+                        <a href="products.php?brand_id=<?php echo $p['brand_id']; ?>" class="brand-link"><?php echo $brandDisp; ?></a>
                     </span>
                     <span class="rating fw-semibold d-inline-flex align-items-center gap-1">
                         <span><?php echo $ratingText; ?></span>

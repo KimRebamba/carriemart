@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $q->close();
             }
         }
-        header('Location: cart.php');
+        header('Location: cart.php?status=qty_updated');
         exit;
     }
 
@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $u->execute();
             $u->close();
         }
-        header('Location: cart.php');
+        header('Location: cart.php?status=qty_set');
         exit;
     }
 
@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $d->execute();
             $d->close();
         }
-        header('Location: cart.php');
+        header('Location: cart.php?status=removed');
         exit;
     }
 
@@ -148,11 +148,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($bulk_action === 'checkout') {
                 // Go to checkout with only selected product ids
                 $qs = http_build_query(['ids' => $ids]);
-                header('Location: /carriemart/main/checkout.php?' . $qs);
+                header('Location: /carriemart/user/cart/checkout-form.php?' . $qs);
                 exit;
             }
         }
-        header('Location: cart.php');
+        header('Location: cart.php?error=none_selected');
         exit;
     }
 }
@@ -201,7 +201,51 @@ while ($st->fetch()) {
 }
 $st->close();
 
+// Add missing peso() helper used in the template
 function peso($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
+
+// Map and collect error/success messages (same pattern used in register.php warnings)
+function cm_map_error($code) {
+    if (strpos($code, 'stock_') === 0) return 'Insufficient stock for product #' . substr($code, 6) . '.';
+    if (strpos($code, 'not_found_') === 0) return 'Product not found #' . substr($code, 10) . '.';
+    if (strpos($code, 'inactive_') === 0) return 'Product inactive #' . substr($code, 9) . '.';
+    switch ($code) {
+        case 'server': return 'A server error occurred.';
+        case 'no_items': return 'No items selected.';
+        case 'no_cart': return 'No cart found.';
+        case 'login_required': return 'Please log in to continue.';
+        case 'invalid_id': return 'Invalid ID.';
+        case 'out_of_stock': return 'Item is out of stock.';
+        case 'none_selected': return 'No items were selected.';
+        default: return $code;
+    }
+}
+function cm_map_status($code, $orderId = null) {
+    switch ($code) {
+        case 'qty_updated': return 'Quantity updated.';
+        case 'qty_set': return 'Quantity set.';
+        case 'removed': return 'Item removed from cart.';
+        case 'deleted': return 'Selected items removed from cart.';
+        case 'order_placed': return 'Order placed successfully.' . ($orderId ? ' Order ID: #' . $orderId : '');
+        default: return '';
+    }
+}
+$cm_errors = [];
+$cm_success = [];
+if (isset($_GET['error']) && $_GET['error'] !== '') {
+    $codes = explode(',', trim($_GET['error']));
+    foreach ($codes as $c) {
+        $m = cm_map_error(trim($c));
+        if ($m !== '') $cm_errors[] = $m;
+    }
+}
+if (isset($_GET['status']) && $_GET['status'] !== '') {
+    $codes = explode(',', trim($_GET['status']));
+    foreach ($codes as $c) {
+        $m = cm_map_status(trim($c), isset($_GET['order_id']) ? $_GET['order_id'] : null);
+        if ($m !== '') $cm_success[] = $m;
+    }
+}
 ?>
 <html lang="en">
 <head>
@@ -253,6 +297,20 @@ function peso($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
 </div>
 
 <div class="container">
+    <?php if (!empty($cm_errors)): ?>
+        <div class="alert alert-danger mb-2" role="alert">
+            <?php foreach ($cm_errors as $em): ?>
+                <div>- <?php echo $em; ?></div>
+            <?php endforeach; ?>
+        </div>
+    <?php elseif (!empty($cm_success)): ?>
+        <div class="alert alert-success mb-2" role="alert">
+            <?php foreach ($cm_success as $sm): ?>
+                <div><?php echo $sm; ?></div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
     <form method="post" id="bulkForm" class="d-none">
         <input type="hidden" name="action" value="bulk">
         <input type="hidden" name="bulk_action" id="bulkActionField" value="">

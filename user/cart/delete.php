@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 
 if (!$conn) { die('DB error'); }
 if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) {

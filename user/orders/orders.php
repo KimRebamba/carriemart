@@ -2,6 +2,166 @@
 session_start();
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
+if (!$conn) { die('DB error'); }
+if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) {
+    header('Location: /carriemart/main/products.php?error=login_required');
+    exit;
+}
+$userId = (int)$_SESSION['user_id'];
+
+// Filters
+$orderStatus   = isset($_GET['order_status']) ? trim($_GET['order_status']) : '';
+$paymentStatus = isset($_GET['payment_status']) ? trim($_GET['payment_status']) : '';
+$recipient     = isset($_GET['recipient']) ? trim($_GET['recipient']) : '';
+$dateFrom      = isset($_GET['date_from']) ? trim($_GET['date_from']) : '';
+$dateTo        = isset($_GET['date_to']) ? trim($_GET['date_to']) : '';
+$minSubtotal   = isset($_GET['min_subtotal']) ? trim($_GET['min_subtotal']) : '';
+$sort          = isset($_GET['sort']) ? trim($_GET['sort']) : '';
+
+$conditions = ['o.user_id = ?'];
+$params = [$userId];
+$types  = 'i';
+
+if ($orderStatus !== '' && in_array($orderStatus, ['pending','processing','shipped','completed','cancelled','requested_refund','returned'])) {
+    $conditions[] = 'o.order_status = ?';
+    $params[] = $orderStatus; $types .= 's';
+}
+if ($paymentStatus !== '' && in_array($paymentStatus, ['pending','paid','refunded'])) {
+    $conditions[] = 'o.payment_status = ?';
+    $params[] = $paymentStatus; $types .= 's';
+}
+if ($recipient !== '') {
+    $conditions[] = 'o.delivery_recipient LIKE ?';
+    $params[] = '%'.$recipient.'%'; $types .= 's';
+}
+if ($dateFrom !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateFrom)) {
+    $conditions[] = 'DATE(o.date_ordered) >= ?';
+    $params[] = $dateFrom; $types .= 's';
+}
+if ($dateTo !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateTo)) {
+    $conditions[] = 'DATE(o.date_ordered) <= ?';
+    $params[] = $dateTo; $types .= 's';
+}
+
+$whereSql = 'WHERE ' . implode(' AND ', $conditions);
+
+$orderSql = 'ORDER BY o.order_id DESC';
+switch ($sort) {
+    case 'recent':
+        $orderSql = 'ORDER BY o.date_ordered DESC, o.order_id DESC';
+        break;
+    case 'status':
+        $orderSql = 'ORDER BY o.order_status ASC, o.order_id DESC';
+        break;
+    case 'recipientAZ':
+        $orderSql = 'ORDER BY o.delivery_recipient ASC, o.order_id DESC';
+        break;
+}
+
+$sql = "
+SELECT 
+  o.order_id, o.date_ordered, o.payment_status, o.order_status,
+  o.voucher_code, o.percent_sale, o.delivery_fee,
+  o.delivery_recipient, o.delivery_address, o.delivery_phone,
+  o.payment_option,
+  COALESCE(SUM(po.quantity * po.unit_price), 0) AS subtotal
+FROM orders o
+LEFT JOIN product_order po ON po.order_id = o.order_id
+$whereSql
+GROUP BY o.order_id
+";
+
+if ($minSubtotal !== '' && is_numeric($minSubtotal)) {
+    $sql .= " HAVING subtotal >= " . (float)$minSubtotal;
+}
+
+$sql .= " $orderSql";
+
+$user_orders = [];
+$stmt = $conn->prepare($sql);
+if ($stmt) {
+    if ($types !== '') {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $stmt->bind_result($oid, $dateOrd, $payStat, $ordStat, $vcode, $percent, $delFee, $recip, $addr, $phone, $payOpt, $sub);
+    while ($stmt->fetch()) {
+        $discount = ((int)$percent > 0) ? ($sub * ((int)$percent / 100.0)) : 0.0;
+        $total = $sub - $discount + (float)$delFee;
+        $user_orders[] = [
+            'order_id' => $oid,
+            'date_ordered' => $dateOrd,
+            'payment_status' => $payStat,
+            'order_status' => $ordStat,
+            'voucher_code' => $vcode,
+            'percent_sale' => (int)$percent,
+            'delivery_fee' => (float)$delFee,
+            'delivery_recipient' => $recip,
+            'delivery_address' => $addr,
+            'delivery_phone' => $phone,
+            'payment_option' => $payOpt,
+            'subtotal' => (float)$sub,
+            'discount' => (float)$discount,
+            'total' => (float)$total
+        ];
+    }
+    $stmt->close();
+}
+
+// For each order, fetch lines
+foreach ($user_orders as $key => $ord) {
+    $lines = [];
+    $ls = $conn->prepare("
+        SELECT po.product_order_id, po.product_id, po.quantity, po.unit_price, p.product_name, b.brand_name,
+               EXISTS(SELECT 1 FROM product_review pr WHERE pr.product_order_id = po.product_order_id AND pr.user_id = ?) AS has_review
+        FROM product_order po
+        JOIN products p ON p.product_id = po.product_id
+        LEFT JOIN brands b ON b.brand_id = p.brand_id
+        WHERE po.order_id = ?
+    ");
+    if ($ls) {
+        $ls->bind_param('ii', $userId, $ord['order_id']);
+        $ls->execute();
+        $ls->bind_result($poid, $pid, $qty, $unit, $pname, $brand, $hasRev);
+        while ($ls->fetch()) {
+            $lines[] = [
+                'product_order_id' => $poid,
+                'product_id' => $pid,
+                'product_name' => $pname,
+                'brand_name' => $brand ? $brand : 'Unknown',
+                'quantity' => (int)$qty,
+                'unit_price' => (float)$unit,
+                'line_total' => (float)$unit * (int)$qty,
+                'has_review' => (int)$hasRev
+            ];
+        }
+        $ls->close();
+    }
+    $user_orders[$key]['lines'] = $lines;
+}
+
+$order_count = count($user_orders);
+
+function fmtPrice($v) { return '₱' . number_format((float)$v, 2, '.', ','); }
+function fmtDate($d) { return date('Y-m-d H:i', strtotime($d)); }
+function statusBadge($status) {
+    $map = [
+        'pending' => 'warning',
+        'processing' => 'info',
+        'shipped' => 'primary',
+        'completed' => 'success',
+        'cancelled' => 'danger',
+        'requested_refund' => 'secondary',
+        'returned' => 'dark'
+    ];
+    $class = isset($map[$status]) ? $map[$status] : 'secondary';
+    return '<span class="badge bg-'.$class.'">'.$status.'</span>';
+}
+function paymentBadge($status) {
+    $map = ['pending'=>'warning','paid'=>'success','refunded'=>'info'];
+    $class = isset($map[$status]) ? $map[$status] : 'secondary';
+    return '<span class="badge bg-'.$class.'">'.$status.'</span>';
+}
 ?>
 <html lang="en">
 <head>
@@ -190,16 +350,22 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
                 </svg>
                 Filters
             </button>
-            <select class="form-select form-select-sm" aria-label="Sort by" style="width: 180px;">
-                <option selected>Sort by</option>
-                <option value="recent">Most Recent</option>
-                <option value="status">Status</option>
-                <option value="subtotalHigh">Subtotal: High to Low</option>
-                <option value="subtotalLow">Subtotal: Low to High</option>
-                <option value="recipientAZ">Recipient A–Z</option>
-            </select>
+            <form method="get" class="d-inline-block mb-0">
+                <input type="hidden" name="order_status" value="<?php echo $orderStatus; ?>">
+                <input type="hidden" name="payment_status" value="<?php echo $paymentStatus; ?>">
+                <input type="hidden" name="recipient" value="<?php echo $recipient; ?>">
+                <input type="hidden" name="date_from" value="<?php echo $dateFrom; ?>">
+                <input type="hidden" name="date_to" value="<?php echo $dateTo; ?>">
+                <input type="hidden" name="min_subtotal" value="<?php echo $minSubtotal; ?>">
+                <select name="sort" class="form-select form-select-sm" style="width: 180px;" onchange="this.form.submit()">
+                    <option value="">Sort by</option>
+                    <option value="recent" <?php if($sort==='recent') echo 'selected'; ?>>Most Recent</option>
+                    <option value="status" <?php if($sort==='status') echo 'selected'; ?>>Status</option>
+                    <option value="recipientAZ" <?php if($sort==='recipientAZ') echo 'selected'; ?>>Recipient A–Z</option>
+                </select>
+            </form>
         </div>
-        <small class="text-muted" style="margin-left: 1rem;">Showing 1 order</small>
+        <small class="text-muted" style="margin-left: 1rem;">Showing <?php echo $order_count; ?> orders</small>
     </div>
 </div>
 
@@ -210,44 +376,45 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-        <form class="vstack gap-3">
+        <form class="vstack gap-3" method="get">
+            <input type="hidden" name="sort" value="<?php echo $sort; ?>">
             <div>
                 <label class="form-label">Order status</label>
-                <select class="form-select">
+                <select class="form-select" name="order_status">
                     <option value="">Any</option>
-                    <option value="pending">Pending</option>
-                    <option value="processing">Processing</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="pending" <?php if($orderStatus==='pending') echo 'selected'; ?>>Pending</option>
+                    <option value="processing" <?php if($orderStatus==='processing') echo 'selected'; ?>>Processing</option>
+                    <option value="shipped" <?php if($orderStatus==='shipped') echo 'selected'; ?>>Shipped</option>
+                    <option value="completed" <?php if($orderStatus==='completed') echo 'selected'; ?>>Completed</option>
+                    <option value="cancelled" <?php if($orderStatus==='cancelled') echo 'selected'; ?>>Cancelled</option>
                 </select>
             </div>
             <div>
                 <label class="form-label">Payment status</label>
-                <select class="form-select">
+                <select class="form-select" name="payment_status">
                     <option value="">Any</option>
-                    <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
-                    <option value="refunded">Refunded</option>
+                    <option value="pending" <?php if($paymentStatus==='pending') echo 'selected'; ?>>Pending</option>
+                    <option value="paid" <?php if($paymentStatus==='paid') echo 'selected'; ?>>Paid</option>
+                    <option value="refunded" <?php if($paymentStatus==='refunded') echo 'selected'; ?>>Refunded</option>
                 </select>
             </div>
             <div>
                 <label class="form-label">Recipient</label>
-                <input type="text" class="form-control" placeholder="Search recipient">
+                <input type="text" class="form-control" name="recipient" value="<?php echo $recipient; ?>" placeholder="Search recipient">
             </div>
             <div>
                 <label class="form-label">Date range</label>
                 <div class="d-flex gap-2">
-                    <input type="date" class="form-control">
-                    <input type="date" class="form-control">
+                    <input type="date" class="form-control" name="date_from" value="<?php echo $dateFrom; ?>">
+                    <input type="date" class="form-control" name="date_to" value="<?php echo $dateTo; ?>">
                 </div>
             </div>
             <div>
                 <label class="form-label">Min subtotal</label>
-                <input type="number" step="0.01" class="form-control" placeholder="0.00">
+                <input type="number" step="0.01" class="form-control" name="min_subtotal" value="<?php echo $minSubtotal; ?>" placeholder="0.00">
             </div>
             <div class="d-grid">
-                <button type="button" class="btn btn-primary">Apply Filters</button>
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
             </div>
         </form>
     </div>
@@ -255,74 +422,85 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 
 <div class="container">
     <div class="order-list">
-
-        <!-- Order #1001 -->
+        <?php if (empty($user_orders)): ?>
+            <div class="text-muted">No orders found.</div>
+        <?php else: foreach ($user_orders as $o): ?>
         <div class="order-card">
             <div class="order-header">
                 <div class="order-left">
-                    <div class="order-id">Order #1001</div>
+                    <div class="order-id">Order #<?php echo $o['order_id']; ?></div>
                     <div class="order-actions">
-                        <a href="/carriemart/user/order-details.php" class="btn btn-primary btn-sm">Edit Delivery Details</a>
-                        <a href="#" class="btn btn-outline-secondary btn-sm">Return/Refund</a>
-                        <button class="btn btn-outline-danger btn-sm">Cancel Order</button>
+                        <?php if ($o['order_status'] === 'pending' || $o['order_status'] === 'processing'): ?>
+                            <a href="/carriemart/user/orders/order-form.php?id=<?php echo $o['order_id']; ?>" class="btn btn-primary btn-sm">Edit Delivery Details</a>
+                        <?php endif; ?>
+                        <?php if ($o['order_status'] === 'completed'): ?>
+                            <a href="/carriemart/user/returns/create.php?order_id=<?php echo $o['order_id']; ?>" class="btn btn-outline-secondary btn-sm">Return/Refund</a>
+                        <?php endif; ?>
+                        <?php if ($o['order_status'] === 'pending' || $o['order_status'] === 'processing'): ?>
+                            <form method="post" action="/carriemart/user/orders/update.php" class="d-inline-block mb-0">
+                                <input type="hidden" name="order_id" value="<?php echo $o['order_id']; ?>">
+                                <input type="hidden" name="action" value="cancel">
+                                <button class="btn btn-outline-danger btn-sm" type="submit">Cancel Order</button>
+                            </form>
+                        <?php endif; ?>
+        
                     </div>
                 </div>
-                <div class="order-date">Date Ordered: 2025-11-12 14:32</div>
+                <div class="order-date">Date Ordered: <?php echo fmtDate($o['date_ordered']); ?></div>
             </div>
             <div class="order-grid">
                 <div class="info-sections">
                     <div>
                         <div class="section-title">Products</div>
                         <div class="product-list">
+                            <?php foreach ($o['lines'] as $ln): ?>
                             <div class="product-row">
-                                <div class="title">Wireless Earbuds Pro</div>
-                                <div class="label">SoundMax</div>
-                                <div class="price">₱3,495</div>
-                                <div class="qty">Qty: 1</div>
-                                <div class="product-actions">
-                                    <a class="btn btn-outline-secondary btn-sm w-100 my-1" href="">Edit Review</a>
-                                </div>
-                            </div>
-                            <div class="product-row">
-                                <div class="title">USB-C Fast Charger 30W</div>
-                                <div class="label">Voltix</div>
-                                <div class="price">₱899</div>
-                                <div class="qty">Qty: 2</div>
-                                <div class="product-actions">
-                                    <a class="btn btn-outline-secondary btn-sm w-100 my-1" href="">Add Review</a>
-                                </div>
-                            </div>
+    <div class="title"><?php echo $ln['product_name']; ?></div>
+    <div class="label"><?php echo $ln['brand_name']; ?></div>
+    <div class="price"><?php echo fmtPrice($ln['unit_price']); ?></div>
+    <div class="qty">Qty: <?php echo $ln['quantity']; ?></div>
+    <div class="product-actions">
+        <?php if ((int)$ln['has_review'] === 1): ?>
+            <a class="btn btn-outline-secondary btn-sm w-100 my-1" href="/carriemart/user/reviews/review-details.php?mode=edit&product_order_id=<?php echo $ln['product_order_id']; ?>">Edit Review</a>
+        <?php else: ?>
+            <a class="btn btn-outline-secondary btn-sm w-100 my-1" href="/carriemart/user/reviews/review-details.php?mode=add&product_order_id=<?php echo $ln['product_order_id']; ?>">Add Review</a>
+        <?php endif; ?>
+    </div>
+</div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
 
                     <div>
                         <div class="section-title">Delivery</div>
-                        <div class="kv"><div class="k">Recipient</div><div class="v">Jane Doe</div></div>
-                        <div class="kv"><div class="k">Address</div><div class="v">221B Baker St, Quezon City</div></div>
-                        <div class="kv"><div class="k">Phone</div><div class="v">0917-123-4567</div></div>
+                        <div class="kv"><div class="k">Recipient</div><div class="v"><?php echo $o['delivery_recipient'] ? $o['delivery_recipient'] : '—'; ?></div></div>
+                        <div class="kv"><div class="k">Address</div><div class="v"><?php echo $o['delivery_address'] ? $o['delivery_address'] : '—'; ?></div></div>
+                        <div class="kv"><div class="k">Phone</div><div class="v"><?php echo $o['delivery_phone'] ? $o['delivery_phone'] : '—'; ?></div></div>
                     </div>
 
                     <div class="split-two">
                         <div>
                             <div class="section-title">Payment</div>
-                            <div class="kv"><div class="k">Payment Option</div><div class="v">GCash</div></div>
-                            <div class="kv"><div class="k">Payment Status</div><div class="v text-success">Paid</div></div>
-                            <div class="kv"><div class="k">Order Status</div><div class="v">Shipped</div></div>
+                            <div class="kv"><div class="k">Payment Option</div><div class="v"><?php echo $o['payment_option'] ? $o['payment_option'] : '—'; ?></div></div>
+                            <div class="kv"><div class="k">Payment Status</div><div class="v"><?php echo paymentBadge($o['payment_status']); ?></div></div>
+                            <div class="kv"><div class="k">Order Status</div><div class="v"><?php echo statusBadge($o['order_status']); ?></div></div>
                         </div>
                         <div>
                             <div class="section-title">Summary</div>
                             <div class="summary">
-                                <div class="line"><span>Delivery Fee</span><span>₱85</span></div>
-                                <div class="line"><span>Percent Sale</span><span>10% (-₱85)</span></div>
-                                <div class="line"><span>SubTotal</span><span>₱4,793</span></div>
+                                <div class="line"><span>Subtotal</span><span><?php echo fmtPrice($o['subtotal']); ?></span></div>
+                                <div class="line"><span>Delivery Fee</span><span><?php echo fmtPrice($o['delivery_fee']); ?></span></div>
+                                <?php if ($o['percent_sale'] > 0): ?>
+                                <div class="line"><span>Discount (<?php echo $o['percent_sale']; ?>%)</span><span>-<?php echo fmtPrice($o['discount']); ?></span></div>
+                                <?php endif; ?>
+                                <div class="line"><strong>Total</strong><strong><?php echo fmtPrice($o['total']); ?></strong></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        
+        <?php endforeach; endif; ?>
     </div>
 </div>
 

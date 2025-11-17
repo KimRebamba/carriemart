@@ -1,3 +1,29 @@
+<?php
+session_start();
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+if (!$conn) { die('DB error'); }
+
+// Fetch active categories
+$categories = [];
+$st = $conn->prepare("
+    SELECT category_id, category_name, description, photo_url
+    FROM categories
+    WHERE is_active = 1
+    ORDER BY category_name ASC
+");
+$st->execute();
+$st->bind_result($cid, $cname, $cdesc, $cphoto);
+while ($st->fetch()) {
+    $categories[] = [
+        'category_id' => $cid,
+        'category_name' => $cname,
+        'description' => ($cdesc !== null ? $cdesc : ''),
+        'photo_url' => ($cphoto && $cphoto !== '' ? $cphoto : '/carriemart/assets/default-product.png'),
+    ];
+}
+$st->close();
+$category_count = count($categories);
+?>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -74,24 +100,27 @@
         </a>
     </div>
 
-
     <div class="container mb-3">
         <div class="d-flex align-items-center justify-content-start">
-            <small class="text-muted" style="">Showing 8 categories</small>
+            <small class="text-muted">Showing <?php echo $category_count; ?> categories</small>
         </div>
     </div>
     
     <!-- Categories grid -->
     <div class="container pb-2">
         <div class="product-grid">
-            <!-- Category: Electronics -->
-            <div class="product-card">
-                <img class="product-img" src="https://picsum.photos/seed/electronics/600/400" alt="Electronics">
-                <h6 class="mt-2 mb-1">Electronics</h6>
-                <p class="text-muted small mb-0">Phones, laptops, audio, cameras, and more tech gadgets.</p>
-                <a href="./products.php" class="stretched-link" aria-label="View Electronics"></a>
-            </div>
+            <?php foreach ($categories as $cat): ?>
+                <div class="product-card">
+                    <img class="product-img" src="<?php echo $cat['photo_url']; ?>" alt="<?php echo $cat['category_name']; ?>">
+                    <h6 class="mt-2 mb-1"><?php echo $cat['category_name']; ?></h6>
+                    <p class="text-muted small mb-0"><?php echo $cat['description']; ?></p>
+                    <a href="./products.php?category_id=<?php echo $cat['category_id']; ?>" class="stretched-link" aria-label="View <?php echo $cat['category_name']; ?>"></a>
+                </div>
+            <?php endforeach; ?>
 
+            <?php if (empty($categories)): ?>
+                <div class="text-muted small">No active categories found.</div>
+            <?php endif; ?>
         </div>
     </div>
  <?php

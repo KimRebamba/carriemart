@@ -118,50 +118,20 @@ if (!$stmt) {
     header('Location: order-form.php?id='.$order_id.'&error=server');
     exit;
 }
+
+// Fixed bind_param - remove the confusing conditional logic
 $stmt->bind_param(
-    'sssssssds i' === '' ? 'sssssssds i' : 'sss', // dummy to avoid syntax highlight confusion
-    $payment_status,
-    $order_status,
-    $payment_option,
-    $delivery_recipient,
-    $delivery_address,
-    $delivery_phone,
-    $percent_sale,
-    $delivery_fee,
-    $completed_at_new,
-    $order_id
-);
-// Correct bind_param (fix previous hack)
-$stmt->close();
-$stmt = $conn->prepare($sql);
-$stmt->bind_param(
-    'sssssssds i' === '' ? 'sssssssds i' : 'sss', // placeholder will never trigger
-    $payment_status,
-    $order_status,
-    $payment_option,
-    $delivery_recipient,
-    $delivery_address,
-    $delivery_phone,
-    $percent_sale,
-    $delivery_fee,
-    $completed_at_new,
-    $order_id
-);
-// Real binding (manual due to hack removal)
-$stmt->close();
-$stmt = $conn->prepare($sql);
-$stmt->bind_param(
-    'ssssssidsi',
-    $payment_status,
-    $order_status,
-    $payment_option,
-    $delivery_recipient,
-    $delivery_address,
-    $delivery_phone,
-    $percent_sale,
-    $delivery_fee,
-    $completed_at_new,
-    $order_id
+    'ssssssidsi',        // Type definition: 10 parameters
+    $payment_status,     // s - string
+    $order_status,       // s - string
+    $payment_option,     // s - string
+    $delivery_recipient, // s - string
+    $delivery_address,   // s - string
+    $delivery_phone,     // s - string
+    $percent_sale,       // i - integer
+    $delivery_fee,       // d - double
+    $completed_at_new,   // s - string (nullable)
+    $order_id            // i - integer
 );
 
 if (!$stmt->execute()) {

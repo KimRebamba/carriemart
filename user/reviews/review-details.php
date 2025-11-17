@@ -2,6 +2,134 @@
 session_start();
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
+
+// Determine mode: add or edit
+$mode = isset($_GET['mode']) ? $_GET['mode'] : 'add';
+$product_order_id = isset($_GET['product_order_id']) ? (int)$_GET['product_order_id'] : 0;
+
+// Debug: Check what we received
+error_log("Mode: $mode, Product Order ID: $product_order_id");
+
+if (!$product_order_id) {
+    error_log("No product_order_id, redirecting to orders");
+    header('Location: /carriemart/user/orders/orders.php');
+    exit;
+}
+
+// Get product order details
+$sql = "SELECT 
+    po.product_order_id,
+    po.order_id,
+    po.quantity,
+    po.unit_price,
+    p.product_name,
+    b.brand_name
+FROM product_order po
+INNER JOIN products p ON po.product_id = p.product_id
+INNER JOIN brands b ON p.brand_id = b.brand_id
+INNER JOIN orders o ON po.order_id = o.order_id
+WHERE po.product_order_id = ? AND o.user_id = ?";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ii", $product_order_id, $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$product_order = $result->fetch_assoc();
+$stmt->close();
+
+error_log("Product order found: " . ($product_order ? "YES" : "NO"));
+
+if (!$product_order) {
+    error_log("Product order not found or doesn't belong to user, redirecting");
+    header('Location: /carriemart/user/orders/orders.php');
+    exit;
+}
+
+// Get product order details
+$sql = "SELECT 
+    po.product_order_id,
+    po.order_id,
+    po.quantity,
+    po.unit_price,
+    p.product_name,
+    b.brand_name
+FROM product_order po
+INNER JOIN products p ON po.product_id = p.product_id
+INNER JOIN brands b ON p.brand_id = b.brand_id
+INNER JOIN orders o ON po.order_id = o.order_id
+WHERE po.product_order_id = ? AND o.user_id = ?";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ii", $product_order_id, $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$product_order = $result->fetch_assoc();
+$stmt->close();
+
+if (!$product_order) {
+    header('Location: /carriemart/user/orders/orders.php');
+    exit;
+}
+
+// Initialize review data
+$review_title = '';
+$review_text = '';
+$rating = 3;
+$review_id = null;
+$created_at = date('Y-m-d H:i');
+
+// Check if review exists (regardless of mode)
+$sql = "SELECT review_id, review_title, review_text, rating, created_at 
+        FROM product_review 
+        WHERE product_order_id = ? AND user_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ii", $product_order_id, $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$existing_review = $result->fetch_assoc();
+$stmt->close();
+
+if ($existing_review) {
+    // Review exists - load it
+    $review_title = $existing_review['review_title'];
+    $review_text = $existing_review['review_text'];
+    $rating = $existing_review['rating'];
+    $review_id = $existing_review['review_id'];
+    $created_at = date('Y-m-d H:i', strtotime($existing_review['created_at']));
+    $mode = 'edit'; // Force edit mode if review exists
+}
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $review_title = $_POST['review_title'];
+    $review_text = $_POST['review_text'];
+    $rating = (int)$_POST['rating'];
+    
+    if ($review_id) {
+        // Update existing review
+        $sql = "UPDATE product_review 
+                SET review_title = ?, review_text = ?, rating = ?
+                WHERE review_id = ? AND user_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssiii", $review_title, $review_text, $rating, $review_id, $_SESSION['user_id']);
+        $stmt->execute();
+        $stmt->close();
+    } else {
+        // Insert new review
+        $sql = "INSERT INTO product_review (product_order_id, user_id, rating, review_title, review_text, is_verified) 
+                VALUES (?, ?, ?, ?, ?, 1)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iiiss", $product_order_id, $_SESSION['user_id'], $rating, $review_title, $review_text);
+        $stmt->execute();
+        $stmt->close();
+    }
+    
+    // Redirect back to orders page
+    header('Location: /carriemart/user/orders/orders.php');
+    exit;
+}
+
+$total_price = $product_order['unit_price'] * $product_order['quantity'];
 ?>
 
 <!DOCTYPE html>
@@ -37,25 +165,25 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
           <ul class="list-group mb-3">
             <li class="list-group-item d-flex justify-content-between lh-sm">
               <div>
-                <h6 class="my-0">Wireless Earbuds Pro</h6>
-                <small class="text-body-secondary">SoundMax • Qty: 1</small>
+                <h6 class="my-0"><?php echo $product_order['product_name']; ?></h6>
+                <small class="text-body-secondary"><?php echo $product_order['brand_name']; ?> • Qty: <?php echo $product_order['quantity']; ?></small>
               </div>
-              <span class="text-body-secondary">₱3,495.00</span>
+              <span class="text-body-secondary">₱<?php echo number_format($total_price, 2); ?></span>
             </li>
           </ul>
         </div>
 
         <!-- Main: Review Information -->
         <div class="col-md-7 col-lg-8 my-5">
-          <h4 class="mb-3">Review Information</h4>
-          <form class="needs-validation" novalidate>
+          <h4 class="mb-3"><?php echo $review_id ? 'Edit Review' : 'Add Review'; ?></h4>
+          <form method="POST">
             <div class="row g-3">
 
               <div class="col-12">
                 <label for="review_title" class="form-label">Review title</label>
                 <input type="text" class="form-control" id="review_title" name="review_title"
                        placeholder="Summarize your experience" required
-                       value="Great sound for the price">
+                       value="<?php echo $review_title; ?>">
                 <div class="invalid-feedback">Please enter a review title.</div>
               </div>
 
@@ -63,7 +191,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
               <div class="col-12">
                 <label for="review_text" class="form-label">Review description</label>
                 <textarea class="form-control" id="review_text" name="review_text" rows="4" required
-                          placeholder="Share details about what you liked or disliked.">Bass is punchy, battery lasts all day, and pairing is instant. Case feels a bit plasticky.</textarea>
+                          placeholder="Share details about what you liked or disliked."><?php echo $review_text; ?></textarea>
                 <div class="invalid-feedback">Please enter your review.</div>
               </div>
 
@@ -75,18 +203,18 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
                     <path d="M3.612 15.443 4.6 9.97.825 6.765l5.059-.736L8 1.5l2.116 4.529 5.059.736L11.4 9.97l.988 5.473L8 12.897l-4.388 2.546z"/>
                   </svg> 
                 </label>
-                <input type="range" class="form-range" min="1" max="5" step="1" id="range2" name="rating" value="4">
+                <input type="range" class="form-range" min="1" max="5" step="1" id="range2" name="rating" value="<?php echo $rating; ?>">
               </div>
 
               <div class="col-6">
                 <div class="label-small">Order number</div>
-                <div class="readonly-box">#1001</div>
+                <div class="readonly-box">#<?php echo $product_order['order_id']; ?></div>
               </div>
 
         
               <div class="col-6">
                 <div class="label-small">Date</div>
-                <div class="readonly-box">2025-11-15 09:40</div>
+                <div class="readonly-box"><?php echo $created_at; ?></div>
               </div>
             </div>
 
