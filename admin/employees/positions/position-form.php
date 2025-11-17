@@ -1,7 +1,58 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
-?>
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
+$position = [];
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$found = false;
+
+if ($id > 0) {
+    $stmt = $conn->prepare("SELECT position_id, position_name, monthly_rate, created_at FROM positions WHERE position_id = ?");
+    if ($stmt) {
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $stmt->bind_result($position_id, $position_name, $monthly_rate, $created_at);
+        if ($stmt->fetch()) {
+            $found = true;
+            $position = [
+                'position_id' => $position_id,
+                'position_name' => $position_name,
+                'monthly_rate' => $monthly_rate,
+                'created_at' => $created_at
+            ];
+        }
+        $stmt->close();
+    }
+    if (!$found) {
+        header('Location: index.php?error=not_found');
+        exit;
+    }
+}
+
+$isEdit = ($id > 0 && $found);
+$formAction = $isEdit ? 'update.php' : 'create.php';
+$pageTitle = $isEdit ? 'Edit Position' : 'Add Position';
+
+// Collect error codes from redirects (comma-separated supported)
+$errors = [];
+if (isset($_GET['error'])) {
+    $codes = explode(',', $_GET['error']);
+    foreach ($codes as $e) {
+        $e = trim($e);
+        if ($e === 'name_required')   $errors[] = 'Position name is required.';
+        if ($e === 'rate_required')   $errors[] = 'Monthly rate is required.';
+        if ($e === 'rate_invalid')    $errors[] = 'Monthly rate must be a number greater than or equal to 0.';
+        if ($e === 'duplicate')       $errors[] = 'Position name already exists.';
+        if ($e === 'server')          $errors[] = 'Server error. Please try again.';
+    }
+}
+
+$successMsg = '';
+if (isset($_GET['status'])) {
+    if ($_GET['status'] === 'created') $successMsg = 'Position created.';
+    if ($_GET['status'] === 'updated') $successMsg = 'Position updated.';
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -50,50 +101,58 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
     <div class="container">
         <main class="form-register">
             <div class="py-4 text-center">
-                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Header-Logo-01.svg" alt="" width="72" height="57">
+                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Logo.svg" alt="" width="72" height="57">
             </div>
 
             <div class="row g-5">
                 <div class="col-md-8 col-lg-7 mx-auto">
-                    <h4 class="mb-3">Edit Position</h4>
+                    <h4 class="mb-3"><?php echo $pageTitle; ?></h4>
 
-                    <form class="needs-validation" method="post" enctype="multipart/form-data" novalidate>
-                        <!-- IDs & timestamps (read-only display) -->
+                    <?php if (!empty($errors)): ?>
+                    <div class="alert alert-danger mb-3" role="alert">
+                        <?php foreach ($errors as $err): ?>
+                        <div>- <?php echo $err; ?></div>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php elseif ($successMsg !== ''): ?>
+                    <div class="alert alert-success mb-3" role="alert">
+                        <?php echo $successMsg; ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <form method="post" action="<?php echo $formAction; ?>">
+                        <?php if ($isEdit): ?>
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="form-label">Position ID</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($position['position_id'] ?? '') ?>" disabled>
-                                <input type="hidden" name="position_id" value="<?= htmlspecialchars($position['position_id'] ?? '') ?>">
+                                <input type="text" class="form-control" value="<?php echo $position['position_id']; ?>"
+                                    disabled>
+                                <input type="hidden" name="position_id" value="<?php echo $position['position_id']; ?>">
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Date created</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($position['created_at'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?php echo $position['created_at']; ?>"
+                                    disabled>
                             </div>
                         </div>
-
                         <hr class="my-4">
+                        <?php endif; ?>
 
-                        <!-- Position fields (schema: positions) -->
                         <div class="row g-3">
                             <div class="col-12">
-                                <label for="position_name" class="form-label">Position name</label>
-                                <input type="text" class="form-control" id="position_name" name="position_name"
-                                       value="<?= htmlspecialchars($position['position_name'] ?? '') ?>" required>
-                                <div class="invalid-feedback">Position name is required.</div>
+                                <label class="form-label">Position name</label>
+                                <input type="text" class="form-control" name="position_name"
+                                    value="<?php echo $position['position_name'] ?? ($_POST['position_name'] ?? ''); ?>">
                             </div>
                             <div class="col-12">
-                                <label for="monthly_rate" class="form-label">Monthly rate</label>
+                                <label class="form-label">Monthly rate</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₱</span>
-                                    <input type="number" class="form-control" id="monthly_rate" name="monthly_rate"
-                                           step="0.01" min="0" placeholder="0.00"
-                                           value="<?= htmlspecialchars($position['monthly_rate'] ?? '0.00') ?>" required>
+                                    <input type="text" class="form-control" name="monthly_rate" placeholder="0.00"
+                                        value="<?php echo isset($position['monthly_rate']) ? $position['monthly_rate'] : ($_POST['monthly_rate'] ?? ''); ?>">
                                 </div>
-                                <div class="invalid-feedback">Monthly rate is required.</div>
                             </div>
                         </div>
-
-                        <!-- Note: Only essential fields for positions per schema.sql -->
 
                         <hr class="my-4">
 
@@ -119,16 +178,6 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script>
-    // Simple preview for profile picture
-    const fileInput = document.getElementById('formFile');
-    const avatarPreview = document.getElementById('avatarPreview');
-    fileInput?.addEventListener('change', (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        avatarPreview.src = URL.createObjectURL(file);
-    });
-    </script>
 </body>
 
 </html>

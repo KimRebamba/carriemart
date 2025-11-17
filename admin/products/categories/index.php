@@ -1,177 +1,250 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
-?>
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
+// GET inputs
+$q           = isset($_GET['q']) ? trim($_GET['q']) : '';
+$sort        = isset($_GET['sort']) ? trim($_GET['sort']) : '';
+$active      = isset($_GET['active']) ? trim($_GET['active']) : '';
+$createdFrom = isset($_GET['created_from']) ? trim($_GET['created_from']) : '';
+$createdTo   = isset($_GET['created_to']) ? trim($_GET['created_to']) : '';
+$nameLike    = isset($_GET['name']) ? trim($_GET['name']) : '';
+
+$sql = "SELECT category_id, category_name, description, is_active, created_at
+        FROM categories
+        WHERE 1";
+$types = '';
+$params = [];
+
+// Free text search (id + name)
+if ($q !== '') {
+    $like = '%'.$q.'%';
+    $sql .= " AND (CAST(category_id AS CHAR) LIKE ? OR category_name LIKE ?)";
+    $types .= 'ss';
+    $params[] = $like;
+    $params[] = $like;
+}
+
+// Name contains
+if ($nameLike !== '') {
+    $sql .= " AND category_name LIKE ?";
+    $types .= 's';
+    $params[] = '%'.$nameLike.'%';
+}
+
+// Active filter
+if ($active === '1') {
+    $sql .= " AND is_active = 1";
+} elseif ($active === '0') {
+    $sql .= " AND is_active = 0";
+}
+
+// Date range
+$validDate = function($d){ return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
+if ($createdFrom !== '' && $validDate($createdFrom)) {
+    $sql .= " AND DATE(created_at) >= ?";
+    $types .= 's';
+    $params[] = $createdFrom;
+}
+if ($createdTo !== '' && $validDate($createdTo)) {
+    $sql .= " AND DATE(created_at) <= ?";
+    $types .= 's';
+    $params[] = $createdTo;
+}
+
+// Sorting
+switch ($sort) {
+    case 'oldest':
+        $sql .= " ORDER BY created_at ASC, category_id ASC";
+        break;
+    case 'nameAZ':
+        $sql .= " ORDER BY category_name ASC, created_at DESC";
+        break;
+    case 'nameZA':
+        $sql .= " ORDER BY category_name DESC, created_at DESC";
+        break;
+    case 'active':
+        $sql .= " ORDER BY is_active DESC, created_at DESC";
+        break;
+    case 'newest':
+    default:
+        $sql .= " ORDER BY created_at DESC, category_id DESC";
+        break;
+}
+
+$categories = [];
+$stmt = $conn->prepare($sql);
+if ($stmt) {
+    if ($types !== '') $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $stmt->bind_result($cid, $cname, $cdesc, $cactive, $ccreated);
+    while ($stmt->fetch()) {
+        $categories[] = [
+            'category_id' => $cid,
+            'category_name' => $cname,
+            'description' => $cdesc,
+            'is_active' => (int)$cactive,
+            'created_at' => $ccreated
+        ];
+    }
+    $stmt->close();
+}
+
+function badgeClassCat($isActive) { return $isActive ? 'cat-active' : 'cat-inactive'; }
+?>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CM: Categories</title>
-    <?php
-include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/links.php');
-?>
-<link rel="stylesheet" href="/carriemart/includes/admin-panel.css">
-
+    <?php include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/links.php'); ?>
+    <link rel="stylesheet" href="/carriemart/includes/admin-panel.css">
     <style>
-    
+        .table thead th { white-space:nowrap; }
+        .actions-cell .btn { padding:.25rem .55rem; }
+        .status-badge { font-size:.65rem; letter-spacing:.5px; font-weight:600; padding:.35rem .55rem; border-radius:.35rem; text-transform:uppercase; }
+        .cat-active { background:#d1e7dd; color:#0f5132; border:1px solid #badbcc; }
+        .cat-inactive { background:#f8d7da; color:#842029; border:1px solid #f5c2c7; }
+        @media (max-width: 992px){
+            .table-responsive { font-size:.85rem; }
+            .actions-cell .btn { font-size:.65rem; }
+        }
     </style>
 </head>
 
 <body>
-<?php
-include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
-?>
+<?php include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php'); ?>
 
-        <div class="flex-grow-1 p-3"> <!-- other column -->
-            <div class="container-fluid">
+<div class="flex-grow-1 p-3">
+    <div class="container-fluid">
 
-                <h3 class="mb-3 d-flex align-items-center gap-2">
-                    <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/folder.svg" alt="" width="22" height="22" class="mt-1">
-                    Categories
-                </h3>
+        <h3 class="mb-3 d-flex align-items-center gap-2">
+            <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/folder.svg" alt="" width="22" height="22" class="mt-1">
+            Categories
+        </h3>
 
-                <div class="card mb-4 table-card">
-                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <div class="input-group input-group-sm" style="width:340px;">
-                                <span class="input-group-text bg-white">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                                      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85ZM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                                    </svg>
-                                </span>
-                                <input type="text" class="form-control" placeholder="Search category ID / name">
-                            </div>
-                            <button class="btn btn-outline-secondary btn-sm"
-                                    type="button" data-bs-toggle="offcanvas"
-                                    data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="me-1" aria-hidden="true">
-                                    <path d="M1.5 1.5h13a.5.5 0 0 1 .39.812L10 8v5.5a.5.5 0 0 1-.79.407l-2-1.333A.5.5 0 0 1 7 12.167V8L1.11 2.312A.5.5 0 0 1 1.5 1.5z"/>
+        <div class="card mb-4 table-card">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+                        <div class="input-group input-group-sm" style="width:340px;">
+                            <span class="input-group-text bg-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85ZM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                                 </svg>
-                                Filters
-                            </button>
-                            <select class="form-select form-select-sm" aria-label="Sort by" style="width:180px;">
-                                <option selected>Sort by</option>
-                                <option value="newest">Newest</option>
-                                <option value="oldest">Oldest</option>
-                                <option value="nameAZ">Name A–Z</option>
-                                <option value="nameZA">Name Z–A</option>
-                                <option value="active">Active first</option>
-                            </select>
+                            </span>
+                            <input type="text" class="form-control" name="q" value="<?php echo $q; ?>" placeholder="Search category ID / name">
                         </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <small class="text-muted">Showing 3 categories</small>
-                            <a href="create.php" class="btn btn-primary btn-sm">Add Category</a>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <style>
-                            .table thead th { white-space:nowrap; }
-                            .actions-cell .btn { padding:.25rem .55rem; }
-                            .status-badge { font-size:.65rem; letter-spacing:.5px; font-weight:600; padding:.35rem .55rem; border-radius:.35rem; text-transform:uppercase; }
-                            .cat-active { background:#d1e7dd; color:#0f5132; border:1px solid #badbcc; }
-                            .cat-inactive { background:#f8d7da; color:#842029; border:1px solid #f5c2c7; }
-                             @media (max-width: 992px){
-                                .table-responsive { font-size:.85rem; }
-                                .actions-cell .btn { font-size:.65rem; }
-                            }
-                        </style>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Category ID</th>
-                                        <th>Name</th>
-                                        <th>Description</th>
-                                        <th>Status</th>
-                                        <th>Created</th>
-                                        <th class="text-center" style="width:160px;">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Example rows; replace with server data -->
-                                    <tr>
-                                        <td>4001</td>
-                                        <td>Mobiles</td>
-                                        <td><span class="small text-muted">Smartphones & accessories</span></td>
-                                        <td><span class="status-badge cat-active">active</span></td>
-                                        <td><span class="small text-muted">2025-11-10</span></td>
-                                        <td class="text-center actions-cell">
-                                            <a href="view.php?id=4001" class="btn btn-outline-primary btn-sm my-1">View</a>
-                                            <a href="edit.php?id=4001" class="btn btn-outline-secondary btn-sm">Edit</a>
-                                            <button class="btn btn-outline-danger btn-sm mb-1">Delete</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>4002</td>
-                                        <td>Computers</td>
-                                        <td><span class="small text-muted">Laptops, desktops, parts</span></td>
-                                        <td><span class="status-badge cat-active">active</span></td>
-                                        <td><span class="small text-muted">2025-11-12</span></td>
-                                        <td class="text-center actions-cell">
-                                            <a href="view.php?id=4002" class="btn btn-outline-primary btn-sm my-1">View</a>
-                                            <a href="edit.php?id=4002" class="btn btn-outline-secondary btn-sm">Edit</a>
-                                            <button class="btn btn-outline-danger btn-sm mb-1">Delete</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>4003</td>
-                                        <td>Audio</td>
-                                        <td><span class="small text-muted">Headphones & speakers</span></td>
-                                        <td><span class="status-badge cat-inactive">inactive</span></td>
-                                        <td><span class="small text-muted">2025-11-14</span></td>
-                                        <td class="text-center actions-cell">
-                                            <a href="view.php?id=4003" class="btn btn-outline-primary btn-sm my-1">View</a>
-                                            <a href="edit.php?id=4003" class="btn btn-outline-secondary btn-sm">Edit</a>
-                                            <button class="btn btn-outline-danger btn-sm mb-1">Delete</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                        <button class="btn btn-outline-secondary btn-sm"
+                                type="button" data-bs-toggle="offcanvas"
+                                data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="me-1" aria-hidden="true">
+                                <path d="M1.5 1.5h13a.5.5 0 0 1 .39.812L10 8v5.5a.5.5 0 0 1-.79.407l-2-1.333A.5.5 0 0 1 7 12.167V8L1.11 2.312A.5.5 0 0 1 1.5 1.5z"/>
+                            </svg>
+                            Filters
+                        </button>
+                        <select class="form-select form-select-sm" name="sort" style="width:180px;" onchange="this.form.submit()">
+                            <option value="">Sort by</option>
+                            <option value="newest" <?php if($sort===''||$sort==='newest') echo 'selected'; ?>>Newest</option>
+                            <option value="oldest" <?php if($sort==='oldest') echo 'selected'; ?>>Oldest</option>
+                            <option value="nameAZ" <?php if($sort==='nameAZ') echo 'selected'; ?>>Name A–Z</option>
+                            <option value="nameZA" <?php if($sort==='nameZA') echo 'selected'; ?>>Name Z–A</option>
+                            <option value="active" <?php if($sort==='active') echo 'selected'; ?>>Active first</option>
+                        </select>
+                        <!-- Preserve filter hidden fields -->
+                        <input type="hidden" name="active" value="<?php echo $active; ?>">
+                        <input type="hidden" name="created_from" value="<?php echo $createdFrom; ?>">
+                        <input type="hidden" name="created_to" value="<?php echo $createdTo; ?>">
+                        <input type="hidden" name="name" value="<?php echo $nameLike; ?>">
+                    </form>
                 </div>
-
-                <!-- Offcanvas: Filters (Categories) -->
-                <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
-                    <div class="offcanvas-header">
-                        <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Categories</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                    </div>
-                    <div class="offcanvas-body">
-                        <form class="vstack gap-3">
-                            <div>
-                                <label class="form-label">Active status</label>
-                                <select class="form-select">
-                                    <option value="">Any</option>
-                                    <option value="1">active</option>
-                                    <option value="0">inactive</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="form-label">Created date range</label>
-                                <div class="d-flex gap-2">
-                                    <input type="date" class="form-control">
-                                    <input type="date" class="form-control">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="form-label">Name contains</label>
-                                <input type="text" class="form-control" placeholder="Keyword">
-                            </div>
-                            <div class="d-grid">
-                                <button type="button" class="btn btn-primary btn-sm">Apply Filters</button>
-                            </div>
-                        </form>
-                    </div>
+                <div class="d-flex align-items-center gap-3">
+                    <small class="text-muted">Showing <?php echo count($categories); ?> categories</small>
+                    <a href="category-form.php" class="btn btn-primary btn-sm">Add Category</a>
                 </div>
-
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Category ID</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th class="text-center" style="width:160px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php if (empty($categories)): ?>
+                            <tr><td colspan="6" class="text-center text-muted py-4">No categories found.</td></tr>
+                        <?php else: foreach ($categories as $c):
+                            $statusCls = badgeClassCat($c['is_active']);
+                            $createdDisp = substr($c['created_at'], 0, 10);
+                            $descShort = ($c['description'] !== '' && $c['description'] !== null) ? $c['description'] : '—';
+                        ?>
+                            <tr>
+                                <td><?php echo $c['category_id']; ?></td>
+                                <td><?php echo $c['category_name']; ?></td>
+                                <td><span class="small text-muted"><?php echo $descShort; ?></span></td>
+                                <td><span class="status-badge <?php echo $statusCls; ?>"><?php echo $c['is_active'] ? 'active' : 'inactive'; ?></span></td>
+                                <td><span class="small text-muted"><?php echo $createdDisp; ?></span></td>
+                                <td class="text-center actions-cell">
+                                    <a href="view.php?id=<?php echo $c['category_id']; ?>" class="btn btn-outline-primary btn-sm my-1">View</a>
+                                    <a href="category-form.php?id=<?php echo $c['category_id']; ?>" class="btn btn-outline-secondary btn-sm">Edit</a>
+                                    <a href="delete.php?id=<?php echo $c['category_id']; ?>" class="btn btn-outline-danger btn-sm mb-1"
+                                       onclick="return confirm('Delete category #<?php echo $c['category_id']; ?>?');">Delete</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
-    </script>
-</body>
 
+        <!-- Offcanvas: Filters (Categories) -->
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Categories</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <form class="vstack gap-3" method="GET">
+                    <input type="hidden" name="q" value="<?php echo $q; ?>">
+                    <input type="hidden" name="sort" value="<?php echo $sort; ?>">
+                    <div>
+                        <label class="form-label">Active status</label>
+                        <select class="form-select" name="active">
+                            <option value="">Any</option>
+                            <option value="1" <?php if($active==='1') echo 'selected'; ?>>active</option>
+                            <option value="0" <?php if($active==='0') echo 'selected'; ?>>inactive</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Created date range</label>
+                        <div class="d-flex gap-2">
+                            <input type="date" class="form-control" name="created_from" value="<?php echo $createdFrom; ?>">
+                            <input type="date" class="form-control" name="created_to" value="<?php echo $createdTo; ?>">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Name contains</label>
+                        <input type="text" class="form-control" name="name" value="<?php echo $nameLike; ?>" placeholder="Keyword">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
+</script>
+</body>
 </html>

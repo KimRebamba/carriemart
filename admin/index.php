@@ -1,17 +1,102 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
-?>
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
+// Dashboard metrics (defaults)
+$salesToday        = 0.00;
+$ordersToday       = 0;
+$expensesToday     = 0.00;
+$netProfitToday    = 0.00;
+$totalUsers        = 0;
+$totalProducts     = 0;
+$lowStockCount     = 0;
+$pendingReturns    = 0;
+
+// Sales today (paid orders only)
+$qSales = $conn->prepare("
+    SELECT COALESCE(SUM(po.unit_price * po.quantity),0) AS amt
+    FROM orders o
+    JOIN product_order po ON po.order_id = o.order_id
+    WHERE o.payment_status='paid' AND DATE(o.date_ordered) = CURDATE()
+");
+if ($qSales) {
+    $qSales->execute();
+    $qSales->bind_result($amt);
+    if ($qSales->fetch()) $salesToday = (float)$amt;
+    $qSales->close();
+}
+
+// Orders today (all orders placed today)
+$qOrders = $conn->prepare("
+    SELECT COUNT(*) FROM orders WHERE DATE(date_ordered) = CURDATE()
+");
+if ($qOrders) {
+    $qOrders->execute();
+    $qOrders->bind_result($cnt);
+    if ($qOrders->fetch()) $ordersToday = (int)$cnt;
+    $qOrders->close();
+}
+
+// Expenses today (created today)
+$qExp = $conn->prepare("
+    SELECT COALESCE(SUM(amount),0) FROM expenses WHERE DATE(created_at) = CURDATE()
+");
+if ($qExp) {
+    $qExp->execute();
+    $qExp->bind_result($expAmt);
+    if ($qExp->fetch()) $expensesToday = (float)$expAmt;
+    $qExp->close();
+}
+
+// Net profit today
+$netProfitToday = $salesToday - $expensesToday;
+
+// Total users
+$qUsers = $conn->prepare("SELECT COUNT(*) FROM accounts");
+if ($qUsers) {
+    $qUsers->execute();
+    $qUsers->bind_result($u);
+    if ($qUsers->fetch()) $totalUsers = (int)$u;
+    $qUsers->close();
+}
+
+// Total products (active)
+$qProd = $conn->prepare("SELECT COUNT(*) FROM products WHERE is_active = 1");
+if ($qProd) {
+    $qProd->execute();
+    $qProd->bind_result($p);
+    if ($qProd->fetch()) $totalProducts = (int)$p;
+    $qProd->close();
+}
+
+// Low stock alerts (stock_level < 5 and active)
+$qLow = $conn->prepare("SELECT COUNT(*) FROM products WHERE is_active=1 AND stock_level < 5");
+if ($qLow) {
+    $qLow->execute();
+    $qLow->bind_result($ls);
+    if ($qLow->fetch()) $lowStockCount = (int)$ls;
+    $qLow->close();
+}
+
+// Pending returns (requested or approved awaiting processing)
+$qRet = $conn->prepare("SELECT COUNT(*) FROM order_return WHERE return_status IN ('requested','approved')");
+if ($qRet) {
+    $qRet->execute();
+    $qRet->bind_result($pr);
+    if ($qRet->fetch()) $pendingReturns = (int)$pr;
+    $qRet->close();
+}
+
+// Simple formatter
+$fmtMoney = function($v){ return '₱' . number_format((float)$v, 2, '.', ','); };
+?>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CM: Admin</title>
-    
-    <?php
-    include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/links.php');
-    ?>
+    <?php include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/links.php'); ?>
     <link rel="stylesheet" href="/carriemart/includes/admin-panel.css">
 
     <style>
@@ -24,9 +109,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 
 <body>
     
-<?php
-include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
-?>
+<?php include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php'); ?>
 
         <div class="flex-grow-1 p-3"> <!-- other column -->
             <div class="container-fluid">
@@ -43,7 +126,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                         <div class="card  h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Total Sales Today</small>
-                                <h4 class="mt-2 mb-0" id="metric-sales">₱0.00</h4>
+                                <h4 class="mt-2 mb-0" id="metric-sales"><?php echo $fmtMoney($salesToday); ?></h4>
                                 <small class="text-success" id="metric-sales-change">+0%</small>
                             </div>
                         </div>
@@ -52,7 +135,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                         <div class="card h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Total Orders Today</small>
-                                <h4 class="mt-2 mb-0" id="metric-orders">0</h4>
+                                <h4 class="mt-2 mb-0" id="metric-orders"><?php echo $ordersToday; ?></h4>
                                 <small class="text-primary" id="metric-orders-change">+0%</small>
                             </div>
                         </div>
@@ -61,7 +144,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                         <div class="card h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Total Expenses Today</small>
-                                <h4 class="mt-2 mb-0" id="metric-expenses">₱0.00</h4>
+                                <h4 class="mt-2 mb-0" id="metric-expenses"><?php echo $fmtMoney($expensesToday); ?></h4>
                                 <small class="text-danger" id="metric-expenses-change">0%</small>
                             </div>
                         </div>
@@ -70,7 +153,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                         <div class="card h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Net Profit Today</small>
-                                <h4 class="mt-2 mb-0" id="metric-profit">₱0.00</h4>
+                                <h4 class="mt-2 mb-0" id="metric-profit"><?php echo $fmtMoney($netProfitToday); ?></h4>
                                 <small class="text-muted" id="metric-profit-note">(Sales – Expenses)</small>
                             </div>
                         </div>
@@ -79,7 +162,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                         <div class="card h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Total Users</small>
-                                <h4 class="mt-2 mb-0" id="metric-users">0</h4>
+                                <h4 class="mt-2 mb-0" id="metric-users"><?php echo $totalUsers; ?></h4>
                                 <small class="text-muted">Active + Pending</small>
                             </div>
                         </div>
@@ -88,7 +171,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                         <div class="card h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Products In Store</small>
-                                <h4 class="mt-2 mb-0" id="metric-products">0</h4>
+                                <h4 class="mt-2 mb-0" id="metric-products"><?php echo $totalProducts; ?></h4>
                                 <small class="text-muted">SKU Count</small>
                             </div>
                         </div>
@@ -97,7 +180,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                         <div class="card h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Low Stock Alerts</small>
-                                <h4 class="mt-2 mb-0" id="metric-lowstock">0</h4>
+                                <h4 class="mt-2 mb-0" id="metric-lowstock"><?php echo $lowStockCount; ?></h4>
                                 <small class="text-danger">Need restock</small>
                             </div>
                         </div>
@@ -106,7 +189,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                         <div class="card  h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Pending Returns</small>
-                                <h4 class="mt-2 mb-0" id="metric-returns">0</h4>
+                                <h4 class="mt-2 mb-0" id="metric-returns"><?php echo $pendingReturns; ?></h4>
                                 <small class="text-warning">Awaiting action</small>
                             </div>
                         </div>
@@ -124,9 +207,9 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                     <div class="card-body">
                         <div class="d-flex flex-wrap gap-2">
                             <a href="/carriemart/admin/accounts/account-form.php" class="btn btn-outline-primary btn-sm">Add Account</a>
-                            <a href="#" class="btn btn-outline-primary btn-sm">Add Employee</a>
-                            <a href="#" class="btn btn-outline-primary btn-sm">Add Expense</a>
-                            <a href="#" class="btn btn-outline-primary btn-sm">Add Product</a>
+                            <a href="/carriemart/admin/employees/employee-form.php" class="btn btn-outline-primary btn-sm">Add Employee</a>
+                            <a href="/carriemart/admin/reports/expenses/expense-form.php" class="btn btn-outline-primary btn-sm">Add Expense</a>
+                            <a href="/carriemart/admin/products/product-form.php" class="btn btn-outline-primary btn-sm">Add Product</a>
                         </div>
                     </div>
                 </div>

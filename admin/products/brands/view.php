@@ -1,5 +1,40 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($id <= 0) {
+    header('Location: index.php?error=invalid_id');
+    exit;
+}
+
+$sql = "SELECT brand_id, brand_name, logo_url, website, description, is_active, created_at
+        FROM brands
+        WHERE brand_id = ?";
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    header('Location: index.php?error=server');
+    exit;
+}
+$stmt->bind_param('i', $id);
+$stmt->execute();
+$stmt->bind_result($brand_id, $brand_name, $logo_url, $website, $description, $is_active, $created_at);
+if (!$stmt->fetch()) {
+    $stmt->close();
+    header('Location: index.php?error=not_found');
+    exit;
+}
+$stmt->close();
+
+$brand = [
+    'brand_id' => $brand_id,
+    'brand_name' => $brand_name,
+    'logo_url' => $logo_url,
+    'website' => $website,
+    'description' => $description,
+    'is_active' => (int)$is_active,
+    'created_at' => $created_at
+];
 ?>
 
 <!DOCTYPE html>

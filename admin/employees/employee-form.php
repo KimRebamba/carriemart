@@ -1,14 +1,88 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
-?>
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
+$emp = [];
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$found = false;
+
+// Load positions (for select)
+$positions = [];
+$ps = $conn->prepare("SELECT position_id, position_name FROM positions ORDER BY position_name ASC");
+if ($ps) {
+    $ps->execute();
+    $ps->bind_result($pid, $pname);
+    while ($ps->fetch()) { $positions[] = ['id'=>$pid,'name'=>$pname]; }
+    $ps->close();
+}
+
+if ($id > 0) {
+    $stmt = $conn->prepare("SELECT emp_id, first_name, last_name, email, phone_number, address, birth_date, gender, employment_status, hire_date, current_position_id, created_at
+                            FROM employees WHERE emp_id = ?");
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $stmt->bind_result($emp_id, $first_name, $last_name, $email, $phone_number, $address, $birth_date, $gender, $employment_status, $hire_date, $current_position_id, $created_at);
+    if ($stmt->fetch()) {
+        $found = true;
+        $emp = [
+            'emp_id' => $emp_id,
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'email' => $email,
+            'phone_number' => $phone_number,
+            'address' => $address,
+            'birth_date' => $birth_date,
+            'gender' => $gender,
+            'employment_status' => $employment_status,
+            'hire_date' => $hire_date,
+            'current_position_id' => $current_position_id,
+            'created_at' => $created_at
+        ];
+    }
+    $stmt->close();
+    if (!$found) {
+        header('Location: index.php?error=not_found');
+        exit;
+    }
+}
+
+$isEdit = ($id > 0 && $found);
+$formAction = $isEdit ? 'update.php' : 'create.php';
+$pageTitle = $isEdit ? 'Edit Employee' : 'Add Employee';
+
+// Collect error codes (single or comma-separated)
+$errors = [];
+if (isset($_GET['error'])) {
+    $codes = explode(',', $_GET['error']);
+    foreach ($codes as $e) {
+        $e = trim($e);
+        if ($e === 'first_name_required')    $errors[] = 'First name is required.';
+        if ($e === 'last_name_required')     $errors[] = 'Last name is required.';
+        if ($e === 'invalid_email')          $errors[] = 'Valid email is required.';
+        if ($e === 'phone_required')         $errors[] = 'Phone number is required.';
+        if ($e === 'invalid_phone')          $errors[] = 'Phone must match format 09XX-XXXX-XXX.';
+        if ($e === 'address_required')       $errors[] = 'Address is required.';
+        if ($e === 'employment_status_bad')  $errors[] = 'Employment status invalid.';
+        if ($e === 'duplicate_email')        $errors[] = 'Email already in use.';
+        if ($e === 'hire_date_required')     $errors[] = 'Hire date is required.';
+        if ($e === 'birth_date_invalid')     $errors[] = 'Birth date invalid.';
+        if ($e === 'server')                 $errors[] = 'Server error. Please try again.';
+    }
+}
+
+$successMsg = '';
+if (isset($_GET['status'])) {
+    if ($_GET['status'] === 'created') $successMsg = 'Employee created.';
+    if ($_GET['status'] === 'updated') $successMsg = 'Employee updated.';
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CarrieMart: Edit Employee</title>
+    <title>CM: Employee Form</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
@@ -50,94 +124,120 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
     <div class="container">
         <main class="form-register">
             <div class="py-4 text-center">
-                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Header-Logo-01.svg" alt="" width="72" height="57">
+                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Logo.svg" alt="" width="72" height="57">
             </div>
 
             <div class="row g-5">
                 <div class="col-md-8 col-lg-7 mx-auto">
-                    <h4 class="mb-3">Edit Employee</h4>
+                    <h4 class="mb-3"><?php echo $pageTitle; ?></h4>
 
-                    <form class="needs-validation" method="post" novalidate>
-                        <!-- IDs & timestamps (read-only display) -->
+                    <?php if (!empty($errors)): ?>
+                    <div class="alert alert-danger mb-3" role="alert">
+                        <?php foreach ($errors as $err): ?>
+                        <div>- <?php echo $err; ?></div>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php elseif ($successMsg !== ''): ?>
+                    <div class="alert alert-success mb-3" role="alert">
+                        <?php echo $successMsg; ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <form method="post" action="<?php echo $formAction; ?>" enctype="multipart/form-data">
+                        <?php if ($isEdit): ?>
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="form-label">Employee ID</label>
-                                <input type="text" class="form-control" value="" disabled>
+                                <input type="text" class="form-control" value="<?php echo $emp['emp_id']; ?>" disabled>
+                                <input type="hidden" name="emp_id" value="<?php echo $emp['emp_id']; ?>">
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Date created</label>
-                                <input type="text" class="form-control" value="" disabled>
+                                <input type="text" class="form-control" value="<?php echo $emp['created_at']; ?>" disabled>
                             </div>
                         </div>
-
                         <hr class="my-4">
+                        <?php endif; ?>
 
-                        <!-- Basic info (schema: employees) -->
                         <div class="row g-3">
                             <div class="col-sm-6">
-                                <label for="first_name" class="form-label">First name</label>
-                                <input type="text" class="form-control" id="first_name" name="first_name" required>
-                                <div class="invalid-feedback">First name is required.</div>
+                                <label class="form-label">First name</label>
+                                <input type="text" class="form-control" name="first_name"
+                                    value="<?php echo $emp['first_name'] ?? ($_POST['first_name'] ?? ''); ?>">
                             </div>
                             <div class="col-sm-6">
-                                <label for="last_name" class="form-label">Last name</label>
-                                <input type="text" class="form-control" id="last_name" name="last_name" required>
-                                <div class="invalid-feedback">Last name is required.</div>
+                                <label class="form-label">Last name</label>
+                                <input type="text" class="form-control" name="last_name"
+                                    value="<?php echo $emp['last_name'] ?? ($_POST['last_name'] ?? ''); ?>">
                             </div>
                             <div class="col-12">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com">
+                                <label class="form-label">Email</label>
+                                <input type="text" class="form-control" name="email"
+                                    value="<?php echo $emp['email'] ?? ($_POST['email'] ?? ''); ?>">
                             </div>
                             <div class="col-12">
-                                <label for="phone_number" class="form-label">Phone number</label>
-                                <input type="text" class="form-control" id="phone_number" name="phone_number" placeholder="09##-###-####">
+                                <label class="form-label">Phone number</label>
+                                <input type="text" class="form-control" name="phone_number" placeholder="09##-XXXX-XXX"
+                                    value="<?php echo $emp['phone_number'] ?? ($_POST['phone_number'] ?? ''); ?>">
                             </div>
                             <div class="col-12">
-                                <label for="address" class="form-label">Address</label>
-                                <input type="text" class="form-control" id="address" name="address" placeholder="1234 Main St">
+                                <label class="form-label">Address</label>
+                                <input type="text" class="form-control" name="address"
+                                    value="<?php echo $emp['address'] ?? ($_POST['address'] ?? ''); ?>">
                             </div>
                         </div>
 
-                        <!-- Core employee fields (schema: employees) -->
-                        <div class="row g-3">
+                        <div class="row g-3 mt-0">
                             <div class="col-md-6">
-                                <label for="birth_date" class="form-label">Birth date</label>
-                                <input type="date" class="form-control" id="birth_date" name="birth_date" value="">
+                                <label class="form-label">Birth date</label>
+                                <input type="date" class="form-control" name="birth_date"
+                                    value="<?php echo $emp['birth_date'] ?? ($_POST['birth_date'] ?? ''); ?>">
                             </div>
                             <div class="col-md-6">
-                                <label for="gender" class="form-label">Gender</label>
-                                <select id="gender" name="gender" class="form-select">
-                                    <option value="" selected>—</option>
-                                    <option value="male">male</option>
-                                    <option value="female">female</option>
-                                    <option value="other">other</option>
+                                <label class="form-label">Gender</label>
+                                <select class="form-select" name="gender">
+                                    <?php
+                                    $gSel = $emp['gender'] ?? ($_POST['gender'] ?? '');
+                                    ?>
+                                    <option value="" <?php echo ($gSel===''?'selected':''); ?>>—</option>
+                                    <option value="male" <?php echo ($gSel==='male'?'selected':''); ?>>male</option>
+                                    <option value="female" <?php echo ($gSel==='female'?'selected':''); ?>>female</option>
+                                    <option value="other" <?php echo ($gSel==='other'?'selected':''); ?>>other</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="row g-3 mt-0">
                             <div class="col-md-6">
-                                <label for="employment_status" class="form-label">Employment status</label>
-                                <select id="employment_status" name="employment_status" class="form-select" required>
-                                    <option value="active" selected>active</option>
-                                    <option value="inactive">inactive</option>
-                                    <option value="terminated">terminated</option>
-                                    <option value="on_leave">on_leave</option>
+                                <label class="form-label">Employment status</label>
+                                <?php $es = $emp['employment_status'] ?? ($_POST['employment_status'] ?? 'active'); ?>
+                                <select class="form-select" name="employment_status">
+                                    <option value="active" <?php echo ($es==='active'?'selected':''); ?>>active</option>
+                                    <option value="inactive" <?php echo ($es==='inactive'?'selected':''); ?>>inactive</option>
+                                    <option value="terminated" <?php echo ($es==='terminated'?'selected':''); ?>>terminated</option>
+                                    <option value="on_leave" <?php echo ($es==='on_leave'?'selected':''); ?>>on_leave</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label for="hire_date" class="form-label">Hire date</label>
-                                <input type="date" class="form-control" id="hire_date" name="hire_date" value="">
+                                <label class="form-label">Hire date</label>
+                                <input type="date" class="form-control" name="hire_date"
+                                    value="<?php echo $emp['hire_date'] ?? ($_POST['hire_date'] ?? ''); ?>">
                             </div>
                         </div>
 
                         <div class="row g-3 mt-0">
                             <div class="col-12">
-                                <label for="current_position_id" class="form-label">Current position</label>
-                                <select id="current_position_id" name="current_position_id" class="form-select">
+                                <label class="form-label">Current position</label>
+                                <?php $posSel = $emp['current_position_id'] ?? ($_POST['current_position_id'] ?? ''); ?>
+                                <select class="form-select" name="current_position_id">
                                     <option value="">— None —</option>
+                                    <?php foreach ($positions as $p): ?>
+                                    <option value="<?php echo $p['id']; ?>" <?php echo ($posSel===$p['id'] ? 'selected':''); ?>>
+                                        <?php echo $p['name']; ?>
+                                    </option>
+                                    <?php endforeach; ?>
                                 </select>
-                                <div class="form-text">Manage positions in Admin > Employees > Positions.</div>
+                                <div class="form-text">Manage positions separately.</div>
                             </div>
                         </div>
 
@@ -145,14 +245,14 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 
                         <div class="d-flex gap-2 mb-3">
                             <button class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2 btn-icon"
-                                type="submit" style="flex: 2 1 0%;">
+                                type="submit" style="flex:2 1 0%;">
                                 Save changes
                                 <img src="/carriemart/assets/person-check-fill.svg" alt="" aria-hidden="true">
                             </button>
 
                             <button type="button"
                                 class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center justify-content-center gap-2 btn-icon-inverted"
-                                style="flex: 1 1 0%;" onclick="history.back()">
+                                style="flex:1 1 0%;" onclick="history.back()">
                                 Go back
                                 <img src="/carriemart/assets/caret-right-square.svg" alt="" aria-hidden="true">
                             </button>

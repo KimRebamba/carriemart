@@ -1,7 +1,135 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
-?>
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
+// Metrics initialization
+$totalSalesAmount = 0.00;
+$totalOrdersPaid  = 0;
+$totalItemsSold   = 0;
+$totalRefunds     = 0.00;
+$returnCount      = 0;
+$netRevenue       = 0.00;
+
+// 1. Total sales amount (paid orders only) & items sold
+$qsales = "
+    SELECT 
+        COALESCE(SUM(po.unit_price * po.quantity),0) AS sales_amount,
+        COALESCE(SUM(po.quantity),0) AS items_sold,
+        COUNT(DISTINCT o.order_id) AS paid_orders
+    FROM orders o
+    JOIN product_order po ON po.order_id = o.order_id
+    WHERE o.payment_status = 'paid'
+";
+$rs = $conn->query($qsales);
+if ($rs && $row = $rs->fetch_assoc()) {
+    $totalSalesAmount = (float)$row['sales_amount'];
+    $totalItemsSold   = (int)$row['items_sold'];
+    $totalOrdersPaid  = (int)$row['paid_orders'];
+}
+if ($rs) $rs->close();
+
+// 2. Total discounts (percent_sale per order). We approximate discount by applying percent_sale to each order's line item sum.
+$discountTotal = 0.00;
+$qdisc = "
+    SELECT o.order_id, o.percent_sale, COALESCE(SUM(po.unit_price * po.quantity),0) AS order_total
+    FROM orders o
+    JOIN product_order po ON po.order_id = o.order_id
+    WHERE o.payment_status = 'paid' AND o.percent_sale > 0
+    GROUP BY o.order_id
+";
+$rd = $conn->query($qdisc);
+if ($rd) {
+    while ($drow = $rd->fetch_assoc()) {
+        $pct = (int)$drow['percent_sale'];
+        $orderTotal = (float)$drow['order_total'];
+        if ($pct > 0) {
+            $discountTotal += ($orderTotal * $pct / 100.0);
+        }
+    }
+    $rd->close();
+}
+
+// 3. Refunds / returns (approved or processed)
+$qrefund = "
+    SELECT 
+        COALESCE(SUM(refund_amount),0) AS refunds_sum,
+        COUNT(*) AS returns_cnt
+    FROM order_return
+    WHERE return_status IN ('approved','processed')
+";
+$rrf = $conn->query($qrefund);
+if ($rrf && $rrow = $rrf->fetch_assoc()) {
+    $totalRefunds = (float)$rrow['refunds_sum'];
+    $returnCount  = (int)$rrow['returns_cnt'];
+}
+if ($rrf) $rrf->close();
+
+// 4. Net revenue
+$netRevenue = $totalSalesAmount - $discountTotal - $totalRefunds;
+
+// 5. Best-selling items (top 5 by qty among paid orders)
+$bestItems = [];
+$qbest = "
+    SELECT 
+        p.product_id,
+        p.product_name,
+        COALESCE(SUM(po.quantity),0) AS qty_sold,
+        COALESCE(SUM(po.unit_price * po.quantity),0) AS revenue
+    FROM products p
+    JOIN product_order po ON po.product_id = p.product_id
+    JOIN orders o ON o.order_id = po.order_id
+    WHERE o.payment_status = 'paid'
+    GROUP BY p.product_id
+    ORDER BY qty_sold DESC, revenue DESC
+    LIMIT 5
+";
+$rb = $conn->query($qbest);
+if ($rb) {
+    while ($b = $rb->fetch_assoc()) {
+        $bestItems[] = [
+            'product_id' => $b['product_id'],
+            'product_name' => $b['product_name'],
+            'qty_sold' => (int)$b['qty_sold'],
+            'revenue' => (float)$b['revenue']
+        ];
+    }
+    $rb->close();
+}
+
+// 6. Worst-selling items (bottom 5 by qty > 0)
+$worstItems = [];
+$qworst = "
+    SELECT 
+        p.product_id,
+        p.product_name,
+        COALESCE(SUM(po.quantity),0) AS qty_sold,
+        COALESCE(SUM(po.unit_price * po.quantity),0) AS revenue
+    FROM products p
+    JOIN product_order po ON po.product_id = p.product_id
+    JOIN orders o ON o.order_id = po.order_id
+    WHERE o.payment_status = 'paid'
+    GROUP BY p.product_id
+    HAVING qty_sold > 0
+    ORDER BY qty_sold ASC, revenue ASC
+    LIMIT 5
+";
+$rw = $conn->query($qworst);
+if ($rw) {
+    while ($w = $rw->fetch_assoc()) {
+        $worstItems[] = [
+            'product_id' => $w['product_id'],
+            'product_name' => $w['product_name'],
+            'qty_sold' => (int)$w['qty_sold'],
+            'revenue' => (float)$w['revenue']
+        ];
+    }
+    $rw->close();
+}
+
+// Simple formatting helpers
+$fmtAmount = function($v){ return '₱' . number_format((float)$v, 2, '.', ','); };
+$fmtQty    = function($v){ return (int)$v; };
+?>
 <html lang="en">
 
 <head>
@@ -18,6 +146,8 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/links.php');
     .quick-actions .card-header { padding:.5rem .75rem; }
     .quick-actions .card-body { padding:.75rem .75rem; }
     .quick-actions .btn { padding:.4rem .75rem; }
+    .amount-cell { font-variant-numeric: tabular-nums; }
+    .table thead th { white-space: nowrap; }
     </style>
 </head>
 
@@ -38,17 +168,12 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                     Sales
                 </h3>
 
-                <style>
-                    .amount-cell { font-variant-numeric: tabular-nums; }
-                    .table thead th { white-space: nowrap; }
-                </style>
-
                 <div class="row g-3 mb-4">
                     <div class="col-sm-6 col-lg-3">
                         <div class="card h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Total Sales Amount</small>
-                                <h4 class="mt-2 mb-0 amount-cell" id="metric-total-sales">₱0.00</h4>
+                                <h4 class="mt-2 mb-0 amount-cell" id="metric-total-sales"><?php echo $fmtAmount($totalSalesAmount); ?></h4>
                                 <small class="text-success" id="metric-total-sales-change">+0%</small>
                             </div>
                         </div>
@@ -57,7 +182,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                         <div class="card h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Total Orders</small>
-                                <h4 class="mt-2 mb-0" id="metric-total-orders">0</h4>
+                                <h4 class="mt-2 mb-0" id="metric-total-orders"><?php echo $totalOrdersPaid; ?></h4>
                                 <small class="text-muted">paid orders</small>
                             </div>
                         </div>
@@ -66,7 +191,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                         <div class="card h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Total Items Sold</small>
-                                <h4 class="mt-2 mb-0" id="metric-items-sold">0</h4>
+                                <h4 class="mt-2 mb-0" id="metric-items-sold"><?php echo $totalItemsSold; ?></h4>
                                 <small class="text-muted">sum of quantities</small>
                             </div>
                         </div>
@@ -75,8 +200,8 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                         <div class="card h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Total Refunds / Returns</small>
-                                <h4 class="mt-2 mb-0 amount-cell" id="metric-refunds">₱0.00</h4>
-                                <small class="text-danger" id="metric-returns-count">0 returns</small>
+                                <h4 class="mt-2 mb-0 amount-cell" id="metric-refunds"><?php echo $fmtAmount($totalRefunds); ?></h4>
+                                <small class="text-danger" id="metric-returns-count"><?php echo $returnCount; ?> returns</small>
                             </div>
                         </div>
                     </div>
@@ -84,7 +209,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                         <div class="card h-100">
                             <div class="card-body">
                                 <small class="text-uppercase text-muted fw-semibold">Net Revenue</small>
-                                <h4 class="mt-2 mb-0 amount-cell" id="metric-net-revenue">₱0.00</h4>
+                                <h4 class="mt-2 mb-0 amount-cell" id="metric-net-revenue"><?php echo $fmtAmount($netRevenue); ?></h4>
                                 <small class="text-muted">(Sales − Discounts − Refunds)</small>
                             </div>
                         </div>
@@ -110,37 +235,16 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                                             </tr>
                                         </thead>
                                         <tbody id="table-best-selling">
-                                            <!-- Example rows; replace with server data -->
+                                        <?php if (empty($bestItems)): ?>
+                                            <tr><td colspan="4" class="text-center text-muted py-3">No sales data.</td></tr>
+                                        <?php else: foreach ($bestItems as $it): ?>
                                             <tr>
-                                                <td>2001</td>
-                                                <td>Alpha Smartphone X</td>
-                                                <td class="text-end">320</td>
-                                                <td class="text-end amount-cell">₱7,999,680.00</td>
+                                                <td><?php echo $it['product_id']; ?></td>
+                                                <td><?php echo $it['product_name']; ?></td>
+                                                <td class="text-end"><?php echo $fmtQty($it['qty_sold']); ?></td>
+                                                <td class="text-end amount-cell"><?php echo $fmtAmount($it['revenue']); ?></td>
                                             </tr>
-                                            <tr>
-                                                <td>2002</td>
-                                                <td>Omega Laptop Pro</td>
-                                                <td class="text-end">140</td>
-                                                <td class="text-end amount-cell">₱7,630,000.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2005</td>
-                                                <td>Gamma Smartwatch S</td>
-                                                <td class="text-end">480</td>
-                                                <td class="text-end amount-cell">₱2,880,000.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2010</td>
-                                                <td>Delta Headphones Lite</td>
-                                                <td class="text-end">520</td>
-                                                <td class="text-end amount-cell">₱675,480.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2015</td>
-                                                <td>Echo Bluetooth Speaker</td>
-                                                <td class="text-end">410</td>
-                                                <td class="text-end amount-cell">₱533,000.00</td>
-                                            </tr>
+                                        <?php endforeach; endif; ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -169,37 +273,16 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
                                             </tr>
                                         </thead>
                                         <tbody id="table-worst-selling">
-                                            <!-- Example rows; replace with server data -->
+                                        <?php if (empty($worstItems)): ?>
+                                            <tr><td colspan="4" class="text-center text-muted py-3">No low-selling items found.</td></tr>
+                                        <?php else: foreach ($worstItems as $it): ?>
                                             <tr>
-                                                <td>2099</td>
-                                                <td>Zeta VR Headset</td>
-                                                <td class="text-end">3</td>
-                                                <td class="text-end amount-cell">₱45,000.00</td>
+                                                <td><?php echo $it['product_id']; ?></td>
+                                                <td><?php echo $it['product_name']; ?></td>
+                                                <td class="text-end"><?php echo $fmtQty($it['qty_sold']); ?></td>
+                                                <td class="text-end amount-cell"><?php echo $fmtAmount($it['revenue']); ?></td>
                                             </tr>
-                                            <tr>
-                                                <td>2098</td>
-                                                <td>Theta Smart Home Hub</td>
-                                                <td class="text-end">4</td>
-                                                <td class="text-end amount-cell">₱12,000.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2097</td>
-                                                <td>Iota Action Cam</td>
-                                                <td class="text-end">5</td>
-                                                <td class="text-end amount-cell">₱24,995.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2096</td>
-                                                <td>Kappa Charging Pad</td>
-                                                <td class="text-end">6</td>
-                                                <td class="text-end amount-cell">₱5,940.00</td>
-                                            </tr>
-                                            <tr>
-                                                <td>2095</td>
-                                                <td>Lambda USB-C Cable</td>
-                                                <td class="text-end">8</td>
-                                                <td class="text-end amount-cell">₱1,520.00</td>
-                                            </tr>
+                                        <?php endforeach; endif; ?>
                                         </tbody>
                                     </table>
                                 </div>

@@ -1,3 +1,160 @@
+<?php
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+
+if (!$conn) { die('DB error'); }
+
+$q          = isset($_GET['q']) ? trim($_GET['q']) : '';
+$categoryId = isset($_GET['category']) ? trim($_GET['category']) : '';
+$brandId    = isset($_GET['brand']) ? trim($_GET['brand']) : '';
+$minPrice   = isset($_GET['min_price']) ? trim($_GET['min_price']) : '';
+$maxPrice   = isset($_GET['max_price']) ? trim($_GET['max_price']) : '';
+$minRating  = isset($_GET['min_rating']) ? trim($_GET['min_rating']) : '';
+$sort       = isset($_GET['sort']) ? trim($_GET['sort']) : '';
+
+$conditions = [];
+$params = [];
+$types  = '';
+
+$conditions[] = 'p.is_active = 1';
+
+if ($q !== '') {
+    $conditions[] = '(p.product_name LIKE ? OR CAST(p.product_id AS CHAR) LIKE ?)';
+
+    $like = '%'.$q.'%';
+    $params[] = $like; $types .= 's';
+    $params[] = $like; $types .= 's';
+}
+if (ctype_digit($categoryId) && (int)$categoryId > 0) {
+    $conditions[] = 'p.category_id = ?';
+    $params[] = (int)$categoryId; $types .= 'i';
+}
+if (ctype_digit($brandId) && (int)$brandId > 0) {
+    $conditions[] = 'p.brand_id = ?';
+    $params[] = (int)$brandId; $types .= 'i';
+}
+
+$isNum = function($v){ return $v !== '' && is_numeric(str_replace([',','₱',' '],'',$v)); };
+$cleanMoney = function($v){ return str_replace(['₱',',',' '],'',$v); };
+
+if ($isNum($minPrice)) {
+    $conditions[] = 'p.retail_price >= ?';
+    $params[] = (float)$cleanMoney($minPrice); $types .= 'd';
+}
+if ($isNum($maxPrice)) {
+    $conditions[] = 'p.retail_price <= ?';
+    $params[] = (float)$cleanMoney($maxPrice); $types .= 'd';
+}
+if ($isNum($minRating)) {
+    $conditions[] = '(COALESCE(r.avg_rating,0) >= ?)';
+
+    $params[] = (float)$minRating; $types .= 'd';
+}
+
+$whereSql = '';
+if (!empty($conditions)) {
+    $whereSql = 'WHERE ' . implode(' AND ', $conditions);
+}
+
+$orderSql = 'ORDER BY p.created_at DESC';
+switch ($sort) {
+    case 'popular':
+        $orderSql = 'ORDER BY COALESCE(s.total_sold,0) DESC, p.product_id DESC';
+        break;
+    case 'rating':
+        $orderSql = 'ORDER BY COALESCE(r.avg_rating,0) DESC, COALESCE(r.rating_count,0) DESC';
+        break;
+    case 'priceLow':
+        $orderSql = 'ORDER BY p.retail_price ASC, p.product_id ASC';
+        break;
+    case 'priceHigh':
+        $orderSql = 'ORDER BY p.retail_price DESC, p.product_id DESC';
+        break;
+    case 'newest':
+        $orderSql = 'ORDER BY p.created_at DESC, p.product_id DESC';
+        break;
+}
+
+$sql = "
+SELECT
+  p.product_id,
+  p.product_name,
+  p.retail_price,
+  b.brand_name,
+  COALESCE(ph.photo_url,'/carriemart/assets/default-product.png') AS photo_url,
+  COALESCE(r.avg_rating,0) AS avg_rating,
+  COALESCE(r.rating_count,0) AS rating_count,
+  COALESCE(s.total_sold,0) AS total_sold
+FROM products p
+LEFT JOIN brands b ON b.brand_id = p.brand_id
+LEFT JOIN (
+    SELECT product_id, photo_url
+    FROM product_photos
+    WHERE is_primary = 1
+    GROUP BY product_id
+) ph ON ph.product_id = p.product_id
+LEFT JOIN (
+    SELECT po.product_id,
+           AVG(pr.rating) AS avg_rating,
+           COUNT(pr.review_id) AS rating_count
+    FROM product_review pr
+    JOIN product_order po ON po.product_order_id = pr.product_order_id
+    GROUP BY po.product_id
+) r ON r.product_id = p.product_id
+LEFT JOIN (
+    SELECT product_id, SUM(quantity) AS total_sold
+    FROM product_order
+    GROUP BY product_id
+) s ON s.product_id = p.product_id
+$whereSql
+$orderSql
+LIMIT 200
+";
+
+$products = [];
+$stmt = $conn->prepare($sql);
+if ($stmt) {
+    if ($types !== '') {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $stmt->bind_result($pid, $pname, $price, $brandName, $photoUrl, $avgRating, $ratingCount, $totalSold);
+    while ($stmt->fetch()) {
+        $products[] = [
+            'product_id' => $pid,
+            'product_name' => $pname,
+            'retail_price' => (float)$price,
+            'brand_name' => $brandName,
+            'photo_url' => $photoUrl,
+            'avg_rating' => (float)$avgRating,
+            'rating_count' => (int)$ratingCount,
+            'total_sold' => (int)$totalSold
+        ];
+    }
+    $stmt->close();
+}
+
+// Category list
+$categories = [];
+$catStmt = $conn->prepare("SELECT category_id, category_name FROM categories WHERE is_active=1 ORDER BY category_name ASC");
+if ($catStmt) {
+    $catStmt->execute();
+    $catStmt->bind_result($cid, $cname);
+    while ($catStmt->fetch()) $categories[] = ['id'=>$cid,'name'=>$cname];
+    $catStmt->close();
+}
+// Brand list
+$brands = [];
+$brandStmt = $conn->prepare("SELECT brand_id, brand_name FROM brands WHERE is_active=1 ORDER BY brand_name ASC");
+if ($brandStmt) {
+    $brandStmt->execute();
+    $brandStmt->bind_result($bid, $bname);
+    while ($brandStmt->fetch()) $brands[] = ['id'=>$bid,'name'=>$bname];
+    $brandStmt->close();
+}
+
+$totalShown = count($products);
+function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
+?>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -79,25 +236,37 @@
         }
         .rating { display:inline-flex; align-items:center; }
         .rating .star { width:14px; height:14px; }
+        .badge-sold {
+            font-size: .65rem;
+            background: #eef;
+            color: #223;
+            padding: .25rem .45rem;
+            border-radius: .4rem;
+        }
     </style>
 </head>
 <body>
     <header class="p-3 mb-2 border-bottom">
         <div class="container">
             <div class="d-flex flex-wrap align-items-center justify-content-center">
-                <a href="#" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
-                    <img src="../assets/Header-Logo-01.svg" alt="Carriemart logo" width="40" height="40" class="me-2">
+                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
+                    <img src="/carriemart/assets/Header-Logo-01.svg" alt="Carriemart logo" width="40" height="40" class="me-2">
                 </a>
-                <form class="search-form d-flex mb-0 me-2 me-lg-3 flex-grow-1" role="search" style="max-width:540px;">
-                    <input type="search" class="form-control w-100" placeholder="Search..." aria-label="Search">
+                <form method="get" class="d-flex mb-0 me-2 me-lg-3 flex-grow-1" style="max-width:540px;">
+                    <input type="text" class="form-control w-100" name="q" value="<?php echo $q; ?>" placeholder="Search products">
+                    <input type="hidden" name="category" value="<?php echo $categoryId; ?>">
+                    <input type="hidden" name="brand" value="<?php echo $brandId; ?>">
+                    <input type="hidden" name="min_price" value="<?php echo $minPrice; ?>">
+                    <input type="hidden" name="max_price" value="<?php echo $maxPrice; ?>">
+                    <input type="hidden" name="min_rating" value="<?php echo $minRating; ?>">
+                    <input type="hidden" name="sort" value="<?php echo $sort; ?>">
                 </form>
                 <div class="dropdown text-end avatar-dropdown align-self-center">
                     <a href="#" class="d-inline-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle"
                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="../assets/me.jfif" alt="mdo" width="32" height="32" class="rounded-circle">
+                        <img src="/carriemart/assets/me.jfif" alt="mdo" width="32" height="32" class="rounded-circle">
                     </a>
                     <ul class="dropdown-menu text-small">
-                        <li><a class="dropdown-item" href="#">New project...</a></li>
                         <li><a class="dropdown-item" href="#">Settings</a></li>
                         <li><a class="dropdown-item" href="#">Profile</a></li>
                         <li><hr class="dropdown-divider"></li>
@@ -132,16 +301,24 @@
                     </svg>
                     Filters
                 </button>
-                <select class="form-select form-select-sm" aria-label="Sort by" style="width: 180px;">
-                    <option selected>Sort by</option>
-                    <option value="popular">Most Popular</option>
-                    <option value="rating">Highest Rated</option>
-                    <option value="priceLow">Price: Low to High</option>
-                    <option value="priceHigh">Price: High to Low</option>
-                    <option value="newest">Newest</option>
-                </select>
+                <form method="get" class="d-inline-block mb-0">
+                    <input type="hidden" name="q" value="<?php echo $q; ?>">
+                    <input type="hidden" name="category" value="<?php echo $categoryId; ?>">
+                    <input type="hidden" name="brand" value="<?php echo $brandId; ?>">
+                    <input type="hidden" name="min_price" value="<?php echo $minPrice; ?>">
+                    <input type="hidden" name="max_price" value="<?php echo $maxPrice; ?>">
+                    <input type="hidden" name="min_rating" value="<?php echo $minRating; ?>">
+                    <select name="sort" class="form-select form-select-sm" style="width:180px;" onchange="this.form.submit()">
+                        <option value="">Sort by</option>
+                        <option value="popular" <?php if($sort==='popular') echo 'selected'; ?>>Most Popular</option>
+                        <option value="rating" <?php if($sort==='rating') echo 'selected'; ?>>Highest Rated</option>
+                        <option value="priceLow" <?php if($sort==='priceLow') echo 'selected'; ?>>Price: Low to High</option>
+                        <option value="priceHigh" <?php if($sort==='priceHigh') echo 'selected'; ?>>Price: High to Low</option>
+                        <option value="newest" <?php if($sort==='newest') echo 'selected'; ?>>Newest</option>
+                    </select>
+                </form>
             </div>
-            <small class="text-muted" style="margin-left: 1rem;">Showing 25 products</small>
+            <small class="text-muted ms-3">Showing <?php echo $totalShown; ?> products</small>
         </div>
     </div>
 
@@ -152,38 +329,45 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <form class="vstack gap-3">
+            <form class="vstack gap-3" method="get">
+                <input type="hidden" name="q" value="<?php echo $q; ?>">
+                <input type="hidden" name="sort" value="<?php echo $sort; ?>">
                 <div>
                     <label class="form-label">Category</label>
-                    <select class="form-select">
-                        <option>All</option>
-                        <option>Clothing</option>
-                        <option>Electronics</option>
-                        <option>Home</option>
+                    <select class="form-select" name="category">
+                        <option value="">All</option>
+                        <?php foreach ($categories as $c): ?>
+                            <option value="<?php echo $c['id']; ?>" <?php if($categoryId!=='' && (int)$categoryId===$c['id']) echo 'selected'; ?>><?php echo $c['name']; ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div>
                     <label class="form-label">Brand</label>
-                    <input type="text" class="form-control" placeholder="Search brand">
+                    <select class="form-select" name="brand">
+                        <option value="">All</option>
+                        <?php foreach ($brands as $b): ?>
+                            <option value="<?php echo $b['id']; ?>" <?php if($brandId!=='' && (int)$brandId===$b['id']) echo 'selected'; ?>><?php echo $b['name']; ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div>
                     <label class="form-label">Price range</label>
                     <div class="d-flex gap-2">
-                        <input type="number" class="form-control" placeholder="Min">
-                        <input type="number" class="form-control" placeholder="Max">
+                        <input type="text" class="form-control" name="min_price" value="<?php echo $minPrice; ?>" placeholder="Min">
+                        <input type="text" class="form-control" name="max_price" value="<?php echo $maxPrice; ?>" placeholder="Max">
                     </div>
                 </div>
                 <div>
                     <label class="form-label">Minimum rating</label>
-                    <select class="form-select">
-                        <option>Any</option>
-                        <option>4.5+</option>
-                        <option>4.0+</option>
-                        <option>3.5+</option>
+                    <select class="form-select" name="min_rating">
+                        <option value="">Any</option>
+                        <option value="4.5" <?php if($minRating==='4.5') echo 'selected'; ?>>4.5+</option>
+                        <option value="4.0" <?php if($minRating==='4.0') echo 'selected'; ?>>4.0+</option>
+                        <option value="3.5" <?php if($minRating==='3.5') echo 'selected'; ?>>3.5+</option>
                     </select>
                 </div>
                 <div class="d-grid">
-                    <button type="button" class="btn btn-primary">Apply Filters</button>
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
                 </div>
             </form>
         </div>
@@ -192,30 +376,39 @@
     <!-- Product grid -->
     <div class="container pb-5">
         <div class="product-grid">
-            <!-- Card 1 -->
+            <?php if (empty($products)): ?>
+                <div class="col-12 text-muted">No products found.</div>
+            <?php else: foreach ($products as $p):
+                $ratingText = $p['avg_rating'] > 0 ? number_format($p['avg_rating'],1) : '—';
+                $brandDisp  = $p['brand_name'] !== null ? $p['brand_name'] : 'Unknown';
+            ?>
             <div class="product-card">
-                <img class="product-img" src="../assets/pro1.webp" alt="Wireless Headphones">
-                <h6 class="mt-2 mb-1">Wireless Headphones</h6>
+                <img class="product-img" src="<?php echo $p['photo_url']; ?>" alt="<?php echo $p['product_name']; ?>">
+                <h6 class="mt-2 mb-1"><?php echo $p['product_name']; ?></h6>
                 <div class="d-flex align-items-center justify-content-between mb-2 small">
                     <span class="text-muted">Brand:
-                        <a href="brand.php?name=AudioMax" class="brand-link">Roland</a>
+                        <a href="?brand=<?php echo $p['brand_name']!==null ? $p['product_id'] : ''; ?>" class="brand-link"><?php echo $brandDisp; ?></a>
                     </span>
                     <span class="rating fw-semibold d-inline-flex align-items-center gap-1">
-                        <span>4.8</span>
-                        <svg class="star" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                            <path d="M3.612 15.443 4.6 9.97.825 6.765l5.059-.736L8 1.5l2.116 4.529 5.059.736L11.4 9.97l.988 5.473L8 12.897l-4.388 2.546z"/>
-                        </svg>
+                        <span><?php echo $ratingText; ?></span>
+                        <svg class="star" viewBox="0 0 16 16" fill="currentColor"><path d="M3.612 15.443 4.6 9.97.825 6.765l5.059-.736L8 1.5l2.116 4.529 5.059.736L11.4 9.97l.988 5.473L8 12.897l-4.388 2.546z"/></svg>
                     </span>
                 </div>
                 <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="price">$129.99</span>
+                    <span class="price"><?php echo fmtPrice($p['retail_price']); ?></span>
+                    <?php if ($p['total_sold'] > 0): ?>
+                        <span class="badge-sold">Sold <?php echo $p['total_sold']; ?></span>
+                    <?php endif; ?>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary btn-sm flex-grow-1">Add to Cart</button>
+                    <form method="post" action="/carriemart/user/cart/create.php" class="flex-grow-1">
+                        <input type="hidden" name="product_id" value="<?php echo $p['product_id']; ?>">
+                        <button class="btn btn-outline-secondary btn-sm w-100" type="submit">Add to Cart</button>
+                    </form>
                 </div>
-                <a href="./details.php" class="stretched-link" aria-label="View Wireless Headphones"></a>
+                <a href="product-details.php?id=<?php echo $p['product_id']; ?>" class="stretched-link"></a>
             </div>
-
+            <?php endforeach; endif; ?>
         </div>
     </div>
 
@@ -223,16 +416,10 @@
     <footer class="container py-lg-4 py-md-4 py-3">
         <div class="row">
             <div class="col-12 col-md">
-                <img src="../assets/Header-Logo-01.svg" width="50" height="50" class="d-block mb-2"
-                    alt="Carriemart logo">
-                <small class="d-block mb-3 text-body-secondary">© CarrieMart - 2025 <br>
-                    <br> Made by: <br>
-                    Kim Rebamba <br>
-                    JM Carutcho</small>
+                <img src="/carriemart/assets/Header-Logo-01.svg" width="50" height="50" class="d-block mb-2" alt="Carriemart logo">
+                <small class="d-block mb-3 text-body-secondary">© CarrieMart - 2025<br><br>Made by:<br>Kim Rebamba<br>JM Carutcho</small>
             </div>
-            <div class="col-6 col-md">
-                <!-- empty div for spacing lol */ -->
-            </div>
+            <div class="col-6 col-md"></div>
             <div class="col-6 col-md">
                 <h5>Shortcuts</h5>
                 <ul class="list-unstyled text-small">
@@ -254,8 +441,7 @@
             <div class="col-6 col-md">
                 <h5>More on</h5>
                 <ul class="list-unstyled text-small">
-                    <li><a class="link-secondary text-decoration-none" href="https://github.com/KimRebamba">Github
-                            :P</a></li>
+                    <li><a class="link-secondary text-decoration-none" href="https://github.com/KimRebamba">Github :P</a></li>
                 </ul>
             </div>
         </div>

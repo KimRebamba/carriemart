@@ -1,5 +1,84 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($id <= 0) {
+    header('Location: index.php?error=invalid_id');
+    exit;
+}
+
+// Load product with related names
+$sql = "SELECT 
+            p.product_id, p.product_name, p.brand_id, b.brand_name,
+            p.model, p.category_id, c.category_name,
+            p.retail_price, p.cost_price, p.supplier_id, s.supplier_name,
+            p.description, p.specifications, p.product_condition,
+            p.warranty_months, p.is_active, p.stock_level, p.created_at
+        FROM products p
+        LEFT JOIN brands b ON p.brand_id = b.brand_id
+        LEFT JOIN categories c ON p.category_id = c.category_id
+        LEFT JOIN suppliers s ON p.supplier_id = s.supplier_id
+        WHERE p.product_id = ?";
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    header('Location: index.php?error=server');
+    exit;
+}
+$stmt->bind_param('i', $id);
+$stmt->execute();
+$stmt->bind_result(
+    $product_id, $product_name, $brand_id, $brand_name,
+    $model, $category_id, $category_name,
+    $retail_price, $cost_price, $supplier_id, $supplier_name,
+    $description, $specifications, $product_condition,
+    $warranty_months, $is_active, $stock_level, $created_at
+);
+if (!$stmt->fetch()) {
+    $stmt->close();
+    header('Location: index.php?error=not_found');
+    exit;
+}
+$stmt->close();
+
+$product = [
+    'product_id' => $product_id,
+    'product_name' => $product_name,
+    'brand_id' => $brand_id,
+    'brand_name' => $brand_name,
+    'model' => $model,
+    'category_id' => $category_id,
+    'category_name' => $category_name,
+    'retail_price' => $retail_price,
+    'cost_price' => $cost_price,
+    'supplier_id' => $supplier_id,
+    'supplier_name' => $supplier_name,
+    'description' => $description,
+    'specifications' => $specifications,
+    'product_condition' => $product_condition,
+    'warranty_months' => $warranty_months,
+    'is_active' => $is_active,
+    'stock_level' => $stock_level,
+    'created_at' => $created_at
+];
+
+// Load photos
+$product_photos = [];
+$ps = $conn->prepare("SELECT product_photo_id, photo_url, is_primary, sort_order FROM product_photos WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC, product_photo_id ASC");
+if ($ps) {
+    $ps->bind_param('i', $product_id);
+    $ps->execute();
+    $ps->bind_result($ppid, $purl, $primary, $sort);
+    while ($ps->fetch()) {
+        $product_photos[] = [
+            'product_photo_id' => $ppid,
+            'photo_url' => $purl,
+            'is_primary' => (int)$primary,
+            'sort_order' => (int)$sort
+        ];
+    }
+    $ps->close();
+}
 ?>
 
 <!DOCTYPE html>

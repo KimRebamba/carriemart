@@ -1,3 +1,132 @@
 <?php
+// filepath: c:\xampp_for_carriemart\htdocs\carriemart\admin\employees\create.phpS
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
-?>
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: employee-form.php');
+    exit;
+}
+
+$first_name        = trim($_POST['first_name'] ?? '');
+$last_name         = trim($_POST['last_name'] ?? '');
+$email             = trim($_POST['email'] ?? '');
+$phone_number      = trim($_POST['phone_number'] ?? '');
+$address           = trim($_POST['address'] ?? '');
+$birth_date        = trim($_POST['birth_date'] ?? '');
+$gender            = trim($_POST['gender'] ?? '');
+$employment_status = trim($_POST['employment_status'] ?? 'active');
+$hire_date         = trim($_POST['hire_date'] ?? '');
+$current_position_id = isset($_POST['current_position_id']) && $_POST['current_position_id'] !== '' ? (int)$_POST['current_position_id'] : 0;
+
+$errors = [];
+
+// Validate required text fields
+if ($first_name === '') $errors[] = 'first_name_required';
+if ($last_name === '')  $errors[] = 'last_name_required';
+if ($address === '')    $errors[] = 'address_required';
+
+// Email
+if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'invalid_email';
+
+// Phone
+if ($phone_number === '') {
+    $errors[] = 'phone_required';
+} else {
+    $digitsPhone = preg_replace('/\D/', '', $phone_number);
+    // Expect 11 digits starting with 09 (e.g. 09XXXXXXXXX)
+    if (!preg_match('/^09\d{9}$/', $digitsPhone)) $errors[] = 'invalid_phone';
+}
+
+// Employment status
+$allowedStatus = ['active','inactive','terminated','on_leave'];
+if (!in_array($employment_status, $allowedStatus, true)) $errors[] = 'employment_status_bad';
+
+// Hire date required
+if ($hire_date === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $hire_date)) {
+    $errors[] = 'hire_date_required';
+}
+
+// Birth date optional; if given validate
+if ($birth_date !== '') {
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $birth_date)) {
+        $errors[] = 'birth_date_invalid';
+    } else {
+        if ($birth_date > date('Y-m-d')) $errors[] = 'birth_date_invalid';
+    }
+}
+
+// Gender enum or blank
+$allowedGender = ['male','female','other',''];
+if (!in_array($gender, $allowedGender, true)) $gender = '';
+
+// Position id validation (optional)
+if ($current_position_id > 0) {
+    $pchk = $conn->prepare("SELECT position_id FROM positions WHERE position_id = ?");
+    if ($pchk) {
+        $pchk->bind_param('i', $current_position_id);
+        $pchk->execute();
+        $pchk->store_result();
+        if ($pchk->num_rows === 0) {
+            // Invalid position -> set null
+            $current_position_id = 0;
+        }
+        $pchk->close();
+    }
+}
+
+// Duplicate email check (only if email not empty and no prior email error)
+if (!in_array('invalid_email', $errors, true) && $email !== '') {
+    $dup = $conn->prepare("SELECT emp_id FROM employees WHERE email = ? LIMIT 1");
+    if ($dup) {
+        $dup->bind_param('s', $email);
+        $dup->execute();
+        $dup->store_result();
+        if ($dup->num_rows > 0) $errors[] = 'duplicate_email';
+        $dup->close();
+    } else {
+        $errors[] = 'server';
+    }
+}
+
+if (!empty($errors)) {
+    header('Location: employee-form.php?error=' . implode(',', $errors));
+    exit;
+}
+
+// Prepare values (NULL handling)
+$birth_date_val = ($birth_date === '') ? null : $birth_date;
+$hire_date_val  = ($hire_date === '') ? null : $hire_date;
+$position_val   = ($current_position_id > 0) ? $current_position_id : null;
+
+// Insert
+$stmt = $conn->prepare("INSERT INTO employees
+    (first_name, last_name, email, phone_number, address, birth_date, gender, employment_status, hire_date, current_position_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+if (!$stmt) {
+    header('Location: employee-form.php?error=server');
+    exit;
+}
+$stmt->bind_param(
+    'sssssssssi',
+    $first_name,
+    $last_name,
+    $email,
+    $phone_number,
+    $address,
+    $birth_date_val,
+    $gender,
+    $employment_status,
+    $hire_date_val,
+    $position_val
+);
+if (!$stmt->execute()) {
+    $stmt->close();
+    header('Location: employee-form.php?error=server');
+    exit;
+}
+$newId = $stmt->insert_id;
+$stmt->close();
+
+header('Location: index.php?id=' . $newId . '&status=created');
+exit;

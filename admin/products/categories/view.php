@@ -1,5 +1,41 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($id <= 0) {
+    header('Location: index.php?error=invalid_id');
+    exit;
+}
+
+$sql = "SELECT category_id, category_name, description, photo_url, is_active, created_at
+        FROM categories
+        WHERE category_id = ?";
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    header('Location: index.php?error=server');
+    exit;
+}
+$stmt->bind_param('i', $id);
+$stmt->execute();
+$stmt->bind_result($category_id, $category_name, $description, $photo_url, $is_active, $created_at);
+if (!$stmt->fetch()) {
+    $stmt->close();
+    header('Location: index.php?error=not_found');
+    exit;
+}
+$stmt->close();
+
+$category = [
+    'category_id'   => $category_id,
+    'category_name' => $category_name,
+    'description'   => $description,
+    'photo_url'     => $photo_url,
+    'is_active'     => (int)$is_active,
+    'created_at'    => $created_at
+];
+
+$photoDisplay = $category['photo_url'] !== '' ? $category['photo_url'] : '/carriemart/assets/person-circle.svg';
 ?>
 
 <!DOCTYPE html>
@@ -57,19 +93,22 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
                 <div class="col-md-8 col-lg-7 mx-auto">
                     <h4 class="mb-3">View Category</h4>
 
-                    <form class="needs-validation" novalidate>
+                    <form>
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label">Category ID</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($category['category_id'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?php echo $category['category_id']; ?>"
+                                       disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Created at</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($category['created_at'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?php echo $category['created_at']; ?>"
+                                       disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Status</label>
-                                <input type="text" class="form-control" value="<?= isset($category['is_active']) && $category['is_active'] ? 'active' : 'inactive' ?>" disabled>
+                                <input type="text" class="form-control"
+                                       value="<?php echo $category['is_active'] ? 'active' : 'inactive'; ?>" disabled>
                             </div>
                         </div>
 
@@ -78,17 +117,16 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label">Category name</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($category['category_name'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?php echo $category['category_name']; ?>"
+                                       disabled>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Description</label>
-                                <textarea class="form-control" rows="4" disabled><?= htmlspecialchars($category['description'] ?? '') ?></textarea>
+                                <textarea class="form-control" rows="4" disabled><?php echo $category['description']; ?></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label d-block">Category photo</label>
-                                <img class="avatar-lg border"
-                                     src="<?= htmlspecialchars($category['photo_url'] ?? '/carriemart/assets/person-circle.svg') ?>"
-                                     alt="category photo">
+                                <img class="avatar-lg border" src="<?php echo $photoDisplay; ?>" alt="category photo">
                             </div>
                             <div class="col-12">
                                 <small class="text-muted">All fields are read-only.</small>
@@ -99,7 +137,8 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 
                         <div class="d-flex gap-2 mb-3">
                             <a class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2 btn-icon"
-                               style="flex:2 1 0%;" href="category-form.php?id=<?= urlencode($category['category_id'] ?? '') ?>">
+                               style="flex:2 1 0%;"
+                               href="category-form.php?id=<?php echo urlencode($category['category_id']); ?>">
                                 Edit Category
                                 <img src="/carriemart/assets/person-check-fill.svg" alt="" aria-hidden="true">
                             </a>

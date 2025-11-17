@@ -109,8 +109,7 @@
                     <div class="collapse" id="report-collapse">
                         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
                             <li><a href="/carriemart/admin/reports/expenses/index.php" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Expenses</a></li>
-                            <li><a href="/carriemart/admin/reports/sales.php" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Sales</a></li>
-                            <li><a href="/carriemart/admin/reports/user-view.php" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Sort by Users</a></li>
+                            <li><a href="/carriemart/admin/reports/sales.php" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Sales</a></li>                            
                             <li><a href="/carriemart/admin/reports/item-view.php" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Sort by Items</a></li>
                         </ul>
                     </div>
