@@ -11,17 +11,22 @@ $st = $conn->prepare("
     WHERE is_active = 1
     ORDER BY category_name ASC
 ");
-$st->execute();
-$st->bind_result($cid, $cname, $cdesc, $cphoto);
-while ($st->fetch()) {
-    $categories[] = [
-        'category_id' => $cid,
-        'category_name' => $cname,
-        'description' => ($cdesc !== null ? $cdesc : ''),
-        'photo_url' => ($cphoto && $cphoto !== '' ? $cphoto : '/carriemart/assets/default-product.png'),
-    ];
-}
-$st->close();
+if (!$st) {
+    error_log('Failed to prepare categories query: ' . $conn->error);
+    $categories = [];
+} else {
+    $st->execute();
+    $st->bind_result($cid, $cname, $cdesc, $cphoto);
+    while ($st->fetch()) {
+        $categories[] = [
+            'category_id' => $cid,
+            'category_name' => $cname,
+            'description' => ($cdesc !== null ? $cdesc : ''),
+            'photo_url' => ($cphoto && $cphoto !== '' ? $cphoto : '/carriemart/assets/default-product.png'),
+        ];
+    }
+    $st->close();
+    }
 $category_count = count($categories);
 ?>
 <html lang="en">

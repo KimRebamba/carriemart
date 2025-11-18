@@ -102,6 +102,7 @@ LEFT JOIN (
            COUNT(pr.review_id) AS rating_count
     FROM product_review pr
     JOIN product_order po ON po.product_order_id = pr.product_order_id
+    WHERE pr.is_verified = 1
     GROUP BY po.product_id
 ) r ON r.product_id = p.product_id
 LEFT JOIN (
@@ -116,8 +117,11 @@ LIMIT 200
 
 $products = [];
 $stmt = $conn->prepare($sql);
-if ($stmt) {
-    if ($types !== '') {
+if (!$stmt) {
+    error_log('Failed to prepare products query: ' . $conn->error);
+    $products = [];
+} else {
+    if ($types !== '' && !empty($params)) {
         $stmt->bind_param($types, ...$params);
     }
     $stmt->execute();
@@ -147,6 +151,9 @@ if ($catStmt) {
     $catStmt->bind_result($cid, $cname);
     while ($catStmt->fetch()) $categories[] = ['id'=>$cid,'name'=>$cname];
     $catStmt->close();
+} else {
+    error_log('Failed to prepare categories query: ' . $conn->error);
+    $categories = [];
 }
 // Brand list
 $brands = [];
@@ -156,6 +163,9 @@ if ($brandStmt) {
     $brandStmt->bind_result($bid, $bname);
     while ($brandStmt->fetch()) $brands[] = ['id'=>$bid,'name'=>$bname];
     $brandStmt->close();
+} else {
+    error_log('Failed to prepare brands query: ' . $conn->error);
+    $brands = [];
 }
 
 $totalShown = count($products);

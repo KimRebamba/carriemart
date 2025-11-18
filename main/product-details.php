@@ -59,13 +59,13 @@ if ($ph) {
 $defaultImg = '/carriemart/assets/default-product.png';
 $heroImg = !empty($photos) ? $photos[0]['url'] : $defaultImg;
 
-// Ratings summary
+// Ratings summary (only verified reviews)
 $avg_rating = 0.0; $rating_count = 0;
 $rt = $conn->prepare("
     SELECT COALESCE(AVG(pr.rating),0), COALESCE(COUNT(pr.review_id),0)
     FROM product_review pr
     JOIN product_order po ON po.product_order_id = pr.product_order_id
-    WHERE po.product_id = ?
+    WHERE po.product_id = ? AND pr.is_verified = 1
 ");
 if ($rt) {
     $rt->bind_param('i', $product_id);
@@ -88,7 +88,7 @@ $rc = $conn->prepare("
     SELECT COUNT(*)
     FROM product_review pr
     JOIN product_order po ON po.product_order_id = pr.product_order_id
-    WHERE po.product_id = ?
+    WHERE po.product_id = ? AND pr.is_verified = 1
 ");
 if ($rc) {
     $rc->bind_param('i', $product_id);
@@ -105,7 +105,7 @@ $rv = $conn->prepare("
     FROM product_review pr
     JOIN product_order po ON po.product_order_id = pr.product_order_id
     LEFT JOIN accounts a ON a.user_id = pr.user_id
-    WHERE po.product_id = ?
+    WHERE po.product_id = ? AND pr.is_verified = 1
     ORDER BY pr.created_at DESC
     LIMIT ? OFFSET ?
 ");
@@ -248,16 +248,16 @@ $stockBadgeClass = $stock_level > 10 ? 'text-bg-success' : ($stock_level > 0 ? '
                 </div>
                 <div class="h4 mb-3"><?php echo peso($retail_price); ?></div>
 
-                <form class="qty-wrap mb-2" method="post" action="/carriemart/cart/add.php">
+                <form class="qty-wrap mb-2" method="post" action="/carriemart/user/cart/create.php">
                     <label class="form-label small mb-1">Quantity</label>
                     <div class="input-group">
                         <button class="btn btn-outline-secondary" type="button" onclick="const i=this.nextElementSibling;i.stepDown();">-</button>
-                        <input type="number" class="form-control text-center" name="quantity" value="1" min="1">
+                        <input type="number" class="form-control text-center" name="quantity" value="1" min="1" max="<?php echo $stock_level; ?>">
                         <button class="btn btn-outline-secondary" type="button" onclick="const i=this.previousElementSibling;i.stepUp();">+</button>
                     </div>
                     <input type="hidden" name="product_id" value="<?php echo $pid; ?>">
                     <div class="cta-wrap">
-                        <button class="btn btn-primary" <?php echo $stock_level <= 0 ? 'disabled' : ''; ?>>Add to Cart</button>
+                        <button class="btn btn-primary" type="submit" <?php echo $stock_level <= 0 ? 'disabled' : ''; ?>>Add to Cart</button>
                     </div>
                 </form>
             </div>

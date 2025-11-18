@@ -10,6 +10,10 @@ if ($id <= 0) {
 }
 
 $stmt = $conn->prepare("SELECT user_id, username, email, address, phone_number, role, first_name, last_name, profile_photo_url, created_at, is_active FROM accounts WHERE user_id = ?");
+if (!$stmt) {
+    header('Location: index.php?error=server');
+    exit;
+}
 $stmt->bind_param('i', $id);
 $stmt->execute();
 $stmt->bind_result($user_id, $username, $email, $address, $phone_number, $role, $first_name, $last_name, $profile_photo_url, $created_at, $is_active);
@@ -83,27 +87,27 @@ $stmt->close();
     <div class="container">
         <main class="form-register">
             <div class="py-4 text-center">
-                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Header-Logo-01.svg" alt="" width="72" height="57">
+                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Logo.svg" alt="" width="72" height="57">
             </div>
 
             <div class="row g-5">
                 <div class="col-md-8 col-lg-7 mx-auto">
                     <h4 class="mb-3">View Account</h4>
 
-                    <form class="needs-validation" method="post" enctype="multipart/form-data" novalidate>
+                    <form method="post" enctype="multipart/form-data">
                         <!-- IDs & timestamps -->
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="form-label">User ID</label>
                                 <input type="text" class="form-control" value="<?=
-                  htmlspecialchars($account['user_id'] ?? '') ?>" disabled>
+($account['user_id'] ?? '') ?>" disabled>
                                 <input type="hidden" name="user_id" value="<?=
-                  htmlspecialchars($account['user_id'] ?? '') ?>">
+($account['user_id'] ?? '') ?>">
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Date created</label>
                                 <input type="text" class="form-control" value="<?=
-                  htmlspecialchars($account['created_at'] ?? '') ?>" disabled>
+($account['created_at'] ?? '') ?>" disabled>
                             </div>
                         </div>
 
@@ -114,13 +118,13 @@ $stmt->close();
                             <div class="col-sm-6">
                                 <label for="first_name" class="form-label">First name</label>
                                 <input type="text" class="form-control" id="first_name" name="first_name"
-                       value="<?= htmlspecialchars($account['first_name'] ?? '') ?>" readonly>
+                       value="<?= ($account['first_name'] ?? '') ?>" readonly>
                             </div>
 
                             <div class="col-sm-6">
                                 <label for="last_name" class="form-label">Last name</label>
                                 <input type="text" class="form-control" id="last_name" name="last_name"
-                       value="<?= htmlspecialchars($account['last_name'] ?? '') ?>" readonly>
+                       value="<?= ($account['last_name'] ?? '') ?>" readonly>
                             </div>
                         </div>
 
@@ -132,7 +136,7 @@ $stmt->close();
                                     <span class="input-group-text">@</span>
                                     <input type="text" class="form-control" id="username" name="username"
                          placeholder="Username"
-                         value="<?= htmlspecialchars($account['username'] ?? '') ?>" readonly>
+                         value="<?= ($account['username'] ?? '') ?>" readonly>
                                 </div>
                             </div>
 
@@ -140,7 +144,7 @@ $stmt->close();
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email" name="email"
                        placeholder="you@example.com"
-                       value="<?= htmlspecialchars($account['email'] ?? '') ?>" readonly>
+                       value="<?= ($account['email'] ?? '') ?>" readonly>
                             </div>
                         </div>
 
@@ -159,14 +163,14 @@ $stmt->close();
                                 <label for="address" class="form-label">Address</label>
                                 <input type="text" class="form-control" id="address" name="address"
                        placeholder="1234 Main St"
-                       value="<?= htmlspecialchars($account['address'] ?? '') ?>" readonly>
+                       value="<?= ($account['address'] ?? '') ?>" readonly>
                             </div>
 
                             <div class="col-12">
                                 <label for="phone_number" class="form-label">Phone number</label>
                                 <input type="text" class="form-control" id="phone_number" name="phone_number"
                        placeholder="09##-###-####"
-                       value="<?= htmlspecialchars($account['phone_number'] ?? '') ?>" readonly>
+                       value="<?= ($account['phone_number'] ?? '') ?>" readonly>
                             </div>
                         </div>
 
@@ -193,12 +197,12 @@ $stmt->close();
                             <label class="form-label d-block">Profile picture</label>
                             <div class="d-flex align-items-center gap-3">
                                 <img id="avatarPreview" class="avatar-lg border"
-                     src="<?= htmlspecialchars($account['profile_photo_url'] ?? '/carriemart/assets/person-circle.svg') ?>"
+                     src="<?= ($account['profile_photo_url'] ?? '/carriemart/assets/person-circle.svg') ?>"
                      alt="avatar">
                                 <div class="flex-grow-1">
                                     <input class="form-control" type="file" id="formFile" name="profile_photo" accept="image/*" disabled>
                                     <input type="hidden" name="profile_photo_url_current"
-                         value="<?= htmlspecialchars($account['profile_photo_url'] ?? '') ?>">
+                         value="<?= ($account['profile_photo_url'] ?? '') ?>">
                                     <small class="text-body-secondary d-block">JPG, PNG, or GIF. Max 5MB.</small>
                                 </div>
                             </div>
@@ -228,7 +232,7 @@ $stmt->close();
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 
 </html>

@@ -241,4 +241,30 @@ CREATE TABLE product_review (
   FOREIGN KEY (user_id) REFERENCES accounts(user_id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE OR REPLACE VIEW order_transaction_details AS
+SELECT
+  o.order_id,
+  o.user_id,
+  o.date_ordered,
+  o.payment_status,
+  o.order_status,
+  o.voucher_code,
+  o.percent_sale,
+  o.delivery_fee,
+  o.delivery_recipient,
+  o.delivery_address,
+  o.delivery_phone,
+  a.username,
+  a.email,
+  po.product_order_id,
+  po.product_id,
+  p.product_name,
+  po.quantity,
+  po.unit_price,
+  (po.quantity * po.unit_price) AS line_total
+FROM orders o
+LEFT JOIN accounts a ON a.user_id = o.user_id
+JOIN product_order po ON po.order_id = o.order_id
+LEFT JOIN products p ON p.product_id = po.product_id;
+
 SET FOREIGN_KEY_CHECKS=1;

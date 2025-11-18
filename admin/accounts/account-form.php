@@ -114,7 +114,7 @@ if (isset($_GET['error'])) {
                         </div>
                     <?php endif; ?>
 
-                    <form class="needs-validation" method="post" action="<?php echo $formAction; ?>" enctype="multipart/form-data" novalidate>
+                    <form method="post" action="<?php echo $formAction; ?>" enctype="multipart/form-data">
                         <!-- IDs & timestamps (read-only display) -->
                         <div class="row g-3">
                             <div class="col-6">
@@ -136,14 +136,12 @@ if (isset($_GET['error'])) {
                                 <label for="first_name" class="form-label">First name</label>
                                 <input type="text" class="form-control" id="first_name" name="first_name"
                                        value="<?=  ($account['first_name'] ?? '') ?>" >
-                                <div class="invalid-feedback">Valid first name is required.</div>
                             </div>
 
                             <div class="col-sm-6">
                                 <label for="last_name" class="form-label">Last name</label>
                                 <input type="text" class="form-control" id="last_name" name="last_name"
                                        value="<?=  ($account['last_name'] ?? '') ?>">
-                                <div class="invalid-feedback">Valid last name is required.</div>
                             </div>
                         </div>
 
@@ -156,7 +154,6 @@ if (isset($_GET['error'])) {
                                     <input type="text" class="form-control" id="username" name="username"
                                            placeholder="Username"
                                            value="<?=  ($account['username'] ?? '') ?>" >
-                                    <div class="invalid-feedback">Your username is required.</div>
                                 </div>
                             </div>
 
@@ -165,7 +162,6 @@ if (isset($_GET['error'])) {
                                 <input type="text" class="form-control" id="email" name="email"
                                        placeholder="you@example.com"
                                        value="<?=  ($account['email'] ?? '') ?>" >
-                                <div class="invalid-feedback">Please enter a valid email.</div>
                             </div>
                         </div>
 

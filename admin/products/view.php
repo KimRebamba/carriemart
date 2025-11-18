@@ -129,23 +129,23 @@ if ($ps) {
     <div class="container">
         <main class="form-register">
             <div class="py-4 text-center">
-                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Header-Logo-01.svg" alt="" width="72" height="57">
+                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Logo.svg" alt="" width="72" height="57">
             </div>
 
             <div class="row g-5">
                 <div class="col-md-8 col-lg-7 mx-auto">
                     <h4 class="mb-3">View Product</h4>
 
-                    <form class="needs-validation" novalidate>
+                    <form>
                         <!-- Product IDs & timestamps (read-only) -->
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="form-label">Product ID</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($product['product_id'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?= ($product['product_id'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-6">
                                 <label class="form-label">Created at</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($product['created_at'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?= ($product['created_at'] ?? '') ?>" disabled>
                             </div>
                         </div>
 
@@ -155,26 +155,26 @@ if ($ps) {
                         <div class="row g-3">
                             <div class="col-md-8">
                                 <label class="form-label">Product name</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($product['product_name'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?= ($product['product_name'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Model</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($product['model'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?= ($product['model'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Brand</label>
                                 <input type="text" class="form-control"
-                                    value="<?= htmlspecialchars($product['brand_name'] ?? $product['brand_id'] ?? '') ?>" disabled>
+                                    value="<?= ($product['brand_name'] ?? $product['brand_id'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Category</label>
                                 <input type="text" class="form-control"
-                                    value="<?= htmlspecialchars($product['category_name'] ?? $product['category_id'] ?? '') ?>" disabled>
+                                    value="<?= ($product['category_name'] ?? $product['category_id'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Supplier</label>
                                 <input type="text" class="form-control"
-                                    value="<?= htmlspecialchars($product['supplier_name'] ?? $product['supplier_id'] ?? '') ?>" disabled>
+                                    value="<?= ($product['supplier_name'] ?? $product['supplier_id'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Retail price (₱)</label>
@@ -188,15 +188,15 @@ if ($ps) {
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Stock level</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars((string)($product['stock_level'] ?? '')) ?>" disabled>
+                                <input type="text" class="form-control" value="<?= ((string)($product['stock_level'] ?? '')) ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Condition</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($product['product_condition'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?= ($product['product_condition'] ?? '') ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Warranty (months)</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars((string)($product['warranty_months'] ?? '')) ?>" disabled>
+                                <input type="text" class="form-control" value="<?= ((string)($product['warranty_months'] ?? '')) ?>" disabled>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Status</label>
@@ -204,11 +204,11 @@ if ($ps) {
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Description</label>
-                                <textarea class="form-control" rows="4" disabled><?= htmlspecialchars($product['description'] ?? '') ?></textarea>
+                                <textarea class="form-control" rows="4" disabled><?= ($product['description'] ?? '') ?></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Specifications</label>
-                                <textarea class="form-control" rows="4" disabled><?= htmlspecialchars($product['specifications'] ?? '') ?></textarea>
+                                <textarea class="form-control" rows="4" disabled><?= ($product['specifications'] ?? '') ?></textarea>
                             </div>
 
                             <!-- Product photos (read-only) -->
@@ -220,7 +220,7 @@ if ($ps) {
                                         <?php foreach ($product_photos as $p): ?>
                                             <div class="col-6 col-sm-4 col-md-3">
                                                 <div class="border rounded p-2 h-100 text-center">
-                                                    <img src="<?= htmlspecialchars($p['photo_url'] ?? '') ?>" class="img-fluid rounded mb-2" alt="photo">
+                                                    <img src="<?= ($p['photo_url'] ?? '') ?>" class="img-fluid rounded mb-2" alt="photo">
                                                     <?php if (!empty($p['is_primary'])): ?>
                                                         <span class="badge text-bg-primary">Primary</span>
                                                     <?php endif; ?>

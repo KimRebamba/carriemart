@@ -85,23 +85,23 @@ $brand = [
     <div class="container">
         <main class="form-register">
             <div class="py-4 text-center">
-                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Header-Logo-01.svg" alt="" width="72" height="57">
+                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Logo.svg" alt="" width="72" height="57">
             </div>
 
             <div class="row g-5">
                 <div class="col-md-8 col-lg-7 mx-auto">
                     <h4 class="mb-3">View Brand</h4>
 
-                    <form class="needs-validation" novalidate>
+                    <form>
                          <!-- Brand IDs & timestamps (read-only) -->
                          <div class="row g-3">
                              <div class="col-md-4">
                                  <label class="form-label">Brand ID</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($brand['brand_id'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?= ($brand['brand_id'] ?? '') ?>" disabled>
                              </div>
                              <div class="col-md-4">
                                  <label class="form-label">Created at</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($brand['created_at'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?= ($brand['created_at'] ?? '') ?>" disabled>
                              </div>
                              <div class="col-md-4">
                                 <label class="form-label">Status</label>
@@ -115,21 +115,21 @@ $brand = [
                          <div class="row g-3">
                              <div class="col-12">
                                 <label class="form-label">Brand name</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($brand['brand_name'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?= ($brand['brand_name'] ?? '') ?>" disabled>
                              </div>
                              <div class="col-12">
                                 <label class="form-label">Website</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($brand['website'] ?? '') ?>" disabled>
+                                <input type="text" class="form-control" value="<?= ($brand['website'] ?? '') ?>" disabled>
                              </div>
                              <div class="col-12">
                                 <label class="form-label">Description</label>
-                                <textarea class="form-control" rows="4" disabled><?= htmlspecialchars($brand['description'] ?? '') ?></textarea>
+                                <textarea class="form-control" rows="4" disabled><?= ($brand['description'] ?? '') ?></textarea>
                              </div>
                              <!-- Brand logo (placed below description) -->
                              <div class="col-12">
                                 <label class="form-label d-block">Brand logo</label>
                                 <img class="avatar-lg border"
-                                     src="<?= htmlspecialchars($brand['logo_url'] ?? '/carriemart/assets/person-circle.svg') ?>"
+                                     src="<?= ($brand['logo_url'] ?? '/carriemart/assets/person-circle.svg') ?>"
                                      alt="brand logo">
                              </div>
                              <div class="col-12">

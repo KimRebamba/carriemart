@@ -98,7 +98,7 @@ mysqli_close($conn);
 
 <body class="d-flex align-items-center py-4 bg-body-tertiary">
     <main class="form-signin w-100 m-auto">
-        <form method="post" novalidate>
+        <form method="post">
             <img class="d-block mx-auto mb-4" src="/carriemart/assets/Logo.svg" alt="CarrieMart" width="72" height="57">
 
             <?php if ($errors): ?>
@@ -117,9 +117,9 @@ mysqli_close($conn);
             <div class="row g-2 align-items-center mb-3">
                 <label for="inputEmail" class="col-12 col-sm-3 col-form-label text-sm-start">Email</label>
                 <div class="col-12 col-sm-9">
-                    <input type="email" class="form-control mt-1 mt-sm-0" id="inputEmail" name="email"
+                    <input type="text" class="form-control mt-1 mt-sm-0" id="inputEmail" name="email"
                     
-                           placeholder="you@example.com" required <?php echo $success ? 'disabled' : ''; ?>>
+                           placeholder="you@example.com"  <?php echo $success ? 'disabled' : ''; ?>>
                 </div>
             </div>
 

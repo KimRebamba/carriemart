@@ -22,11 +22,11 @@ $sql = "SELECT
     pr.created_at,
     po.order_id,
     p.product_name,
-    b.brand_name
+    COALESCE(b.brand_name, 'Unknown') AS brand_name
 FROM product_review pr
 INNER JOIN product_order po ON pr.product_order_id = po.product_order_id
 INNER JOIN products p ON po.product_id = p.product_id
-INNER JOIN brands b ON p.brand_id = b.brand_id
+LEFT JOIN brands b ON p.brand_id = b.brand_id
 WHERE pr.user_id = ?";
 
 $params = [$_SESSION['user_id']];
@@ -257,7 +257,7 @@ $reviewCount = count($reviews);
                 <div class="order-left">
                     <div class="order-id">Review • Order #<?php echo $review['order_id']; ?></div>
                      <div class="order-actions">
-                        <a class="btn btn-primary btn-sm" href="/carriemart/user/review-details.php?mode=edit&product_order_id=<?php echo $review['product_order_id']; ?>">Edit Review Details</a>
+                        <a class="btn btn-primary btn-sm" href="/carriemart/user/reviews/review-details.php?mode=edit&product_order_id=<?php echo $review['product_order_id']; ?>">Edit Review Details</a>
                     </div>
                 </div>
                 <div class="order-date">Date: <?php echo date('Y-m-d H:i', strtotime($review['created_at'])); ?></div>

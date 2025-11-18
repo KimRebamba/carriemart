@@ -52,29 +52,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //works
     if (empty($errors)) {
         $stmt = $conn->prepare("SELECT COUNT(*) FROM accounts WHERE username = ?");
-$stmt->bind_param("s", $username);
-$stmt->execute();
-$stmt->bind_result($count);
-$stmt->fetch();
+        if (!$stmt) {
+            error_log('Failed to prepare username check query: ' . $conn->error);
+            $errors[] = 'A server error occurred. Please try again.';
+        } else {
+            $stmt->bind_param("s", $username);
+            $stmt->execute();
+            $stmt->bind_result($count);
+            $stmt->fetch();
 
-        if ($count > 0) {
-            $errors[] = 'Username already taken.';
+            if ($count > 0) {
+                $errors[] = 'Username already taken.';
+            }
+            $stmt->close();
         }
-        $stmt->close();
     }
 
      //works
     if (empty($errors)) {
         $stmt = $conn->prepare("SELECT COUNT(*) FROM accounts WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $stmt->bind_result($count);
-        $stmt->fetch();
+        if (!$stmt) {
+            error_log('Failed to prepare email check query: ' . $conn->error);
+            $errors[] = 'A server error occurred. Please try again.';
+        } else {
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $stmt->bind_result($count);
+            $stmt->fetch();
 
-      if ($count > 0) {
-            $errors[] = 'Email already registered.';
+            if ($count > 0) {
+                $errors[] = 'Email already registered.';
+            }
+            $stmt->close();
         }
-        $stmt->close();
     }
 
     
@@ -172,7 +182,7 @@ mysqli_close($conn);
     <div class="container">
         <main class="form-register">
             <div class="py-4 text-center">
-                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Header-Logo-01.svg" alt="" width="72" height="57">
+                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Logo.svg" alt="" width="72" height="57">
             </div>
             
             <div class="row g-5">

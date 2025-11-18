@@ -38,7 +38,17 @@ if ($delivery_phone === '') {
         $errors[] = 'Phone must match format 09XX-XXXX-XXX.';
     }
 }
-if (!in_array($payment_option, ['cash_on_delivery','credit_card','gcash'])) {
+// Map old values to new standardized values
+$payment_option_map = [
+    'cash_on_delivery' => 'COD',
+    'credit_card' => 'Credit Card',
+    'gcash' => 'e-Wallet'
+];
+if (isset($payment_option_map[$payment_option])) {
+    $payment_option = $payment_option_map[$payment_option];
+}
+// Validate against allowed values
+if (!in_array($payment_option, ['COD', 'Credit Card', 'Bank Transfer', 'e-Wallet'])) {
     $errors[] = 'Select a valid payment option.';
 }
 

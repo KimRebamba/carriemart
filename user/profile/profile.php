@@ -1,3 +1,54 @@
+<?php
+session_start();
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
+
+if (!$conn) { die('DB error'); }
+if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) {
+    header('Location: /carriemart/main/products.php?error=login_required');
+    exit;
+}
+
+$userId = (int)$_SESSION['user_id'];
+
+// Load user data
+$userData = [];
+$stmt = $conn->prepare("SELECT user_id, username, email, address, phone_number, first_name, last_name, profile_photo_url, is_active, created_at FROM accounts WHERE user_id = ?");
+if ($stmt) {
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $stmt->bind_result($uid, $username, $email, $address, $phone, $first_name, $last_name, $photo_url, $is_active, $created_at);
+    if ($stmt->fetch()) {
+        $userData = [
+            'user_id' => $uid,
+            'username' => $username,
+            'email' => $email,
+            'address' => $address,
+            'phone_number' => $phone,
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'profile_photo_url' => $photo_url,
+            'is_active' => (int)$is_active,
+            'created_at' => $created_at
+        ];
+    }
+    $stmt->close();
+}
+
+if (empty($userData)) {
+    header('Location: /carriemart/main/products.php?error=not_found');
+    exit;
+}
+
+$firstName = $userData['first_name'] ? $userData['first_name'] : '';
+$lastName = $userData['last_name'] ? $userData['last_name'] : '';
+$username = $userData['username'] ? $userData['username'] : '';
+$email = $userData['email'] ? $userData['email'] : '';
+$address = $userData['address'] ? $userData['address'] : '';
+$phone = $userData['phone_number'] ? $userData['phone_number'] : '';
+$isDeactivated = $userData['is_active'] === 0;
+$profilePhoto = $userData['profile_photo_url'] ? $userData['profile_photo_url'] : '/carriemart/assets/person-circle.svg';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -60,63 +111,49 @@
     <div class="container">
         <main class="form-register">
             <div class="py-4 text-center">
-                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Header-Logo-01.svg" alt="" width="72" height="57">
+                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Logo.svg" alt="" width="72" height="57">
             </div>
 
             <div class="row g-5">
                 <div class="col-md-7 col-lg-8 mx-auto">
                     <h4 class="mb-3">Account Information</h4>
 
-                    
-
                     <div class="row g-3">
                         <div class="col-sm-6">
                             <div class="form-label">First name</div>
-                            <div class="data-box"><?php echo htmlspecialchars($firstName ?? 'John'); ?></div>
+                            <div class="data-box"><?php echo $firstName ? $firstName : '—'; ?></div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-label">Last name</div>
-                            <div class="data-box"><?php echo htmlspecialchars($lastName ?? 'Doe'); ?></div>
+                            <div class="data-box"><?php echo $lastName ? $lastName : '—'; ?></div>
                         </div>
                         <div class="col-12">
                             <div class="form-label">Username</div>
-                            <div class="data-box"><?php echo htmlspecialchars($username ?? 'johndoe'); ?></div>
-                        </div>
-                        <div class="col-12">
-                            <div class="form-label">Password</div>
-                            <div class="data-box"><?php echo htmlspecialchars($username ?? '23535'); ?></div>
+                            <div class="data-box"><?php echo $username ? $username : '—'; ?></div>
                         </div>
                         <div class="col-12">
                             <div class="form-label">Email</div>
-                            <div class="data-box"><?php echo htmlspecialchars($email ?? 'john@example.com'); ?></div>
+                            <div class="data-box"><?php echo $email ? $email : '—'; ?></div>
                         </div>
                         <div class="col-12">
                             <div class="form-label">Address</div>
-                            <div class="data-box"><?php echo htmlspecialchars($address ?? '1234 Main St'); ?></div>
+                            <div class="data-box"><?php echo $address ? $address : '—'; ?></div>
                         </div>
                         <div class="col-12">
                             <div class="form-label">Phone number</div>
-                            <div class="data-box"><?php echo htmlspecialchars($phone ?? '09##-####-###'); ?></div>
+                            <div class="data-box"><?php echo $phone ? $phone : '—'; ?></div>
                         </div>
                         <div class="col-12">
                             <div class="form-label">Account status</div>
                             <div class="data-box">
-                                <?php echo !empty($isDeactivated) ? 'Deactivated' : 'Active'; ?>
+                                <?php echo $isDeactivated ? 'Deactivated' : 'Active'; ?>
                             </div>
                         </div>
                         <!-- Profile picture -->
                     <div class="mb-0">
                         <label class="form-label d-block">Profile picture</label>
                         <div class="d-flex align-items-center gap-3">
-                            <img class="avatar-lg border" src="/carriemart/assets/person-circle.svg" alt="Profile picture">
-                            <div class="text-muted small"><figure>
-  <blockquote class="blockquote">
-    <p>"Errrrmmm.. good enough, I guess. Edit to change."</p>
-  </blockquote>
-  <figcaption class="blockquote-footer">
-    our IT web guy: <cite title="Source Title">Kim</cite>
-  </figcaption>
-</figure></div>
+                            <img class="avatar-lg border" src="<?php echo $profilePhoto; ?>" alt="Profile picture">
                         </div>
                     </div>
                     </div>
@@ -124,7 +161,7 @@
                     <hr class="">
 
                     <div class="d-flex gap-2 mb-3">
-                        <a href="/carriemart/user/settings.php"
+                        <a href="/carriemart/user/profile/profile-settings.php"
                            class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2 btn-icon"
                            style="flex:2 1 0%;">
                             Edit Account Information
@@ -142,12 +179,8 @@
         </main>
     </div>
 
-    <!-- thank you https://www.bootdey.com/snippets/view/account-settings#css - used some code lol -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 
 </html>
-
-
-

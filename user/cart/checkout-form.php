@@ -177,7 +177,7 @@ if (isset($_GET['status']) && $_GET['status'] !== '') {
         <?php endif; ?>
         <main>
             <div class="py-4 text-center"> <img class="d-block mx-auto mb-0"
-                    src="/carriemart/assets/Header-Logo-01.svg" alt="" width="72" height="57">
+                    src="/carriemart/assets/Logo.svg" alt="" width="72" height="57">
             </div>
 
             <div class="row g-5">
@@ -260,16 +260,20 @@ if (isset($_GET['status']) && $_GET['status'] !== '') {
                         <h4 class="mb-3">Payment Option</h4>
                         <div class="my-3">
                             <div class="form-check">
-                                <input id="cod" name="payment_option" type="radio" class="form-check-input" value="cash_on_delivery" checked>
-                                <label class="form-check-label" for="cod">Cash on Delivery</label>
+                                <input id="cod" name="payment_option" type="radio" class="form-check-input" value="COD" checked>
+                                <label class="form-check-label" for="cod">Cash on Delivery (COD)</label>
                             </div>
                             <div class="form-check">
-                                <input id="card" name="payment_option" type="radio" class="form-check-input" value="credit_card">
+                                <input id="card" name="payment_option" type="radio" class="form-check-input" value="Credit Card">
                                 <label class="form-check-label" for="card">Credit Card</label>
                             </div>
                             <div class="form-check">
-                                <input id="gcash" name="payment_option" type="radio" class="form-check-input" value="gcash">
-                                <label class="form-check-label" for="gcash">GCash</label>
+                                <input id="ewallet" name="payment_option" type="radio" class="form-check-input" value="e-Wallet">
+                                <label class="form-check-label" for="ewallet">e-Wallet</label>
+                            </div>
+                            <div class="form-check">
+                                <input id="bank" name="payment_option" type="radio" class="form-check-input" value="Bank Transfer">
+                                <label class="form-check-label" for="bank">Bank Transfer</label>
                             </div>
                         </div>
 

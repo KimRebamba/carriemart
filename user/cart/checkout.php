@@ -25,7 +25,18 @@ $itemsRaw = isset($_POST['items']) && is_array($_POST['items']) ? $_POST['items'
 $delivery_recipient = isset($_POST['delivery_recipient']) ? trim($_POST['delivery_recipient']) : '';
 $delivery_address   = isset($_POST['delivery_address']) ? trim($_POST['delivery_address']) : '';
 $delivery_phone     = isset($_POST['delivery_phone']) ? trim($_POST['delivery_phone']) : '';
-$payment_option     = isset($_POST['payment_option']) ? trim($_POST['payment_option']) : 'cash_on_delivery';
+$payment_option_raw = isset($_POST['payment_option']) ? trim($_POST['payment_option']) : 'COD';
+// Map old values to new standardized values
+$payment_option_map = [
+    'cash_on_delivery' => 'COD',
+    'credit_card' => 'Credit Card',
+    'gcash' => 'e-Wallet'
+];
+$payment_option = isset($payment_option_map[$payment_option_raw]) ? $payment_option_map[$payment_option_raw] : $payment_option_raw;
+// Validate against allowed values
+if (!in_array($payment_option, ['COD', 'Credit Card', 'Bank Transfer', 'e-Wallet'])) {
+    $payment_option = 'COD';
+}
 $voucher_code_raw   = isset($_POST['voucher']) ? trim($_POST['voucher']) : '';
 
 // Normalize items (product_id => qty)
@@ -44,6 +55,11 @@ if (empty($items)) {
 // Ensure cart exists for this user (for cleanup)
 $cartId = null;
 $sc = $conn->prepare("SELECT cart_id FROM cart WHERE user_id = ?");
+if (!$sc) {
+    error_log('Failed to prepare cart query: ' . $conn->error);
+    header('Location: /carriemart/user/cart/cart.php?error=server');
+    exit;
+}
 $sc->bind_param('i', $userId);
 $sc->execute();
 $sc->bind_result($cartId);
@@ -71,6 +87,9 @@ $conn->begin_transaction();
 try {
     // Prepare dynamic statement
     $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        throw new Exception('Failed to prepare product query: ' . $conn->error);
+    }
     $bind = [$types];
     foreach ($pids as $id) { $bind[] = $id; }
     $refs = [];

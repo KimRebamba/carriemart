@@ -82,14 +82,15 @@ if ($brand_id_raw !== '') {
     } else {
         $val = (int)$brand_id_raw;
         $chk = $conn->prepare("SELECT brand_id FROM brands WHERE brand_id = ?");
-        if ($chk) {
+        if (!$chk) {
+            error_log('Failed to prepare brand check query: ' . $conn->error);
+            $errors[] = 'server';
+        } else {
             $chk->bind_param('i', $val);
             $chk->execute();
             $chk->store_result();
             if ($chk->num_rows === 0) $errors[] = 'brand_invalid';
             $chk->close();
-        } else {
-            $errors[] = 'server';
         }
         $brand_id = $val;
     }
@@ -102,14 +103,15 @@ if ($category_id_raw !== '') {
     } else {
         $val = (int)$category_id_raw;
         $chk = $conn->prepare("SELECT category_id FROM categories WHERE category_id = ?");
-        if ($chk) {
+        if (!$chk) {
+            error_log('Failed to prepare category check query: ' . $conn->error);
+            $errors[] = 'server';
+        } else {
             $chk->bind_param('i', $val);
             $chk->execute();
             $chk->store_result();
             if ($chk->num_rows === 0) $errors[] = 'category_invalid';
             $chk->close();
-        } else {
-            $errors[] = 'server';
         }
         $category_id = $val;
     }
@@ -122,14 +124,15 @@ if ($supplier_id_raw !== '') {
     } else {
         $val = (int)$supplier_id_raw;
         $chk = $conn->prepare("SELECT supplier_id FROM suppliers WHERE supplier_id = ?");
-        if ($chk) {
+        if (!$chk) {
+            error_log('Failed to prepare supplier check query: ' . $conn->error);
+            $errors[] = 'server';
+        } else {
             $chk->bind_param('i', $val);
             $chk->execute();
             $chk->store_result();
             if ($chk->num_rows === 0) $errors[] = 'supplier_invalid';
             $chk->close();
-        } else {
-            $errors[] = 'server';
         }
         $supplier_id = $val;
     }
@@ -137,14 +140,15 @@ if ($supplier_id_raw !== '') {
 
 // Duplicate check
 $dup = $conn->prepare("SELECT product_id FROM products WHERE product_name = ? AND COALESCE(model,'') = COALESCE(?, '') LIMIT 1");
-if ($dup) {
+if (!$dup) {
+    error_log('Failed to prepare duplicate check query: ' . $conn->error);
+    $errors[] = 'server';
+} else {
     $dup->bind_param('ss', $product_name, $model);
     $dup->execute();
     $dup->store_result();
     if ($dup->num_rows > 0) $errors[] = 'duplicate';
     $dup->close();
-} else {
-    $errors[] = 'server';
 }
 
 // Photos validation

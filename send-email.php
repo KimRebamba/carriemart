@@ -1,4 +1,5 @@
 <?php
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -11,11 +12,11 @@ $mail = new PHPMailer(true);
 try {
     //Server settings
     $mail->isSMTP();
-    $mail->Host       = 'sandbox.smtp.mailtrap.io';
+$mail->Host       = MAILTRAP_HOST;
     $mail->SMTPAuth   = true;
-    $mail->Username   = 'd06f8760800fa0'; // Mailtrap username
-    $mail->Password   = 'c6053775ed89ea'; // Mailtrap password
-    $mail->Port       = 2525;
+$mail->Username   = MAILTRAP_USERNAME; // Mailtrap username
+$mail->Password   = MAILTRAP_PASSWORD; // Mailtrap password
+$mail->Port       = MAILTRAP_PORT;
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // optional for Mailtrap
 
     //Recipients

@@ -13,10 +13,12 @@ $dateTo         = isset($_GET['date_to']) ? trim($_GET['date_to']) : '';
 
 // Build query
 $sql = "SELECT o.order_id, o.user_id, o.voucher_code, o.payment_status, o.order_status,
-               o.payment_option, o.date_ordered, o.delivery_fee,
-               a.username, a.first_name, a.last_name, a.email
+               o.payment_option, o.date_ordered, o.delivery_fee, o.percent_sale,
+               a.username, a.first_name, a.last_name, a.email,
+               COALESCE(SUM(po.quantity * po.unit_price), 0) AS subtotal
         FROM orders o
         LEFT JOIN accounts a ON o.user_id = a.user_id
+        LEFT JOIN product_order po ON po.order_id = o.order_id
         WHERE 1";
 $types = '';
 $params = [];
@@ -63,6 +65,9 @@ if ($dateTo !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateTo)) {
     $params[] = $dateTo;
 }
 
+// Add GROUP BY after WHERE clause
+$sql .= " GROUP BY o.order_id";
+
 // Sorting
 switch ($sort) {
     case 'oldest':
@@ -83,13 +88,18 @@ switch ($sort) {
 // Fetch
 $orders = [];
 $stmt = $conn->prepare($sql);
-if ($stmt) {
-    if ($types !== '') {
+if (!$stmt) {
+    error_log('Failed to prepare orders query: ' . $conn->error);
+    $orders = [];
+} else {
+    if ($types !== '' && !empty($params)) {
         $stmt->bind_param($types, ...$params);
     }
     $stmt->execute();
-    $stmt->bind_result($order_id, $user_id, $voucher_code, $payment_status, $order_status, $payment_option, $date_ordered, $delivery_fee, $username, $first_name, $last_name, $email);
+    $stmt->bind_result($order_id, $user_id, $voucher_code, $payment_status, $order_status, $payment_option, $date_ordered, $delivery_fee, $percent_sale, $username, $first_name, $last_name, $email, $subtotal);
     while ($stmt->fetch()) {
+        $discount = ((int)$percent_sale > 0) ? ($subtotal * ((int)$percent_sale / 100.0)) : 0.0;
+        $total = $subtotal - $discount + (float)$delivery_fee;
         $orders[] = [
             'order_id' => $order_id,
             'user_id' => $user_id,
@@ -99,6 +109,10 @@ if ($stmt) {
             'payment_option' => $payment_option,
             'date_ordered' => $date_ordered,
             'delivery_fee' => $delivery_fee,
+            'percent_sale' => (int)$percent_sale,
+            'subtotal' => (float)$subtotal,
+            'discount' => (float)$discount,
+            'total' => (float)$total,
             'username' => $username,
             'first_name' => $first_name,
             'last_name' => $last_name,
@@ -106,7 +120,7 @@ if ($stmt) {
         ];
     }
     $stmt->close();
-}
+    }
 ?>
 <html lang="en">
 <head>
@@ -204,14 +218,16 @@ if ($stmt) {
                                 <th>Order Status</th>
                                 <th>Payment Option</th>
                                 <th>Date Ordered</th>
+                                <th class="text-end">Subtotal</th>
                                 <th class="text-end">Delivery Fee</th>
+                                <th class="text-end">Total</th>
                                 <th class="text-center" style="width:160px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                         <?php if (empty($orders)): ?>
                             <tr>
-                                <td colspan="9" class="text-center text-muted py-4">No orders found.</td>
+                                <td colspan="11" class="text-center text-muted py-4">No orders found.</td>
                             </tr>
                         <?php else: foreach ($orders as $o):
                             $payClass = 'pay-' . $o['payment_status'];
@@ -228,7 +244,9 @@ if ($stmt) {
                                 <td><span class="status-badge <?php echo $ordClass; ?>"><?php echo $o['order_status']; ?></span></td>
                                 <td><?php echo $opt; ?></td>
                                 <td><?php echo $dt; ?></td>
+                                <td class="text-end">₱<?php echo number_format((float)$o['subtotal'], 2); ?></td>
                                 <td class="text-end">₱<?php echo number_format((float)$o['delivery_fee'], 2); ?></td>
+                                <td class="text-end"><strong>₱<?php echo number_format((float)$o['total'], 2); ?></strong></td>
                                 <td class="text-center actions-cell">
                                     <a href="view.php?id=<?php echo $o['order_id']; ?>" class="btn btn-outline-primary btn-sm my-1">View</a>
                                     <a href="order-form.php?id=<?php echo $o['order_id']; ?>" class="btn btn-outline-secondary btn-sm">Edit</a>

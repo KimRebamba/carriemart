@@ -183,23 +183,28 @@ LEFT JOIN (
 WHERE c.user_id = ?
 ORDER BY cp.cart_product_id DESC";
 $st = $conn->prepare($sql);
-$st->bind_param('i', $userId);
-$st->execute();
-$st->bind_result($pid, $qty, $pname, $price, $stock, $brand, $photo);
-while ($st->fetch()) {
-    $line = (float)$price * (int)$qty;
-    $total += $line;
-    $items[] = [
-        'product_id' => $pid,
-        'quantity' => (int)$qty,
-        'product_name' => $pname,
-        'retail_price' => (float)$price,
-        'stock_level' => (int)$stock,
-        'brand_name' => $brand,
-        'photo_url' => $photo ?: '/carriemart/assets/default-product.png'
-    ];
-}
-$st->close();
+if (!$st) {
+    error_log('Failed to prepare cart items query: ' . $conn->error);
+    $items = [];
+} else {
+    $st->bind_param('i', $userId);
+    $st->execute();
+    $st->bind_result($pid, $qty, $pname, $price, $stock, $brand, $photo);
+    while ($st->fetch()) {
+        $line = (float)$price * (int)$qty;
+        $total += $line;
+        $items[] = [
+            'product_id' => $pid,
+            'quantity' => (int)$qty,
+            'product_name' => $pname,
+            'retail_price' => (float)$price,
+            'stock_level' => (int)$stock,
+            'brand_name' => $brand,
+            'photo_url' => $photo ?: '/carriemart/assets/default-product.png'
+        ];
+    }
+    $st->close();
+    }
 
 // Add missing peso() helper used in the template
 function peso($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
@@ -311,7 +316,7 @@ if (isset($_GET['status']) && $_GET['status'] !== '') {
         </div>
     <?php endif; ?>
 
-    <form method="post" id="bulkForm" class="d-none">
+    <form method="post" id="bulkForm" action="">
         <input type="hidden" name="action" value="bulk">
         <input type="hidden" name="bulk_action" id="bulkActionField" value="">
     </form>
@@ -407,7 +412,6 @@ include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/footer.php');
 ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Replace previous bulk script
 (function(){
     var bulkAction = '';
     var menu = document.querySelectorAll('.dropdown-menu [data-action]');
@@ -421,9 +425,31 @@ include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/footer.php');
     var confirmBtn = document.getElementById('confirmActionBtn');
     if (confirmBtn) {
         confirmBtn.addEventListener('click', function(){
-            if (!bulkAction) return;
-            var form = document.getElementById('bulkForm');
-            // Route based on chosen action
+            if (!bulkAction) {
+                alert('Please select an action first.');
+                return;
+            }
+            var checkboxes = document.querySelectorAll('input[name="sel[]"]:checked');
+            if (checkboxes.length === 0) {
+                alert('Please select at least one item.');
+                return;
+            }
+            
+            // Create a form dynamically to ensure checkboxes are included
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.style.display = 'none';
+            
+            // Add all checked checkboxes
+            checkboxes.forEach(function(cb){
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'sel[]';
+                input.value = cb.value;
+                form.appendChild(input);
+            });
+            
+            // Set action based on bulkAction
             if (bulkAction === 'delete') {
                 form.action = '/carriemart/user/cart/delete.php';
             } else if (bulkAction === 'checkout') {
@@ -431,7 +457,8 @@ include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/footer.php');
             } else {
                 return;
             }
-            form.method = 'POST';
+            
+            document.body.appendChild(form);
             form.submit();
         });
     }

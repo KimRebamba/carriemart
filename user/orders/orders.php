@@ -108,7 +108,7 @@ if ($stmt) {
     $stmt->close();
 }
 
-// For each order, fetch lines
+// For each order, fetch lines and check for return
 foreach ($user_orders as $key => $ord) {
     $lines = [];
     $ls = $conn->prepare("
@@ -138,6 +138,28 @@ foreach ($user_orders as $key => $ord) {
         $ls->close();
     }
     $user_orders[$key]['lines'] = $lines;
+    
+    // Check if order has a return request
+    $retChk = $conn->prepare("SELECT order_return_id, return_status FROM order_return WHERE order_id = ?");
+    if ($retChk) {
+        $retChk->bind_param('i', $ord['order_id']);
+        $retChk->execute();
+        $retChk->bind_result($ret_id, $ret_status);
+        if ($retChk->fetch()) {
+            $user_orders[$key]['has_return'] = true;
+            $user_orders[$key]['return_id'] = $ret_id;
+            $user_orders[$key]['return_status'] = $ret_status;
+        } else {
+            $user_orders[$key]['has_return'] = false;
+            $user_orders[$key]['return_id'] = null;
+            $user_orders[$key]['return_status'] = null;
+        }
+        $retChk->close();
+    } else {
+        $user_orders[$key]['has_return'] = false;
+        $user_orders[$key]['return_id'] = null;
+        $user_orders[$key]['return_status'] = null;
+    }
 }
 
 $order_count = count($user_orders);
@@ -434,7 +456,11 @@ function paymentBadge($status) {
                             <a href="/carriemart/user/orders/order-form.php?id=<?php echo $o['order_id']; ?>" class="btn btn-primary btn-sm">Edit Delivery Details</a>
                         <?php endif; ?>
                         <?php if ($o['order_status'] === 'completed'): ?>
-                            <a href="/carriemart/user/returns/create.php?order_id=<?php echo $o['order_id']; ?>" class="btn btn-outline-secondary btn-sm">Return/Refund</a>
+                            <?php if (isset($o['has_return']) && $o['has_return']): ?>
+                                <a href="/carriemart/user/returns/return-details.php?mode=view&order_return_id=<?php echo $o['return_id']; ?>" class="btn btn-outline-info btn-sm">View Return (<?php echo $o['return_status']; ?>)</a>
+                            <?php else: ?>
+                                <a href="/carriemart/user/returns/create.php?order_id=<?php echo $o['order_id']; ?>" class="btn btn-outline-secondary btn-sm">Return/Refund</a>
+                            <?php endif; ?>
                         <?php endif; ?>
                         <?php if ($o['order_status'] === 'pending' || $o['order_status'] === 'processing'): ?>
                             <form method="post" action="/carriemart/user/orders/update.php" class="d-inline-block mb-0">
@@ -484,6 +510,14 @@ function paymentBadge($status) {
                             <div class="kv"><div class="k">Payment Option</div><div class="v"><?php echo $o['payment_option'] ? $o['payment_option'] : '—'; ?></div></div>
                             <div class="kv"><div class="k">Payment Status</div><div class="v"><?php echo paymentBadge($o['payment_status']); ?></div></div>
                             <div class="kv"><div class="k">Order Status</div><div class="v"><?php echo statusBadge($o['order_status']); ?></div></div>
+                            <?php if (isset($o['has_return']) && $o['has_return']): ?>
+                            <div class="kv">
+                                <div class="k">Return Status</div>
+                                <div class="v">
+                                    <span class="badge bg-info">Return <?php echo $o['return_status']; ?></span>
+                                </div>
+                            </div>
+                            <?php endif; ?>
                         </div>
                         <div>
                             <div class="section-title">Summary</div>

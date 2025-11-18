@@ -1,6 +1,160 @@
 <?php
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\PHPMailer;
+
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/PHPMailer/src/Exception.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/PHPMailer/src/PHPMailer.php');
+require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/PHPMailer/src/SMTP.php');
+
+function get_order_email_payload(mysqli $conn, int $orderId): ?array {
+    $sql = "SELECT order_id, user_id, date_ordered, payment_status, order_status, voucher_code,
+                   percent_sale, delivery_fee, delivery_recipient, delivery_address, delivery_phone,
+                   username, email, product_order_id, product_id, product_name, quantity, unit_price, line_total
+            FROM order_transaction_details
+            WHERE order_id = ?
+            ORDER BY product_order_id ASC";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log('Order email payload prepare failed: ' . $conn->error);
+        return null;
+    }
+    $stmt->bind_param('i', $orderId);
+    $stmt->execute();
+    $stmt->bind_result(
+        $order_id_row,
+        $user_id,
+        $date_ordered,
+        $payment_status,
+        $order_status,
+        $voucher_code,
+        $percent_sale,
+        $delivery_fee,
+        $delivery_recipient,
+        $delivery_address,
+        $delivery_phone,
+        $username,
+        $email,
+        $product_order_id,
+        $product_id,
+        $product_name,
+        $quantity,
+        $unit_price,
+        $line_total
+    );
+    $lines = [];
+    $subtotal = 0.0;
+    $orderMeta = null;
+    while ($stmt->fetch()) {
+        if ($orderMeta === null) {
+            $orderMeta = [
+                'order_id' => $order_id_row,
+                'user_id' => $user_id,
+                'date_ordered' => $date_ordered,
+                'payment_status' => $payment_status,
+                'order_status' => $order_status,
+                'voucher_code' => $voucher_code,
+                'percent_sale' => (int)$percent_sale,
+                'delivery_fee' => (float)$delivery_fee,
+                'delivery_recipient' => $delivery_recipient,
+                'delivery_address' => $delivery_address,
+                'delivery_phone' => $delivery_phone,
+                'username' => $username,
+                'email' => $email
+            ];
+        }
+        $lines[] = [
+            'product_order_id' => $product_order_id,
+            'product_id' => $product_id,
+            'product_name' => $product_name,
+            'quantity' => (int)$quantity,
+            'unit_price' => (float)$unit_price,
+            'line_total' => (float)$line_total
+        ];
+        $subtotal += (float)$line_total;
+    }
+    $stmt->close();
+    if ($orderMeta === null || empty($lines)) {
+        return null;
+    }
+    $discountAmount = $orderMeta['percent_sale'] > 0
+        ? $subtotal * ($orderMeta['percent_sale'] / 100)
+        : 0.0;
+    $grandTotal = $subtotal - $discountAmount + $orderMeta['delivery_fee'];
+    $orderMeta['lines'] = $lines;
+    $orderMeta['subtotal'] = $subtotal;
+    $orderMeta['discount_amount'] = $discountAmount;
+    $orderMeta['grand_total'] = $grandTotal;
+    return $orderMeta;
+}
+
+function send_order_update_email(mysqli $conn, int $orderId): void {
+    $orderData = get_order_email_payload($conn, $orderId);
+    if (!$orderData || empty($orderData['email'])) {
+        return;
+    }
+    $customerName = $orderData['delivery_recipient']
+        ?: ($orderData['username'] ?: 'Customer');
+    $lineRows = '';
+    foreach ($orderData['lines'] as $line) {
+        $lineRows .= sprintf(
+            '<tr><td>%s</td><td style="text-align:right;">%d</td><td style="text-align:right;">₱%s</td><td style="text-align:right;">₱%s</td></tr>',
+            htmlspecialchars($line['product_name'], ENT_QUOTES, 'UTF-8'),
+            $line['quantity'],
+            number_format($line['unit_price'], 2),
+            number_format($line['line_total'], 2)
+        );
+    }
+    $body = sprintf(
+        '<p>Hi %s,</p>
+         <p>Your order <strong>#%d</strong> has been updated to <strong>%s</strong>.</p>
+         <table width="100%%" cellpadding="6" cellspacing="0" border="1" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;">
+            <thead>
+                <tr>
+                    <th align="left">Item</th>
+                    <th align="right">Qty</th>
+                    <th align="right">Unit Price</th>
+                    <th align="right">Line Total</th>
+                </tr>
+            </thead>
+            <tbody>%s</tbody>
+         </table>
+         <p>Subtotal: ₱%s<br>
+            Discount (%d%%): ₱%s<br>
+            Delivery Fee: ₱%s<br>
+            <strong>Grand Total: ₱%s</strong>
+         </p>
+         <p>Thank you for shopping with CarrieMart.</p>',
+        htmlspecialchars($customerName, ENT_QUOTES, 'UTF-8'),
+        $orderData['order_id'],
+        htmlspecialchars($orderData['order_status'], ENT_QUOTES, 'UTF-8'),
+        $lineRows,
+        number_format($orderData['subtotal'], 2),
+        $orderData['percent_sale'],
+        number_format($orderData['discount_amount'], 2),
+        number_format($orderData['delivery_fee'], 2),
+        number_format($orderData['grand_total'], 2)
+    );
+    try {
+        $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = MAILTRAP_HOST;
+        $mail->SMTPAuth = true;
+        $mail->Username = MAILTRAP_USERNAME;
+        $mail->Password = MAILTRAP_PASSWORD;
+        $mail->Port = MAILTRAP_PORT;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->setFrom('no-reply@carriemart.com', 'CarrieMart');
+        $mail->addAddress($orderData['email'], $customerName);
+        $mail->isHTML(true);
+        $mail->Subject = sprintf('Update for Order #%d', $orderData['order_id']);
+        $mail->Body = $body;
+        $mail->send();
+    } catch (Exception $e) {
+        error_log('Order update email failed: ' . $e->getMessage());
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.php');
@@ -140,6 +294,8 @@ if (!$stmt->execute()) {
     exit;
 }
 $stmt->close();
+
+send_order_update_email($conn, $order_id);
 
 header('Location: order-form.php?id='.$order_id.'&status=updated');
 exit;

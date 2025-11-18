@@ -2,8 +2,159 @@
 session_start();
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
-?>
+if (!$conn) { die('DB error'); }
+if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) {
+    header('Location: /carriemart/main/products.php?error=login_required');
+    exit;
+}
+$userId = (int)$_SESSION['user_id'];
 
+// Filters
+$returnStatus = isset($_GET['return_status']) ? trim($_GET['return_status']) : '';
+$orderSearch = isset($_GET['order_search']) ? trim($_GET['order_search']) : '';
+$dateFrom = isset($_GET['date_from']) ? trim($_GET['date_from']) : '';
+$dateTo = isset($_GET['date_to']) ? trim($_GET['date_to']) : '';
+$minRefund = isset($_GET['min_refund']) ? trim($_GET['min_refund']) : '';
+$sort = isset($_GET['sort']) ? trim($_GET['sort']) : '';
+
+$conditions = ['o.user_id = ?'];
+$params = [$userId];
+$types = 'i';
+
+if ($returnStatus !== '' && in_array($returnStatus, ['requested','approved','rejected','processed'])) {
+    $conditions[] = 'ord_ret.return_status = ?';
+    $params[] = $returnStatus;
+    $types .= 's';
+}
+
+if ($orderSearch !== '') {
+    $conditions[] = 'CAST(o.order_id AS CHAR) LIKE ?';
+    $params[] = '%'.$orderSearch.'%';
+    $types .= 's';
+}
+
+if ($dateFrom !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateFrom)) {
+    $conditions[] = 'DATE(ord_ret.created_at) >= ?';
+    $params[] = $dateFrom;
+    $types .= 's';
+}
+
+if ($dateTo !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateTo)) {
+    $conditions[] = 'DATE(ord_ret.created_at) <= ?';
+    $params[] = $dateTo;
+    $types .= 's';
+}
+
+$whereSql = 'WHERE ' . implode(' AND ', $conditions);
+
+$orderSql = 'ORDER BY ord_ret.order_return_id DESC';
+switch ($sort) {
+    case 'recent':
+        $orderSql = 'ORDER BY ord_ret.created_at DESC, ord_ret.order_return_id DESC';
+        break;
+    case 'amountHigh':
+        $orderSql = 'ORDER BY ord_ret.refund_amount DESC, ord_ret.order_return_id DESC';
+        break;
+    case 'amountLow':
+        $orderSql = 'ORDER BY ord_ret.refund_amount ASC, ord_ret.order_return_id DESC';
+        break;
+    case 'status':
+        $orderSql = 'ORDER BY ord_ret.return_status ASC, ord_ret.order_return_id DESC';
+        break;
+}
+
+$sql = "
+SELECT 
+    ord_ret.order_return_id,
+    ord_ret.order_id,
+    ord_ret.reason,
+    ord_ret.cond,
+    ord_ret.return_status,
+    ord_ret.refund_amount,
+    ord_ret.processed_at,
+    ord_ret.created_at,
+    o.date_ordered
+FROM order_return ord_ret
+INNER JOIN orders o ON ord_ret.order_id = o.order_id
+$whereSql
+";
+
+if ($minRefund !== '' && is_numeric($minRefund)) {
+    $sql .= " AND ord_ret.refund_amount >= " . (float)$minRefund;
+}
+
+$sql .= " $orderSql";
+
+$user_returns = [];
+$stmt = $conn->prepare($sql);
+if ($stmt) {
+    if ($types !== '') {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $stmt->bind_result($orid, $oid, $reason, $cond, $rstat, $refund, $proc_at, $created, $date_ord);
+    while ($stmt->fetch()) {
+        $user_returns[] = [
+            'order_return_id' => $orid,
+            'order_id' => $oid,
+            'reason' => $reason,
+            'cond' => $cond,
+            'return_status' => $rstat,
+            'refund_amount' => (float)$refund,
+            'processed_at' => $proc_at,
+            'created_at' => $created,
+            'date_ordered' => $date_ord
+        ];
+    }
+    $stmt->close();
+}
+
+// For each return, fetch order products
+foreach ($user_returns as $key => $ret) {
+    $products = [];
+    $ps = $conn->prepare("
+        SELECT po.product_order_id, po.product_id, po.quantity, po.unit_price, p.product_name,
+               COALESCE(b.brand_name, 'Unknown') AS brand_name
+        FROM product_order po
+        INNER JOIN products p ON po.product_id = p.product_id
+        LEFT JOIN brands b ON p.brand_id = b.brand_id
+        WHERE po.order_id = ?
+    ");
+    if ($ps) {
+        $ps->bind_param('i', $ret['order_id']);
+        $ps->execute();
+        $ps->bind_result($poid, $pid, $qty, $unit, $pname, $brand);
+        while ($ps->fetch()) {
+            $products[] = [
+                'product_order_id' => $poid,
+                'product_id' => $pid,
+                'product_name' => $pname,
+                'brand_name' => $brand,
+                'quantity' => (int)$qty,
+                'unit_price' => (float)$unit,
+                'line_total' => (float)$unit * (int)$qty
+            ];
+        }
+        $ps->close();
+    }
+    $user_returns[$key]['products'] = $products;
+}
+
+$return_count = count($user_returns);
+
+function fmtPrice($v) { return '₱' . number_format((float)$v, 2, '.', ','); }
+function fmtDate($d) { return date('Y-m-d H:i', strtotime($d)); }
+function statusBadge($status) {
+    $map = [
+        'requested' => 'status-requested',
+        'approved' => 'status-approved',
+        'rejected' => 'status-rejected',
+        'processed' => 'status-processed'
+    ];
+    $class = isset($map[$status]) ? $map[$status] : 'status-requested';
+    return '<span class="status-badge ' . $class . '">' . $status . '</span>';
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,17 +190,6 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 .status-rejected {background:#f8d7da;color:#842029;border:1px solid #f5c2c7;}
 .status-processed {background:#cfe2ff;color:#084298;border:1px solid #b6d4fe;}
 
-.product-list {display:grid;gap:.5rem;}
-.product-row {
-  display:grid;
-  grid-template-columns: 2fr 1.1fr 90px 1.4fr 140px 130px 110px; 
-  column-gap:.75rem; row-gap:.25rem;
-  padding:.5rem .75rem; background:#f8f9fa; border:1px solid #e9ecef; border-radius:.375rem; align-items:center;
-}
-.product-row .qty {text-align:center; white-space:nowrap;}
-.product-row .amount {text-align:right; font-weight:600;}
-.product-row .title,.product-row .label,.product-row .reason {min-width:0; overflow:hidden; text-overflow:ellipsis;}
-
 .order-items { display:grid; gap:.5rem; }
 .order-item {
   display:grid;
@@ -83,14 +223,6 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
     letter-spacing:.3px;
   }
 }
-
-@media (max-width: 768px){
-  .product-row {grid-template-columns: 1.8fr 1fr 70px 1.2fr 130px 120px 100px; column-gap:.5rem;}
-}
-@media (max-width: 576px){
-  .product-row {grid-template-columns: 1fr; }
-  .product-row .amount {text-align:left;}
-}
 </style>
 </head>
 <body>
@@ -117,16 +249,22 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
                 </svg>
                 Filters
             </button>
-            <select class="form-select form-select-sm" aria-label="Sort by" style="width: 180px;">
-                <option selected>Sort by</option>
-                <option value="recent">Most Recent</option>
-                <option value="amountHigh">Amount: High to Low</option>
-                <option value="amountLow">Amount: Low to High</option>
-                <option value="status">Status</option>
-                <option value="orderAZ">Order # A–Z</option>
-            </select>
+            <form method="get" class="d-inline-block mb-0">
+                <input type="hidden" name="return_status" value="<?php echo $returnStatus; ?>">
+                <input type="hidden" name="order_search" value="<?php echo $orderSearch; ?>">
+                <input type="hidden" name="date_from" value="<?php echo $dateFrom; ?>">
+                <input type="hidden" name="date_to" value="<?php echo $dateTo; ?>">
+                <input type="hidden" name="min_refund" value="<?php echo $minRefund; ?>">
+                <select name="sort" class="form-select form-select-sm" style="width: 180px;" onchange="this.form.submit()">
+                    <option value="">Sort by</option>
+                    <option value="recent" <?php if($sort==='recent') echo 'selected'; ?>>Most Recent</option>
+                    <option value="amountHigh" <?php if($sort==='amountHigh') echo 'selected'; ?>>Amount: High to Low</option>
+                    <option value="amountLow" <?php if($sort==='amountLow') echo 'selected'; ?>>Amount: Low to High</option>
+                    <option value="status" <?php if($sort==='status') echo 'selected'; ?>>Status</option>
+                </select>
+            </form>
         </div>
-        <small class="text-muted" style="margin-left: 1rem;">Showing 2 returns</small>
+        <small class="text-muted" style="margin-left: 1rem;">Showing <?php echo $return_count; ?> return<?php echo $return_count != 1 ? 's' : ''; ?></small>
     </div>
 </div>
 
@@ -137,38 +275,35 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-        <form class="vstack gap-3">
+        <form class="vstack gap-3" method="get">
+            <input type="hidden" name="sort" value="<?php echo $sort; ?>">
             <div>
                 <label class="form-label">Return status</label>
-                <select class="form-select">
+                <select class="form-select" name="return_status">
                     <option value="">Any</option>
-                    <option value="requested">Requested</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="processed">Processed</option>
+                    <option value="requested" <?php if($returnStatus==='requested') echo 'selected'; ?>>Requested</option>
+                    <option value="approved" <?php if($returnStatus==='approved') echo 'selected'; ?>>Approved</option>
+                    <option value="rejected" <?php if($returnStatus==='rejected') echo 'selected'; ?>>Rejected</option>
+                    <option value="processed" <?php if($returnStatus==='processed') echo 'selected'; ?>>Processed</option>
                 </select>
             </div>
             <div>
                 <label class="form-label">Order number</label>
-                <input type="text" class="form-control" placeholder="#1001">
-            </div>
-            <div>
-                <label class="form-label">Brand</label>
-                <input type="text" class="form-control" placeholder="Search brand">
+                <input type="text" class="form-control" name="order_search" placeholder="#1001" value="<?php echo $orderSearch; ?>">
             </div>
             <div>
                 <label class="form-label">Date range</label>
                 <div class="d-flex gap-2">
-                    <input type="date" class="form-control">
-                    <input type="date" class="form-control">
+                    <input type="date" class="form-control" name="date_from" value="<?php echo $dateFrom; ?>">
+                    <input type="date" class="form-control" name="date_to" value="<?php echo $dateTo; ?>">
                 </div>
             </div>
             <div>
                 <label class="form-label">Min return amount</label>
-                <input type="number" class="form-control" step="0.01" placeholder="0.00">
+                <input type="number" step="0.01" class="form-control" name="min_refund" value="<?php echo $minRefund; ?>" placeholder="0.00">
             </div>
             <div class="d-grid">
-                <button type="button" class="btn btn-primary">Apply Filters</button>
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
             </div>
         </form>
     </div>
@@ -176,104 +311,66 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 
 <div class="container">
     <div class="order-list">
+        <?php if (empty($user_returns)): ?>
+            <div class="text-muted">No returns found.</div>
+        <?php else: foreach ($user_returns as $ret): ?>
         <div class="order-card">
             <div class="order-header">
                 <div class="order-left">
-                    <div class="order-id">Return • Order #1001</div>
+                    <div class="order-id">Return • Order #<?php echo $ret['order_id']; ?></div>
                     <div class="order-actions">
-                        <a class="btn btn-primary btn-sm" href="/carriemart/user/return-details.php?mode=edit&product_return_id=2001">Edit Return Details</a>
-                        <a class="btn btn-danger btn-sm" href="/carriemart/user/return-details.php?mode=edit&product_return_id=2001">Cancel Return</a>
+                        <?php if ($ret['return_status'] === 'requested'): ?>
+                            <a class="btn btn-primary btn-sm" href="/carriemart/user/returns/return-details.php?mode=edit&order_return_id=<?php echo $ret['order_return_id']; ?>">Edit Return Details</a>
+                            <form method="post" action="/carriemart/user/returns/update.php" class="d-inline-block mb-0">
+                                <input type="hidden" name="order_return_id" value="<?php echo $ret['order_return_id']; ?>">
+                                <input type="hidden" name="action" value="cancel">
+                                <button class="btn btn-danger btn-sm" type="submit">Cancel Return</button>
+                            </form>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <div class="order-date">Date: 2025-11-15 09:40</div>
+                <div class="order-date">Date: <?php echo fmtDate($ret['created_at']); ?></div>
             </div>
             <div class="order-grid">
                 <div class="info-sections">
-                    <div class="order-items-header py-0">Return details</div>
-
-                    <div class="kv"><div class="k">Order number</div><div class="v">#1001</div></div>
+                    <div class="kv"><div class="k">Order number</div><div class="v">#<?php echo $ret['order_id']; ?></div></div>
 
                     <div>    
-                    
                         <div class="order-items-header mb-1">
                             <div>Product</div>
                             <div>Brand</div>
                             <div class="text-end">Qty</div>
                         </div>
                         <div class="order-items">
+                            <?php foreach ($ret['products'] as $prod): ?>
                             <div class="order-item">
-                                <div class="title" data-label="Product">Wireless Earbuds Pro</div>
-                                <div class="label" data-label="Brand">SoundMax</div>
-                                <div class="qty" data-label="Qty returned">x1</div>
+                                <div class="title" data-label="Product"><?php echo $prod['product_name']; ?></div>
+                                <div class="label" data-label="Brand"><?php echo $prod['brand_name']; ?></div>
+                                <div class="qty" data-label="Qty">x<?php echo $prod['quantity']; ?></div>
                             </div>
-                            <div class="order-item">
-                                <div class="title" data-label="Product">USB-C Fast Charger 30W</div>
-                                <div class="label" data-label="Brand">Voltix</div>
-                                <div class="qty" data-label="Qty returned">x1</div>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
 
-                    <div class="kv"><div class="k">Reason</div><div class="v">Items arrived with defects; wrong model for charger</div></div>
-                    <div class="kv">
-                        <div class="k">Condition</div>
-                        <div class="v">
-                            <select class="form-select form-select-sm" disabled>
-                                <option>new</option>
-                                <option>opened</option>
-                                <option selected>damaged</option>
-                                <option>other</option>
-                            </select>
-                        </div>
-                    </div>
+                    <div class="kv"><div class="k">Reason</div><div class="v"><?php echo $ret['reason'] ? $ret['reason'] : '—'; ?></div></div>
+                    <div class="kv"><div class="k">Condition</div><div class="v"><?php echo $ret['cond'] ? $ret['cond'] : '—'; ?></div></div>
                     <div class="kv">
                         <div class="k">Return status</div>
-                        <div class="v"><span class="status-badge status-approved">Approved</span></div>
+                        <div class="v"><?php echo statusBadge($ret['return_status']); ?></div>
                     </div>
-                    <div class="kv"><div class="k">Return amount</div><div class="v">₱4,394.00</div></div>
-
-                    <div class="kv"><div class="k">Date</div><div class="v">2025-11-15 09:40</div></div>
+                    <div class="kv"><div class="k">Return amount</div><div class="v"><?php echo fmtPrice($ret['refund_amount']); ?></div></div>
+                    <div class="kv"><div class="k">Date</div><div class="v"><?php echo fmtDate($ret['created_at']); ?></div></div>
                 </div>
             </div>
         </div>
-
+        <?php endforeach; endif; ?>
     </div>
 </div>
 
 <hr>
-<footer class="container py-lg-4 py-md-4 py-3">
-    <div class="row">
-        <div class="col-12 col-md">
-            <img src="../assets/Header-Logo-01.svg" width="50" height="50" class="d-block mb-2" alt="">
-            <small class="d-block mb-3 text-body-secondary">© CarrieMart - 2025<br><br>Made by:<br>Kim Rebamba<br>JM Carutcho</small>
-        </div>
-        <div class="col-6 col-md"></div>
-        <div class="col-6 col-md">
-            <h5>Shortcuts</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="link-secondary text-decoration-none" href="#">Resource name</a></li>
-                <li><a class="link-secondary text-decoration-none" href="#">Resource</a></li>
-                <li><a class="link-secondary text-decoration-none" href="#">Another resource</a></li>
-                <li><a class="link-secondary text-decoration-none" href="#">Final resource</a></li>
-            </ul>
-        </div>
-        <div class="col-6 col-md">
-            <h5>Resources</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="link-secondary text-decoration-none" href="#">Business</a></li>
-                <li><a class="link-secondary text-decoration-none" href="#">Education</a></li>
-                <li><a class="link-secondary text-decoration-none" href="#">Government</a></li>
-                <li><a class="link-secondary text-decoration-none" href="#">Gaming</a></li>
-            </ul>
-        </div>
-        <div class="col-6 col-md">
-            <h5>More on</h5>
-            <ul class="list-unstyled text-small">
-                <li><a class="link-secondary text-decoration-none" href="https://github.com/KimRebamba">Github :P</a></li>
-            </ul>
-        </div>
-    </div>
-</footer>
+<?php
+include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/footer.php');
+?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>

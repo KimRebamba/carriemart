@@ -31,7 +31,7 @@ $success = false;
 $delivery_recipient = '';
 $delivery_address   = '';
 $delivery_phone     = '';
-$payment_option     = 'cash_on_delivery';
+$payment_option     = 'COD';
 $voucher_code       = '';
 
 $items = [];
@@ -58,7 +58,17 @@ if ($isEdit) {
         $delivery_recipient = $recip ? $recip : '';
         $delivery_address   = $addr ? $addr : '';
         $delivery_phone     = $phone ? $phone : '';
-        $payment_option     = $payOpt ? $payOpt : 'cash_on_delivery';
+        // Map old payment_option values to new standardized values
+        $payment_option_map = [
+            'cash_on_delivery' => 'COD',
+            'credit_card' => 'Credit Card',
+            'gcash' => 'e-Wallet'
+        ];
+        $payOptRaw = $payOpt ? $payOpt : 'COD';
+        $payment_option = isset($payment_option_map[$payOptRaw]) ? $payment_option_map[$payOptRaw] : $payOptRaw;
+        if (!in_array($payment_option, ['COD', 'Credit Card', 'Bank Transfer', 'e-Wallet'])) {
+            $payment_option = 'COD';
+        }
         $voucher_code       = $vcode ? $vcode : '';
         $percent_sale       = (int)$percent;
         $delivery_fee       = (float)$delFee;
@@ -178,7 +188,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order_form']) 
     $delivery_recipient = isset($_POST['delivery_recipient']) ? trim($_POST['delivery_recipient']) : '';
     $delivery_address   = isset($_POST['delivery_address']) ? trim($_POST['delivery_address']) : '';
     $delivery_phone     = isset($_POST['delivery_phone']) ? trim($_POST['delivery_phone']) : '';
-    $payment_option     = isset($_POST['payment_option']) ? trim($_POST['payment_option']) : $payment_option;
+    $payment_option_raw = isset($_POST['payment_option']) ? trim($_POST['payment_option']) : $payment_option;
+    // Map old values to new standardized values
+    $payment_option_map = [
+        'cash_on_delivery' => 'COD',
+        'credit_card' => 'Credit Card',
+        'gcash' => 'e-Wallet'
+    ];
+    $payment_option = isset($payment_option_map[$payment_option_raw]) ? $payment_option_map[$payment_option_raw] : $payment_option_raw;
+    if (!in_array($payment_option, ['COD', 'Credit Card', 'Bank Transfer', 'e-Wallet'])) {
+        $payment_option = 'COD';
+    }
     $voucher_code       = isset($_POST['voucher']) ? trim($_POST['voucher']) : $voucher_code;
 
     // Forward via POST to update-delivery-details.php
@@ -219,7 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order_form']) 
     <div class="container">
         <main>
             <div class="py-4 text-center">
-                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Header-Logo-01.svg" alt="" width="72" height="57">
+                <img class="d-block mx-auto mb-0" src="/carriemart/assets/Logo.svg" alt="" width="72" height="57">
             </div>
 
             <div class="row g-5">
@@ -282,7 +302,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order_form']) 
                     <?php endif; ?>
 
                     <!-- Keep your existing frontend; wired names/values below -->
-                    <form method="post" class="needs-validation" novalidate>
+                    <form method="post">
                         <?php if ($isEdit): ?>
                             <input type="hidden" name="id" value="<?php echo $orderId; ?>">
                         <?php endif; ?>
@@ -307,16 +327,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order_form']) 
                         <h4 class="mb-3">Payment Option</h4>
                         <div class="my-3">
                             <div class="form-check">
-                                <input id="cod" name="payment_option" type="radio" class="form-check-input" value="cash_on_delivery" <?php echo ($payment_option==='cash_on_delivery' ? 'checked' : ''); ?>>
-                                <label class="form-check-label" for="cod">Cash on Delivery</label>
+                                <input id="cod" name="payment_option" type="radio" class="form-check-input" value="COD" <?php echo ($payment_option==='COD' ? 'checked' : ''); ?>>
+                                <label class="form-check-label" for="cod">Cash on Delivery (COD)</label>
                             </div>
                             <div class="form-check">
-                                <input id="cc" name="payment_option" type="radio" class="form-check-input" value="credit_card" <?php echo ($payment_option==='credit_card' ? 'checked' : ''); ?>>
-                                <label class="form-check-label" for="cc">Credit card</label>
+                                <input id="cc" name="payment_option" type="radio" class="form-check-input" value="Credit Card" <?php echo ($payment_option==='Credit Card' ? 'checked' : ''); ?>>
+                                <label class="form-check-label" for="cc">Credit Card</label>
                             </div>
                             <div class="form-check">
-                                <input id="gcash" name="payment_option" type="radio" class="form-check-input" value="gcash" <?php echo ($payment_option==='gcash' ? 'checked' : ''); ?>>
-                                <label class="form-check-label" for="gcash">Gcash</label>
+                                <input id="ewallet" name="payment_option" type="radio" class="form-check-input" value="e-Wallet" <?php echo ($payment_option==='e-Wallet' ? 'checked' : ''); ?>>
+                                <label class="form-check-label" for="ewallet">e-Wallet</label>
+                            </div>
+                            <div class="form-check">
+                                <input id="bank" name="payment_option" type="radio" class="form-check-input" value="Bank Transfer" <?php echo ($payment_option==='Bank Transfer' ? 'checked' : ''); ?>>
+                                <label class="form-check-label" for="bank">Bank Transfer</label>
                             </div>
                         </div>
 

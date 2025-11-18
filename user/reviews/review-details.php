@@ -7,11 +7,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 $mode = isset($_GET['mode']) ? $_GET['mode'] : 'add';
 $product_order_id = isset($_GET['product_order_id']) ? (int)$_GET['product_order_id'] : 0;
 
-// Debug: Check what we received
-error_log("Mode: $mode, Product Order ID: $product_order_id");
-
 if (!$product_order_id) {
-    error_log("No product_order_id, redirecting to orders");
     header('Location: /carriemart/user/orders/orders.php');
     exit;
 }
@@ -23,39 +19,10 @@ $sql = "SELECT
     po.quantity,
     po.unit_price,
     p.product_name,
-    b.brand_name
+    COALESCE(b.brand_name, 'Unknown') AS brand_name
 FROM product_order po
 INNER JOIN products p ON po.product_id = p.product_id
-INNER JOIN brands b ON p.brand_id = b.brand_id
-INNER JOIN orders o ON po.order_id = o.order_id
-WHERE po.product_order_id = ? AND o.user_id = ?";
-
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("ii", $product_order_id, $_SESSION['user_id']);
-$stmt->execute();
-$result = $stmt->get_result();
-$product_order = $result->fetch_assoc();
-$stmt->close();
-
-error_log("Product order found: " . ($product_order ? "YES" : "NO"));
-
-if (!$product_order) {
-    error_log("Product order not found or doesn't belong to user, redirecting");
-    header('Location: /carriemart/user/orders/orders.php');
-    exit;
-}
-
-// Get product order details
-$sql = "SELECT 
-    po.product_order_id,
-    po.order_id,
-    po.quantity,
-    po.unit_price,
-    p.product_name,
-    b.brand_name
-FROM product_order po
-INNER JOIN products p ON po.product_id = p.product_id
-INNER JOIN brands b ON p.brand_id = b.brand_id
+LEFT JOIN brands b ON p.brand_id = b.brand_id
 INNER JOIN orders o ON po.order_id = o.order_id
 WHERE po.product_order_id = ? AND o.user_id = ?";
 
@@ -91,42 +58,12 @@ $stmt->close();
 
 if ($existing_review) {
     // Review exists - load it
-    $review_title = $existing_review['review_title'];
-    $review_text = $existing_review['review_text'];
+    $review_title = $existing_review['review_title'] !== null ? $existing_review['review_title'] : '';
+    $review_text = $existing_review['review_text'] !== null ? $existing_review['review_text'] : '';
     $rating = $existing_review['rating'];
     $review_id = $existing_review['review_id'];
     $created_at = date('Y-m-d H:i', strtotime($existing_review['created_at']));
     $mode = 'edit'; // Force edit mode if review exists
-}
-
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $review_title = $_POST['review_title'];
-    $review_text = $_POST['review_text'];
-    $rating = (int)$_POST['rating'];
-    
-    if ($review_id) {
-        // Update existing review
-        $sql = "UPDATE product_review 
-                SET review_title = ?, review_text = ?, rating = ?
-                WHERE review_id = ? AND user_id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssiii", $review_title, $review_text, $rating, $review_id, $_SESSION['user_id']);
-        $stmt->execute();
-        $stmt->close();
-    } else {
-        // Insert new review
-        $sql = "INSERT INTO product_review (product_order_id, user_id, rating, review_title, review_text, is_verified) 
-                VALUES (?, ?, ?, ?, ?, 1)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iiiss", $product_order_id, $_SESSION['user_id'], $rating, $review_title, $review_text);
-        $stmt->execute();
-        $stmt->close();
-    }
-    
-    // Redirect back to orders page
-    header('Location: /carriemart/user/orders/orders.php');
-    exit;
 }
 
 $total_price = $product_order['unit_price'] * $product_order['quantity'];
@@ -152,7 +89,7 @@ $total_price = $product_order['unit_price'] * $product_order['quantity'];
   <div class="container">
     <main>
       <div class="py-4 text-center">
-        <img class="d-block mx-auto mb-0" src="/carriemart/assets/Header-Logo-01.svg" alt="" width="72" height="57">
+        <img class="d-block mx-auto mb-0" src="/carriemart/assets/Logo.svg" alt="" width="72" height="57">
       </div>
 
       <div class="row g-5">
@@ -176,23 +113,25 @@ $total_price = $product_order['unit_price'] * $product_order['quantity'];
         <!-- Main: Review Information -->
         <div class="col-md-7 col-lg-8 my-5">
           <h4 class="mb-3"><?php echo $review_id ? 'Edit Review' : 'Add Review'; ?></h4>
-          <form method="POST">
+          <form method="POST" action="<?php echo $review_id ? 'update.php' : 'create.php'; ?>">
+            <input type="hidden" name="product_order_id" value="<?php echo $product_order_id; ?>">
+            <?php if ($review_id): ?>
+            <input type="hidden" name="review_id" value="<?php echo $review_id; ?>">
+            <?php endif; ?>
             <div class="row g-3">
 
               <div class="col-12">
                 <label for="review_title" class="form-label">Review title</label>
                 <input type="text" class="form-control" id="review_title" name="review_title"
-                       placeholder="Summarize your experience" required
+                       placeholder="Summarize your experience"
                        value="<?php echo $review_title; ?>">
-                <div class="invalid-feedback">Please enter a review title.</div>
               </div>
 
 
               <div class="col-12">
                 <label for="review_text" class="form-label">Review description</label>
-                <textarea class="form-control" id="review_text" name="review_text" rows="4" required
+                <textarea class="form-control" id="review_text" name="review_text" rows="4"
                           placeholder="Share details about what you liked or disliked."><?php echo $review_text; ?></textarea>
-                <div class="invalid-feedback">Please enter your review.</div>
               </div>
 
         

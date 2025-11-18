@@ -11,18 +11,23 @@ $st = $conn->prepare("
     WHERE is_active = 1
     ORDER BY brand_name ASC
 ");
-$st->execute();
-$st->bind_result($bid, $bname, $logo, $site, $desc);
-while ($st->fetch()) {
-    $brands[] = [
-        'brand_id' => $bid,
-        'brand_name' => $bname,
-        'logo_url' => ($logo && $logo !== '' ? $logo : '/carriemart/assets/default-product.png'),
-        'website' => $site,
-        'description' => $desc
-    ];
-}
-$st->close();
+if (!$st) {
+    error_log('Failed to prepare brands query: ' . $conn->error);
+    $brands = [];
+} else {
+    $st->execute();
+    $st->bind_result($bid, $bname, $logo, $site, $desc);
+    while ($st->fetch()) {
+        $brands[] = [
+            'brand_id' => $bid,
+            'brand_name' => $bname,
+            'logo_url' => ($logo && $logo !== '' ? $logo : '/carriemart/assets/default-product.png'),
+            'website' => $site,
+            'description' => $desc
+        ];
+    }
+    $st->close();
+    }
 $brand_count = count($brands);
 ?>
 <html lang="en">

@@ -11,20 +11,25 @@ $st = $conn->prepare("
     WHERE is_active = 1
     ORDER BY voucher_code ASC
 ");
-$st->execute();
-$st->bind_result($code, $percent, $minAmt, $maxAmt, $fromDate, $toDate, $active);
-while ($st->fetch()) {
-    $vouchers[] = [
-        'voucher_code' => $code,
-        'percent_sale' => ($percent !== null ? (int)$percent : 0),
-        'min_purchase_amount' => (string)$minAmt,
-        'max_discount_amount' => ($maxAmt !== null ? (string)$maxAmt : ''),
-        'from_date' => $fromDate,
-        'to_date' => $toDate,
-        'is_active' => (int)$active
-    ];
-}
-$st->close();
+if (!$st) {
+    error_log('Failed to prepare vouchers query: ' . $conn->error);
+    $vouchers = [];
+} else {
+    $st->execute();
+    $st->bind_result($code, $percent, $minAmt, $maxAmt, $fromDate, $toDate, $active);
+    while ($st->fetch()) {
+        $vouchers[] = [
+            'voucher_code' => $code,
+            'percent_sale' => ($percent !== null ? (int)$percent : 0),
+            'min_purchase_amount' => (string)$minAmt,
+            'max_discount_amount' => ($maxAmt !== null ? (string)$maxAmt : ''),
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
+            'is_active' => (int)$active
+        ];
+    }
+    $st->close();
+    }
 $voucher_count = count($vouchers);
 ?>
 <html lang="en">
@@ -142,7 +147,7 @@ $voucher_count = count($vouchers);
       <button type="button" class="btn btn-primary d-none" id="liveToastBtn">Show live toast</button>
       <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
-          <img src="../assets/Header-Logo-01.svg" class="rounded me-2" width="16" height="16" alt="CarrieMart">
+          <img src="/carriemart/assets/Logo.svg" class="rounded me-2" width="16" height="16" alt="CarrieMart">
           <strong class="me-auto">Voucher Copied</strong>
           <small>Just now</small>
           <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>

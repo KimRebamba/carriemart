@@ -222,7 +222,7 @@ if (isset($_GET['status'])) {
                                 <td><span class="small text-muted"><?php echo $createdDisplay; ?></span></td>
                                 <td class="text-center actions-cell">
                                     <a href="view.php?id=<?php echo $r['review_id']; ?>" class="btn btn-outline-primary btn-sm my-1">View</a>
-                                    <a href="edit.php?id=<?php echo $r['review_id']; ?>" class="btn btn-outline-secondary btn-sm">Edit</a>
+                                    <a href="review-form.php?id=<?php echo $r['review_id']; ?>" class="btn btn-outline-secondary btn-sm">Edit</a>
                                     <a href="delete.php?id=<?php echo $r['review_id']; ?>" class="btn btn-outline-danger btn-sm mb-1"
                                        onclick="return confirm('Delete review #<?php echo $r['review_id']; ?>?');">Delete</a>
                                 </td>
