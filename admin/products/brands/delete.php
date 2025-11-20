@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// Accept id from GET or POST (index.php links here)
+   
 $id_raw = isset($_GET['id']) ? trim($_GET['id']) : (isset($_POST['id']) ? trim($_POST['id']) : '');
 $brand_id = ctype_digit($id_raw) ? (int)$id_raw : 0;
 
@@ -11,7 +11,7 @@ if ($brand_id <= 0) {
     exit;
 }
 
-// Ensure brand exists and get logo path
+   
 $logo_url = null;
 $exist = $conn->prepare("SELECT brand_id, logo_url FROM brands WHERE brand_id = ?");
 if (!$exist) {
@@ -28,7 +28,7 @@ if (!$exist->fetch()) {
 }
 $exist->close();
 
-// Deleting a brand will SET NULL brand_id on products (per schema)
+   
 $conn->begin_transaction();
 
 try {
@@ -43,7 +43,7 @@ try {
 
     $conn->commit();
 
-    // Delete associated logo file if present
+      
     if ($logo_url) {
         $fs = $_SERVER['DOCUMENT_ROOT'] . $logo_url;
         if (is_file($fs)) {

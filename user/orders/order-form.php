@@ -13,12 +13,12 @@ $defaultPhoto = '/carriemart/assets/default-product.png';
 
 function fmtPrice($v) { return '₱' . number_format((float)$v, 2, '.', ','); }
 
-// Decide mode (create vs edit)
+   
 $oid_raw = isset($_GET['id']) ? $_GET['id'] : (isset($_POST['id']) ? $_POST['id'] : '');
 $isEdit = (ctype_digit((string)$oid_raw) && (int)$oid_raw > 0);
 $orderId = $isEdit ? (int)$oid_raw : 0;
 
-// Error messages from redirect
+   
 $errors = [];
 if (isset($_GET['error']) && $_GET['error'] !== '') {
     $errs = explode('|', $_GET['error']);
@@ -42,7 +42,7 @@ $delivery_fee = 0.00;
 $discount = 0.00;
 $total = 0.00;
 
-// If editing, load order + lines
+   
 if ($isEdit) {
     $st = $conn->prepare("
         SELECT order_id, date_ordered, payment_status, order_status, voucher_code, percent_sale, delivery_fee,
@@ -58,7 +58,7 @@ if ($isEdit) {
         $delivery_recipient = $recip ? $recip : '';
         $delivery_address   = $addr ? $addr : '';
         $delivery_phone     = $phone ? $phone : '';
-        // Map old payment_option values to new standardized values
+          
         $payment_option_map = [
             'cash_on_delivery' => 'COD',
             'credit_card' => 'Credit Card',
@@ -75,7 +75,7 @@ if ($isEdit) {
     }
     $st->close();
 
-    // Lines for sidebar
+      
     $ls = $conn->prepare("
         SELECT po.product_id, po.quantity, po.unit_price, p.product_name,
                COALESCE(ph.photo_url, ?) AS photo_url
@@ -110,7 +110,7 @@ if ($isEdit) {
     $total = $subtotal - $discount + $delivery_fee;
 
 } else {
-    // Create mode: snapshot cart
+      
     $cartId = null;
     $sc = $conn->prepare("SELECT cart_id FROM cart WHERE user_id = ? LIMIT 1");
     $sc->bind_param('i', $userId);
@@ -151,7 +151,7 @@ if ($isEdit) {
         $cs->close();
         $item_count = count($items);
     }
-    // Optional voucher preview (if user typed one)
+      
     if (isset($_POST['redeem']) || isset($_POST['voucher'])) {
         $voucher_code = trim($_POST['voucher'] ?? '');
     }
@@ -183,13 +183,13 @@ if ($isEdit) {
     $total = $subtotal - $discount + $delivery_fee;
 }
 
-// Handle POST submit for validation then forward to update-delivery-details.php (edit mode only)
+   
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order_form']) && $isEdit) {
     $delivery_recipient = isset($_POST['delivery_recipient']) ? trim($_POST['delivery_recipient']) : '';
     $delivery_address   = isset($_POST['delivery_address']) ? trim($_POST['delivery_address']) : '';
     $delivery_phone     = isset($_POST['delivery_phone']) ? trim($_POST['delivery_phone']) : '';
     $payment_option_raw = isset($_POST['payment_option']) ? trim($_POST['payment_option']) : $payment_option;
-    // Map old values to new standardized values
+      
     $payment_option_map = [
         'cash_on_delivery' => 'COD',
         'credit_card' => 'Credit Card',
@@ -201,7 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order_form']) 
     }
     $voucher_code       = isset($_POST['voucher']) ? trim($_POST['voucher']) : $voucher_code;
 
-    // Forward via POST to update-delivery-details.php
+      
     $forward = [
         'order_id'           => $orderId,
         'delivery_recipient' => $delivery_recipient,
@@ -301,7 +301,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order_form']) 
                         </div>
                     <?php endif; ?>
 
-                    <!-- Keep your existing frontend; wired names/values below -->
+                       
                     <form method="post">
                         <?php if ($isEdit): ?>
                             <input type="hidden" name="id" value="<?php echo $orderId; ?>">

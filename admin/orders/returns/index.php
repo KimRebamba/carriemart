@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// GET inputs
+   
 $q             = isset($_GET['q']) ? trim($_GET['q']) : '';
 $sort          = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 $statusFilter  = isset($_GET['return_status']) ? trim($_GET['return_status']) : '';
@@ -17,7 +17,7 @@ $sql = "SELECT order_return_id, order_id, cond, return_status, refund_amount, pr
 $types = '';
 $params = [];
 
-// Search
+   
 if ($q !== '') {
     $like = "%$q%";
     $sql .= " AND (CAST(order_return_id AS CHAR) LIKE ?
@@ -29,7 +29,7 @@ if ($q !== '') {
     $params[] = $like; $params[] = $like; $params[] = $like; $params[] = $like;
 }
 
-// Status filter
+   
 $allowedStatus = ['requested','approved','rejected','processed'];
 if ($statusFilter !== '' && in_array($statusFilter, $allowedStatus, true)) {
     $sql .= " AND return_status = ?";
@@ -37,7 +37,7 @@ if ($statusFilter !== '' && in_array($statusFilter, $allowedStatus, true)) {
     $params[] = $statusFilter;
 }
 
-// Condition filter
+   
 $allowedCond = ['new','opened','damaged','other'];
 if ($condFilter !== '' && in_array($condFilter, $allowedCond, true)) {
     $sql .= " AND cond = ?";
@@ -45,7 +45,7 @@ if ($condFilter !== '' && in_array($condFilter, $allowedCond, true)) {
     $params[] = $condFilter;
 }
 
-// Processed date range
+   
 $validDate = function($d){ return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
 if ($procFrom !== '' && $validDate($procFrom)) {
     $sql .= " AND processed_at IS NOT NULL AND DATE(processed_at) >= ?";
@@ -58,7 +58,7 @@ if ($procTo !== '' && $validDate($procTo)) {
     $params[] = $procTo;
 }
 
-// Min refund
+   
 $minRefundClean = str_replace(['₱',',',' '],'',$minRefundRaw);
 if ($minRefundClean !== '' && is_numeric($minRefundClean) && (float)$minRefundClean >= 0) {
     $sql .= " AND refund_amount >= ?";
@@ -66,7 +66,7 @@ if ($minRefundClean !== '' && is_numeric($minRefundClean) && (float)$minRefundCl
     $params[] = (float)$minRefundClean;
 }
 
-// Sorting
+   
 switch ($sort) {
     case 'oldest':
         $sql .= " ORDER BY created_at ASC, order_return_id ASC";
@@ -86,7 +86,7 @@ switch ($sort) {
         break;
 }
 
-// Fetch
+   
 $returns = [];
 $stmt = $conn->prepare($sql);
 if ($stmt) {

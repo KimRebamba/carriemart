@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// Dashboard metrics (defaults)
+   
 $salesToday        = 0.00;
 $ordersToday       = 0;
 $expensesToday     = 0.00;
@@ -12,7 +12,7 @@ $totalProducts     = 0;
 $lowStockCount     = 0;
 $pendingReturns    = 0;
 
-// Sales today (paid orders only)
+   
 $qSales = $conn->prepare("
     SELECT COALESCE(SUM(po.unit_price * po.quantity),0) AS amt
     FROM orders o
@@ -26,7 +26,7 @@ if ($qSales) {
     $qSales->close();
 }
 
-// Orders today (all orders placed today)
+   
 $qOrders = $conn->prepare("
     SELECT COUNT(*) FROM orders WHERE DATE(date_ordered) = CURDATE()
 ");
@@ -37,7 +37,7 @@ if ($qOrders) {
     $qOrders->close();
 }
 
-// Expenses today (created today)
+   
 $qExp = $conn->prepare("
     SELECT COALESCE(SUM(amount),0) FROM expenses WHERE DATE(created_at) = CURDATE()
 ");
@@ -48,10 +48,10 @@ if ($qExp) {
     $qExp->close();
 }
 
-// Net profit today
+   
 $netProfitToday = $salesToday - $expensesToday;
 
-// Total users
+   
 $qUsers = $conn->prepare("SELECT COUNT(*) FROM accounts");
 if ($qUsers) {
     $qUsers->execute();
@@ -60,7 +60,7 @@ if ($qUsers) {
     $qUsers->close();
 }
 
-// Total products (active)
+   
 $qProd = $conn->prepare("SELECT COUNT(*) FROM products WHERE is_active = 1");
 if ($qProd) {
     $qProd->execute();
@@ -69,7 +69,7 @@ if ($qProd) {
     $qProd->close();
 }
 
-// Low stock alerts (stock_level < 5 and active)
+   
 $qLow = $conn->prepare("SELECT COUNT(*) FROM products WHERE is_active=1 AND stock_level < 5");
 if ($qLow) {
     $qLow->execute();
@@ -78,7 +78,7 @@ if ($qLow) {
     $qLow->close();
 }
 
-// Pending returns (requested or approved awaiting processing)
+   
 $qRet = $conn->prepare("SELECT COUNT(*) FROM order_return WHERE return_status IN ('requested','approved')");
 if ($qRet) {
     $qRet->execute();
@@ -87,7 +87,7 @@ if ($qRet) {
     $qRet->close();
 }
 
-// Simple formatter
+   
 $fmtMoney = function($v){ return '₱' . number_format((float)$v, 2, '.', ','); };
 ?>
 <html lang="en">
@@ -111,7 +111,7 @@ $fmtMoney = function($v){ return '₱' . number_format((float)$v, 2, '.', ','); 
     
 <?php include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php'); ?>
 
-        <div class="flex-grow-1 p-3"> <!-- other column -->
+        <div class="flex-grow-1 p-3">    
             <div class="container-fluid">
                 <h3 class="mb-4 d-flex align-items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-speedometer mt-1" viewBox="0 0 16 16">
@@ -196,7 +196,7 @@ $fmtMoney = function($v){ return '₱' . number_format((float)$v, 2, '.', ','); 
                     </div>
                 </div>
 
-                <!-- Shortcuts -->
+                   
                 <div class="card mb-4 quick-actions">
                     <div class="card-header d-flex align-items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-lightning-charge">

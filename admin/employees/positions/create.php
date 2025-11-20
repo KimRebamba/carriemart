@@ -12,12 +12,12 @@ $monthly_rate_raw = trim($_POST['monthly_rate'] ?? '');
 
 $errors = [];
 
-// Validate name
+   
 if ($position_name === '') {
     $errors[] = 'name_required';
 }
 
-// Validate rate (required, numeric, >= 0)
+   
 if ($monthly_rate_raw === '') {
     $errors[] = 'rate_required';
 }
@@ -27,7 +27,7 @@ if ($monthly_rate_raw !== '' && (!is_numeric($rate_clean) || (float)$rate_clean 
 }
 $monthly_rate = ($monthly_rate_raw === '' ? 0.00 : (float)$rate_clean);
 
-// Duplicate name check
+   
 if (!in_array('name_required', $errors, true)) {
     $dup = $conn->prepare("SELECT position_id FROM positions WHERE position_name = ? LIMIT 1");
     if ($dup) {
@@ -48,7 +48,7 @@ if (!empty($errors)) {
     exit;
 }
 
-// Insert position
+   
 $stmt = $conn->prepare("INSERT INTO positions (position_name, monthly_rate) VALUES (?, ?)");
 if (!$stmt) {
     header('Location: position-form.php?error=server');

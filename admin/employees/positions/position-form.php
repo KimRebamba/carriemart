@@ -33,7 +33,7 @@ $isEdit = ($id > 0 && $found);
 $formAction = $isEdit ? 'update.php' : 'create.php';
 $pageTitle = $isEdit ? 'Edit Position' : 'Add Position';
 
-// Collect error codes from redirects (comma-separated supported)
+   
 $errors = [];
 if (isset($_GET['error'])) {
     $codes = explode(',', $_GET['error']);

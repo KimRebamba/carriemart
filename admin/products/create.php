@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $errors = [];
 
-// Gather inputs
+   
 $product_name       = isset($_POST['product_name']) ? trim($_POST['product_name']) : '';
 $model              = isset($_POST['model']) ? trim($_POST['model']) : '';
 $brand_id_raw       = isset($_POST['brand_id']) ? trim($_POST['brand_id']) : '';
@@ -24,57 +24,57 @@ $is_active_raw      = isset($_POST['is_active']) ? trim($_POST['is_active']) : '
 $description        = isset($_POST['description']) ? trim($_POST['description']) : '';
 $specifications     = isset($_POST['specifications']) ? trim($_POST['specifications']) : '';
 
-// Basic validations
+   
 if ($product_name === '') {
     $errors[] = 'name_required';
 }
 
-// Money cleaners
+   
 $moneyClean = function($v) {
     $v = str_replace(['₱', ',', ' '], '', $v);
     return $v;
 };
 
-// Retail price
+   
 $retail_price_clean = $moneyClean($retail_price_raw);
 if ($retail_price_clean === '' || !is_numeric($retail_price_clean) || (float)$retail_price_clean < 0) {
     $errors[] = 'price_invalid';
 }
 $retail_price = (float)$retail_price_clean;
 
-// Cost price
+   
 $cost_price_clean = $moneyClean($cost_price_raw);
 if ($cost_price_clean === '' || !is_numeric($cost_price_clean) || (float)$cost_price_clean < 0) {
     $errors[] = 'cost_invalid';
 }
 $cost_price = (float)$cost_price_clean;
 
-// Stock level
+   
 if ($stock_level_raw === '' || (!ctype_digit($stock_level_raw) && !(strlen($stock_level_raw) && $stock_level_raw[0] === '0'))) {
     $errors[] = 'stock_invalid';
 }
 $stock_level = (int)$stock_level_raw;
 if ($stock_level < 0) $errors[] = 'stock_invalid';
 
-// Condition
+   
 $allowedConditions = ['new','used','refurbished'];
 if (!in_array($product_condition, $allowedConditions, true)) {
     $errors[] = 'condition_invalid';
 }
 
-// Warranty
+   
 if ($warranty_raw === '' || !ctype_digit($warranty_raw)) {
     $errors[] = 'warranty_invalid';
 }
 $warranty_months = (int)$warranty_raw;
 
-// Status
+   
 if (!in_array($is_active_raw, ['0','1'], true)) {
     $errors[] = 'status_invalid';
 }
 $is_active = ($is_active_raw === '1') ? 1 : 0;
 
-// Foreign keys: brand/category/supplier
+   
 $brand_id = null;
 if ($brand_id_raw !== '') {
     if (!ctype_digit($brand_id_raw)) {
@@ -138,7 +138,7 @@ if ($supplier_id_raw !== '') {
     }
 }
 
-// Duplicate check
+   
 $dup = $conn->prepare("SELECT product_id FROM products WHERE product_name = ? AND COALESCE(model,'') = COALESCE(?, '') LIMIT 1");
 if (!$dup) {
     error_log('Failed to prepare duplicate check query: ' . $conn->error);
@@ -151,7 +151,7 @@ if (!$dup) {
     $dup->close();
 }
 
-// Photos validation
+   
 $maxFiles = 10;
 $maxSize  = 5 * 1024 * 1024;
 $allowedMime = ['image/jpeg','image/png','image/gif'];
@@ -184,13 +184,13 @@ if (isset($_FILES['photos_new']) && is_array($_FILES['photos_new']['name'])) {
     }
 }
 
-// Stop on errors
+   
 if (!empty($errors)) {
     header('Location: product-form.php?error=' . implode(',', array_values(array_unique($errors))));
     exit;
 }
 
-// Normalize nullable strings
+   
 $modelParam       = ($model !== '' ? $model : null);
 $descriptionParam = ($description !== '' ? $description : null);
 $specsParam       = ($specifications !== '' ? $specifications : null);
@@ -198,7 +198,7 @@ $specsParam       = ($specifications !== '' ? $specifications : null);
 $conn->begin_transaction();
 
 try {
-    // Insert product
+      
     $stmt = $conn->prepare("INSERT INTO products
         (product_name, brand_id, model, category_id, retail_price, cost_price, supplier_id, description, specifications, product_condition, warranty_months, is_active, stock_level)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -229,7 +229,7 @@ try {
     $newId = $stmt->insert_id;
     $stmt->close();
 
-    // Insert automatic expense record for initial inventory purchase
+      
     if ($stock_level > 0 && $cost_price > 0) {
         $expType    = 'inventory_purchase';
         $expDesc    = 'Initial stock for product #' . $newId . ': ' . $product_name;
@@ -246,7 +246,7 @@ try {
         $expStmt->close();
     }
 
-    // Handle photo uploads
+      
     $uploadedPaths = [];
     if (!empty($photos)) {
         $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/carriemart/uploads/product_photos';

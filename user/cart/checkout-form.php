@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) 
 }
 $userId = (int)$_SESSION['user_id'];
 
-// Ensure cart
+   
 $cartId = null;
 $sc = $conn->prepare("SELECT cart_id FROM cart WHERE user_id = ?");
 $sc->bind_param('i', $userId);
@@ -23,7 +23,7 @@ if ($cartId === null) {
     exit;
 }
 
-// Selected product ids (optional). If none, use all cart items.
+   
 $selected = [];
 if (isset($_POST['sel']) && is_array($_POST['sel'])) {
     foreach ($_POST['sel'] as $raw) if (ctype_digit((string)$raw)) $selected[] = (int)$raw;
@@ -32,7 +32,7 @@ if (isset($_POST['sel']) && is_array($_POST['sel'])) {
     foreach ($parts as $raw) if (ctype_digit($raw)) $selected[] = (int)$raw;
 }
 
-// Build WHERE condition
+   
 $whereExtra = '';
 $params = [$userId];
 $types = 'i';
@@ -86,12 +86,12 @@ if ($stmt) {
     $stmt->close();
 }
 
-$deliveryFee = 50.00; // Flat rate for demo purposes
-// Voucher redeem logic
+$deliveryFee = 50.00;   
+   
 $promoCode = '';
 $discount = 0.00;
 
-// Read voucher and discount from GET if present
+   
 if (isset($_GET['voucher'])) {
     $promoCode = $_GET['voucher'];
 }
@@ -99,13 +99,13 @@ if (isset($_GET['discount']) && is_numeric($_GET['discount'])) {
     $discount = (float)$_GET['discount'];
 }
 
-// Calculate total
+   
 $total = $subtotal + $deliveryFee - $discount;
 
 function peso($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
 $countBadge = count($items);
 
-// Accept and show error/status codes coming from cart.php or checkout.php
+   
 function cm_map_error_checkout($code) {
     if (strpos($code, 'stock_') === 0) return 'Insufficient stock for product #' . substr($code, 6) . '.';
     if (strpos($code, 'not_found_') === 0) return 'Product not found #' . substr($code, 10) . '.';
@@ -127,7 +127,7 @@ function cm_map_status_checkout($code) {
         case 'qty_set': return 'Quantity set.';
         case 'removed': return 'Item removed from cart.';
         case 'deleted': return 'Selected items removed from cart.';
-        // Note: successful orders redirect to cart.php, but we still map just in case
+          
         case 'order_placed': return 'Order placed successfully.';
         default: return '';
     }

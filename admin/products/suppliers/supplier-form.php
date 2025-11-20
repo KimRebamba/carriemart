@@ -6,12 +6,12 @@ if (!$conn) {
     die('Database connection failed.');
 }
 
-// Inputs
+   
 $id_raw = isset($_GET['id']) ? trim($_GET['id']) : '';
 $supplier_id = ctype_digit($id_raw) ? (int)$id_raw : 0;
 $isEdit = $supplier_id > 0;
 
-// Defaults
+   
 $supplier = [
     'supplier_id'    => '',
     'supplier_name'  => '',
@@ -23,7 +23,7 @@ $supplier = [
     'created_at'     => ''
 ];
 
-// Load existing
+   
 if ($isEdit) {
     $stmt = $conn->prepare("SELECT supplier_id, supplier_name, contact_person, contact_number, email, address, is_active, created_at FROM suppliers WHERE supplier_id = ?");
     if (!$stmt) {
@@ -50,10 +50,10 @@ if ($isEdit) {
     $stmt->close();
 }
 
-// Determine action
+   
 $formAction = $isEdit ? 'update.php' : 'create.php';
 
-// Error codes mapping (from create/update pages)
+   
 $errors = [];
 if (isset($_GET['error'])) {
     $codes = explode(',', $_GET['error']);
@@ -70,7 +70,7 @@ if (isset($_GET['error'])) {
     }
 }
 
-// Success status
+   
 $success = false;
 $successText = '';
 if (isset($_GET['status'])) {
@@ -83,7 +83,7 @@ if (isset($_GET['status'])) {
     }
 }
 
-// Helper
+   
 $sel = function($a, $b){ return ((string)$a === (string)$b) ? 'selected' : ''; };
 ?>
 <!DOCTYPE html>

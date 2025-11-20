@@ -8,7 +8,7 @@ if ($id <= 0) {
     exit;
 }
 
-// Load product with related names
+   
 $sql = "SELECT 
             p.product_id, p.product_name, p.brand_id, b.brand_name,
             p.model, p.category_id, c.category_name,
@@ -62,7 +62,7 @@ $product = [
     'created_at' => $created_at
 ];
 
-// Load photos
+   
 $product_photos = [];
 $ps = $conn->prepare("SELECT product_photo_id, photo_url, is_primary, sort_order FROM product_photos WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC, product_photo_id ASC");
 if ($ps) {
@@ -137,7 +137,7 @@ if ($ps) {
                     <h4 class="mb-3">View Product</h4>
 
                     <form>
-                        <!-- Product IDs & timestamps (read-only) -->
+                           
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="form-label">Product ID</label>
@@ -151,7 +151,7 @@ if ($ps) {
 
                         <hr class="my-4">
 
-                        <!-- Core product fields (read-only) -->
+                           
                         <div class="row g-3">
                             <div class="col-md-8">
                                 <label class="form-label">Product name</label>
@@ -211,7 +211,7 @@ if ($ps) {
                                 <textarea class="form-control" rows="4" disabled><?= ($product['specifications'] ?? '') ?></textarea>
                             </div>
 
-                            <!-- Product photos (read-only) -->
+                               
                             <?php $product_photos = $product_photos ?? []; ?>
                             <div class="col-12">
                                 <label class="form-label d-block">Product photos</label>

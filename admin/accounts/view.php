@@ -95,7 +95,7 @@ $stmt->close();
                     <h4 class="mb-3">View Account</h4>
 
                     <form method="post" enctype="multipart/form-data">
-                        <!-- IDs & timestamps -->
+                           
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="form-label">User ID</label>
@@ -113,7 +113,7 @@ $stmt->close();
 
                         <hr class="my-4">
 
-                        <!-- Name -->
+                           
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <label for="first_name" class="form-label">First name</label>
@@ -128,7 +128,7 @@ $stmt->close();
                             </div>
                         </div>
 
-                        <!-- Username / Email -->
+                           
                         <div class="row g-3 mt-0">
                             <div class="col-12">
                                 <label for="username" class="form-label">Username</label>
@@ -142,13 +142,13 @@ $stmt->close();
 
                             <div class="col-12">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email"
+                                <input type="text" class="form-control" id="email" name="email"
                        placeholder="you@example.com"
                        value="<?= ($account['email'] ?? '') ?>" readonly>
                             </div>
                         </div>
 
-                        <!-- Password -->
+                           
                         <div class="row g-3 mt-0">
                             <div class="col-12">
                                 <label for="password" class="form-label">Password</label>
@@ -157,7 +157,7 @@ $stmt->close();
                             </div>
                         </div>
 
-                        <!-- Contact & Address -->
+                           
                         <div class="row g-3 mt-0">
                             <div class="col-12">
                                 <label for="address" class="form-label">Address</label>
@@ -174,7 +174,7 @@ $stmt->close();
                             </div>
                         </div>
 
-                        <!-- Role & Status -->
+                           
                         <div class="row g-3 mt-0">
                             <div class="col-md-6">
                                 <label for="role" class="form-label">Role</label>
@@ -192,7 +192,7 @@ $stmt->close();
                             </div>
                         </div>
 
-                        <!-- Profile picture -->
+                           
                         <div class="mb-4 mt-4">
                             <label class="form-label d-block">Profile picture</label>
                             <div class="d-flex align-items-center gap-3">

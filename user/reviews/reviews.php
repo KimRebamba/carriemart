@@ -3,7 +3,7 @@ session_start();
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 
-// Get filters from URL parameters
+   
 $minRating = isset($_GET['min_rating']) ? (int)$_GET['min_rating'] : 0;
 $productSearch = isset($_GET['product_search']) ? $_GET['product_search'] : '';
 $brandSearch = isset($_GET['brand_search']) ? $_GET['brand_search'] : '';
@@ -12,7 +12,7 @@ $dateTo = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 $hasText = isset($_GET['has_text']) ? $_GET['has_text'] : '';
 $sortBy = isset($_GET['sort']) ? $_GET['sort'] : 'recent';
 
-// Build SQL query
+   
 $sql = "SELECT 
     pr.review_id,
     pr.product_order_id,
@@ -32,7 +32,7 @@ WHERE pr.user_id = ?";
 $params = [$_SESSION['user_id']];
 $types = "i";
 
-// Apply filters
+   
 if ($minRating > 0) {
     $sql .= " AND pr.rating >= ?";
     $params[] = $minRating;
@@ -69,7 +69,7 @@ if ($hasText === 'yes') {
     $sql .= " AND (pr.review_text IS NULL OR pr.review_text = '')";
 }
 
-// Apply sorting
+   
 switch ($sortBy) {
     case 'recent':
         $sql .= " ORDER BY pr.created_at DESC";
@@ -90,7 +90,7 @@ switch ($sortBy) {
         $sql .= " ORDER BY pr.created_at DESC";
 }
 
-// Execute query
+   
 $stmt = $conn->prepare($sql);
 $stmt->bind_param($types, ...$params);
 $stmt->execute();
@@ -110,7 +110,7 @@ $reviewCount = count($reviews);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
-/* Back line */
+   
 .back-line {
     display: flex; align-items: center; gap: .5rem;
     padding: .5rem .75rem; border-bottom: 1px solid var(--bs-border-color);
@@ -119,7 +119,7 @@ $reviewCount = count($reviews);
 .back-line:hover { background-color: rgba(var(--bs-primary-rgb), .06); text-decoration: none; }
 .back-line .icon { width: 20px; height: 20px; opacity: .9; }
 
-/* Orders layout reused for reviews */
+   
 .order-list { display: grid; grid-template-columns: 1fr; gap: 1rem; }
 .order-card { background: #fff; border-radius: .5rem; border:1px solid transparent; transition:border-color .15s ease; }
 .order-card:hover { border-color: rgba(0,0,0,.2); }
@@ -131,14 +131,14 @@ $reviewCount = count($reviews);
 }
 .order-id { font-weight: 600; }
 .order-date { color: var(--bs-secondary-color); font-size: .875rem; }
-/* Actions beside order number */
+   
 .order-left { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
 .order-actions { display:flex; gap:.5rem; flex-wrap:wrap; }
 .order-actions .btn-sm { padding:.25rem .5rem; }
 
 .order-grid {
     display: grid;
-    grid-template-columns: 1fr; /* no right-side actions column */
+    grid-template-columns: 1fr;    
     gap: 1rem;
     padding: 1rem;
 }
@@ -164,7 +164,7 @@ $reviewCount = count($reviews);
 <body>
 <?php include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/third-header.php'); ?>
 
-<!-- Go Back line -->
+   
 <div class="container mb-3">
     <a href="#" class="back-line rounded-2" onclick="history.back(); return false;">
         <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
@@ -174,7 +174,7 @@ $reviewCount = count($reviews);
     </a>
 </div>
 
-<!-- Filters toolbar -->
+   
 <div class="container mb-3">
     <div class="d-flex align-items-center justify-content-start">
         <div class="d-flex align-items-center gap-2">
@@ -199,7 +199,7 @@ $reviewCount = count($reviews);
     </div>
 </div>
 
-<!-- Offcanvas: Filters -->
+   
 <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Reviews</h5>
@@ -251,7 +251,7 @@ $reviewCount = count($reviews);
     <?php if ($reviewCount > 0): ?>
     <div class="order-list">
         <?php foreach ($reviews as $review): ?>
-        <!-- Review for Order #<?php echo $review['order_id']; ?> -->
+           
         <div class="order-card">
             <div class="order-header">
                 <div class="order-left">

@@ -17,7 +17,7 @@ if ($order_return_id <= 0) {
     exit;
 }
 
-// Load existing record
+   
 $sel = $conn->prepare("SELECT cond, return_status, refund_amount, processed_at FROM order_return WHERE order_return_id = ?");
 if (!$sel) {
     header('Location: return-form.php?id='.$order_return_id.'&error=server');
@@ -35,7 +35,7 @@ $sel->close();
 
 $errors = [];
 
-// Enumerations
+   
 $allowedCond = ['new','opened','damaged','other'];
 $allowedStatus = ['requested','approved','rejected','processed'];
 
@@ -46,7 +46,7 @@ if (!in_array($return_status, $allowedStatus, true)) {
     $errors[] = 'status_invalid';
 }
 
-// Refund amount
+   
 $refund_clean = str_replace(['₱',',',' '], '', $refund_raw);
 if ($refund_clean === '') $refund_clean = '0';
 if (!is_numeric($refund_clean) || (float)$refund_clean < 0) {
@@ -54,7 +54,7 @@ if (!is_numeric($refund_clean) || (float)$refund_clean < 0) {
 }
 $refund_amount = (float)$refund_clean;
 
-// Processed lock (no changes allowed once processed)
+   
 if ($existing_status === 'processed') {
     $changed = ($cond !== $existing_cond) ||
                ($return_status !== $existing_status) ||
@@ -69,13 +69,13 @@ if (!empty($errors)) {
     exit;
 }
 
-// Determine processed_at value
+   
 $processed_at_new = ($return_status === 'processed')
     ? ($existing_processed_at ? $existing_processed_at : date('Y-m-d H:i:s'))
     : '';
 
 if ($existing_status === 'processed') {
-    // No update (locked); just redirect success
+      
     header('Location: return-form.php?id='.$order_return_id.'&status=updated');
     exit;
 }

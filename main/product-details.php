@@ -10,7 +10,7 @@ if ($product_id <= 0) {
     exit;
 }
 
-// Fetch product core info
+   
 $sql = "
 SELECT
   p.product_id, p.product_name, p.model, p.retail_price, p.cost_price,
@@ -44,7 +44,7 @@ if (!$stmt->fetch()) {
 }
 $stmt->close();
 
-// Photos (primary + gallery)
+   
 $photos = [];
 $ph = $conn->prepare("SELECT photo_url, is_primary, sort_order FROM product_photos WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC, product_photo_id ASC");
 if ($ph) {
@@ -59,7 +59,7 @@ if ($ph) {
 $defaultImg = '/carriemart/assets/default-product.png';
 $heroImg = !empty($photos) ? $photos[0]['url'] : $defaultImg;
 
-// Ratings summary (only verified reviews)
+   
 $avg_rating = 0.0; $rating_count = 0;
 $rt = $conn->prepare("
     SELECT COALESCE(AVG(pr.rating),0), COALESCE(COUNT(pr.review_id),0)
@@ -77,7 +77,7 @@ if ($rt) {
 $avg_rating = (float)$avg_rating;
 $rating_display = $rating_count > 0 ? number_format($avg_rating, 1) : '—';
 
-// Reviews list (pagination)
+   
 $limit = 10;
 $page_raw = isset($_GET['page']) ? trim($_GET['page']) : '1';
 $page = ctype_digit($page_raw) && (int)$page_raw > 0 ? (int)$page_raw : 1;
@@ -101,7 +101,8 @@ if ($rc) {
 $reviews = [];
 $rv = $conn->prepare("
     SELECT pr.review_id, pr.rating, pr.review_title, pr.review_text, pr.created_at,
-           COALESCE(CONCAT(TRIM(a.first_name),' ',TRIM(a.last_name)), a.username) AS uname
+           COALESCE(CONCAT(TRIM(a.first_name),' ',TRIM(a.last_name)), a.username) AS uname,
+           a.profile_photo_url
     FROM product_review pr
     JOIN product_order po ON po.product_order_id = pr.product_order_id
     LEFT JOIN accounts a ON a.user_id = pr.user_id
@@ -112,7 +113,7 @@ $rv = $conn->prepare("
 if ($rv) {
     $rv->bind_param('iii', $product_id, $limit, $offset);
     $rv->execute();
-    $rv->bind_result($rid, $rrating, $rtitle, $rtext, $rcreated, $uname);
+    $rv->bind_result($rid, $rrating, $rtitle, $rtext, $rcreated, $uname, $profile_photo_url);
     while ($rv->fetch()) {
         $reviews[] = [
             'review_id' => $rid,
@@ -120,7 +121,8 @@ if ($rv) {
             'review_title' => $rtitle,
             'review_text' => $rtext,
             'created_at' => $rcreated,
-            'user' => $uname ? $uname : 'Anonymous'
+            'user' => $uname ? $uname : 'Anonymous',
+            'profile_photo_url' => $profile_photo_url
         ];
     }
     $rv->close();
@@ -128,7 +130,7 @@ if ($rv) {
 $hasPrev = $page > 1;
 $hasNext = ($offset + $limit) < $totalReviews;
 
-// Helpers
+   
 function peso($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
 $stockBadgeClass = $stock_level > 10 ? 'text-bg-success' : ($stock_level > 0 ? 'text-bg-warning' : 'text-bg-danger');
 ?>
@@ -192,7 +194,7 @@ $stockBadgeClass = $stock_level > 10 ? 'text-bg-success' : ($stock_level > 0 ? '
 <body>
     <?php include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/secondary-header.php'); ?>
 
-    <!-- Go Back line -->
+       
     <div class="container mb-3">
         <a href="#" class="back-line rounded-2" onclick="history.back(); return false;">
             <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -202,7 +204,7 @@ $stockBadgeClass = $stock_level > 10 ? 'text-bg-success' : ($stock_level > 0 ? '
         </a>
     </div>
 
-    <!-- SECTION 1 -->
+       
     <section class="container section">
         <div class="row section1-row align-items-start">
             <div class="col-12 col-lg-6">
@@ -217,7 +219,7 @@ $stockBadgeClass = $stock_level > 10 ? 'text-bg-success' : ($stock_level > 0 ? '
                             echo '<figure class="thumb m-0"><img src="'.$u.'" alt="Photo '.$i.'"></figure>';
                         }
                     } else {
-                        // Fallback thumbs
+                          
                         echo '<figure class="thumb m-0"><img src="'.$defaultImg.'" alt="Thumb"></figure>';
                         echo '<figure class="thumb m-0"><img src="'.$defaultImg.'" alt="Thumb"></figure>';
                         echo '<figure class="thumb m-0"><img src="'.$defaultImg.'" alt="Thumb"></figure>';
@@ -266,7 +268,7 @@ $stockBadgeClass = $stock_level > 10 ? 'text-bg-success' : ($stock_level > 0 ? '
 
     <div class="section-divider"><hr></div>
 
-    <!-- SECTION 2 -->
+       
     <section class="container section">
         <div class="row g-4 section-2-row">
             <div class="col-12 col-lg-6">
@@ -380,7 +382,7 @@ $stockBadgeClass = $stock_level > 10 ? 'text-bg-success' : ($stock_level > 0 ? '
 
     <div class="section-divider"><hr></div>
 
-    <!-- SECTION 3 -->
+       
     <section class="container section rating-reviews" id="rating-reviews">
         <div class="row g-4">
             <div class="col-12 col-lg-4">
@@ -394,14 +396,16 @@ $stockBadgeClass = $stock_level > 10 ? 'text-bg-success' : ($stock_level > 0 ? '
                 <div class="text-muted"><?php echo $rating_count; ?> reviews</div>
             </div>
 
-            <!-- List + pagination -->
+               
             <div class="col-12 col-lg-8">
                 <div class="list-group mb-3">
                     <?php if (empty($reviews)): ?>
                         <div class="list-group-item py-4 text-muted text-center">No reviews yet.</div>
-                    <?php else: foreach ($reviews as $rvw): ?>
+                    <?php else: foreach ($reviews as $rvw): 
+                        $avatarUrl = !empty($rvw['profile_photo_url']) ? $rvw['profile_photo_url'] : '/carriemart/assets/person-circle.svg';
+                    ?>
                         <div class="list-group-item d-flex gap-3 py-3">
-                            <img src="https://picsum.photos/seed/u<?php echo $rvw['review_id']; ?>/64/64" class="rounded-circle flex-shrink-0" width="32" height="32" alt="">
+                            <img src="<?php echo $avatarUrl; ?>" class="rounded-circle flex-shrink-0" width="32" height="32" alt="" style="object-fit: cover;">
                             <div class="d-flex w-100 justify-content-between">
                                 <div>
                                     <h6 class="mb-1"><?php echo $rvw['review_title'] ? $rvw['review_title'] : 'Review'; ?></h6>

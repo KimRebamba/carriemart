@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $errors = [];
 
-// Inputs
+   
 $product_id_raw    = isset($_POST['product_id']) ? trim($_POST['product_id']) : '';
 $product_id        = ctype_digit($product_id_raw) ? (int)$product_id_raw : 0;
 
@@ -18,7 +18,7 @@ if ($product_id <= 0) {
     exit;
 }
 
-// Ensure product exists
+   
 $exist = $conn->prepare("SELECT product_id FROM products WHERE product_id = ?");
 if (!$exist) {
     header('Location: product-form.php?id='.$product_id.'&error=server');
@@ -34,7 +34,7 @@ if ($exist->num_rows === 0) {
 }
 $exist->close();
 
-// Gather editable fields
+   
 $product_name       = isset($_POST['product_name']) ? trim($_POST['product_name']) : '';
 $model              = isset($_POST['model']) ? trim($_POST['model']) : '';
 $brand_id_raw       = isset($_POST['brand_id']) ? trim($_POST['brand_id']) : '';
@@ -49,12 +49,12 @@ $is_active_raw      = isset($_POST['is_active']) ? trim($_POST['is_active']) : '
 $description        = isset($_POST['description']) ? trim($_POST['description']) : '';
 $specifications     = isset($_POST['specifications']) ? trim($_POST['specifications']) : '';
 
-// Validate core fields
+   
 if ($product_name === '') {
     $errors[] = 'name_required';
 }
 
-// Money cleaner
+   
 $moneyClean = function($v) {
     return str_replace(['₱', ',', ' '], '', $v);
 };
@@ -71,32 +71,32 @@ if ($cost_price_clean === '' || !is_numeric($cost_price_clean) || (float)$cost_p
 }
 $cost_price = (float)$cost_price_clean;
 
-// stock
+   
 if ($stock_level_raw === '' || (!ctype_digit($stock_level_raw) && !(strlen($stock_level_raw) && $stock_level_raw[0] === '0'))) {
     $errors[] = 'stock_invalid';
 }
 $stock_level = (int)$stock_level_raw;
 if ($stock_level < 0) $errors[] = 'stock_invalid';
 
-// condition
+   
 $allowedConditions = ['new','used','refurbished'];
 if (!in_array($product_condition, $allowedConditions, true)) {
     $errors[] = 'condition_invalid';
 }
 
-// warranty
+   
 if ($warranty_raw === '' || !ctype_digit($warranty_raw)) {
     $errors[] = 'warranty_invalid';
 }
 $warranty_months = (int)$warranty_raw;
 
-// status
+   
 if (!in_array($is_active_raw, ['0','1'], true)) {
     $errors[] = 'status_invalid';
 }
 $is_active = ($is_active_raw === '1') ? 1 : 0;
 
-// Optional FKs
+   
 $brand_id = null;
 if ($brand_id_raw !== '') {
     if (!ctype_digit($brand_id_raw)) {
@@ -157,7 +157,7 @@ if ($supplier_id_raw !== '') {
     }
 }
 
-// Duplicate check (exclude this product)
+   
 $dup = $conn->prepare("SELECT product_id FROM products WHERE product_name = ? AND COALESCE(model,'') = COALESCE(?, '') AND product_id <> ? LIMIT 1");
 if ($dup) {
     $dup->bind_param('ssi', $product_name, $model, $product_id);
@@ -169,9 +169,9 @@ if ($dup) {
     $errors[] = 'server';
 }
 
-// Photos: new uploads validation
+   
 $maxFiles = 10;
-$maxSize  = 5 * 1024 * 1024; // 5MB
+$maxSize  = 5 * 1024 * 1024;   
 $allowedMime = ['image/jpeg','image/png','image/gif'];
 $newPhotos = [];
 
@@ -208,12 +208,12 @@ if (!empty($errors)) {
     exit;
 }
 
-// Normalize nullable strings
+   
 $modelParam         = ($model !== '' ? $model : null);
 $descriptionParam   = ($description !== '' ? $description : null);
 $specsParam         = ($specifications !== '' ? $specifications : null);
 
-// Existing photos updates
+   
 $primary_photo_id_raw = isset($_POST['primary_photo_id']) ? trim($_POST['primary_photo_id']) : '';
 $primary_photo_id = ctype_digit($primary_photo_id_raw) ? (int)$primary_photo_id_raw : 0;
 
@@ -224,7 +224,7 @@ $uploadedFsPaths = [];
 $conn->begin_transaction();
 
 try {
-    // Update product fields
+      
     $sql = "UPDATE products SET
                 product_name = ?,
                 brand_id = ?,
@@ -243,7 +243,7 @@ try {
     $stmt = $conn->prepare($sql);
     if (!$stmt) throw new Exception('server');
 
-    // Exactly 14 placeholders => 14 types (s i s i d d i s s s i i i i)
+      
     $types = 'sisiddisssiiii';
     $stmt->bind_param(
         $types,
@@ -268,13 +268,13 @@ try {
     }
     $stmt->close();
 
-    // Handle existing photos (remove / sort)
+      
     if (!empty($photos_existing)) {
         foreach ($photos_existing as $ppidStr => $data) {
             if (!ctype_digit((string)$ppidStr)) continue;
             $ppid = (int)$ppidStr;
 
-            // Ensure photo belongs to product
+              
             $selP = $conn->prepare("SELECT photo_url FROM product_photos WHERE product_photo_id = ? AND product_id = ?");
             if (!$selP) throw new Exception('server');
             $selP->bind_param('ii', $ppid, $product_id);
@@ -287,7 +287,7 @@ try {
                 $sort_order = ctype_digit($sort_order_raw) ? (int)$sort_order_raw : 0;
 
                 if ($remove) {
-                    // delete row
+                      
                     $del = $conn->prepare("DELETE FROM product_photos WHERE product_photo_id = ? AND product_id = ?");
                     if (!$del) throw new Exception('server');
                     $del->bind_param('ii', $ppid, $product_id);
@@ -297,7 +297,7 @@ try {
                     }
                     $del->close();
 
-                    // delete file
+                      
                     if ($photo_url) {
                         $fs = $_SERVER['DOCUMENT_ROOT'] . $photo_url;
                         if (is_file($fs)) {
@@ -309,7 +309,7 @@ try {
                         $primary_photo_id = 0;
                     }
                 } else {
-                    // update sort order
+                      
                     $up = $conn->prepare("UPDATE product_photos SET sort_order = ? WHERE product_photo_id = ? AND product_id = ?");
                     if (!$up) throw new Exception('server');
                     $up->bind_param('iii', $sort_order, $ppid, $product_id);
@@ -325,7 +325,7 @@ try {
         }
     }
 
-    // After deletions/updates: check if selected primary exists
+      
     if ($primary_photo_id > 0) {
         $chkPrim = $conn->prepare("SELECT product_photo_id FROM product_photos WHERE product_photo_id = ? AND product_id = ?");
         if (!$chkPrim) throw new Exception('server');
@@ -338,7 +338,7 @@ try {
         $chkPrim->close();
     }
 
-    // Upload new photos
+      
     $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/carriemart/uploads/product_photos';
     if (!is_dir($uploadDir)) {
         if (!mkdir($uploadDir, 0775, true)) {
@@ -346,7 +346,7 @@ try {
         }
     }
 
-    // Determine next sort order start
+      
     $maxSort = 0;
     $qMax = $conn->prepare("SELECT COALESCE(MAX(sort_order), 0) FROM product_photos WHERE product_id = ?");
     if (!$qMax) throw new Exception('server');
@@ -383,7 +383,7 @@ try {
 
             $maxSort++;
 
-            // Check if any photo exists currently
+              
             $hasAny = 0;
             $qAny = $conn->prepare("SELECT 1 FROM product_photos WHERE product_id = ? LIMIT 1");
             if (!$qAny) {
@@ -413,7 +413,7 @@ try {
         $ins->close();
     }
 
-    // Ensure exactly one primary if photos exist
+      
     $clear = $conn->prepare("UPDATE product_photos SET is_primary = 0 WHERE product_id = ?");
     if (!$clear) throw new Exception('server');
     $clear->bind_param('i', $product_id);

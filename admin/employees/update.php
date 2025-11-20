@@ -24,7 +24,7 @@ if ($emp_id <= 0) {
     exit;
 }
 
-// Ensure employee exists
+   
 $exists = $conn->prepare("SELECT emp_id FROM employees WHERE emp_id = ?");
 if (!$exists) { header('Location: employee-form.php?id=' . $emp_id . '&error=server'); exit; }
 $exists->bind_param('i', $emp_id);
@@ -37,16 +37,16 @@ if ($exists->num_rows === 0) {
 }
 $exists->close();
 
-// Validate inputs (mirror employee-form error codes)
+   
 $errors = [];
 if ($first_name === '') $errors[] = 'first_name_required';
 if ($last_name === '')  $errors[] = 'last_name_required';
 if ($address === '')    $errors[] = 'address_required';
 
-// Email required + format
+   
 if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'invalid_email';
 
-// Phone required + PH mobile pattern 09XXXXXXXXX (11 digits)
+   
 if ($phone_number === '') {
     $errors[] = 'phone_required';
 } else {
@@ -54,16 +54,16 @@ if ($phone_number === '') {
     if (!preg_match('/^09\d{9}$/', $digitsPhone)) $errors[] = 'invalid_phone';
 }
 
-// Employment status enum
+   
 $allowedStatus = ['active','inactive','terminated','on_leave'];
 if (!in_array($employment_status, $allowedStatus, true)) $errors[] = 'employment_status_bad';
 
-// Hire date required (Y-m-d)
+   
 if ($hire_date === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $hire_date)) {
     $errors[] = 'hire_date_required';
 }
 
-// Optional birth date validate if present
+   
 if ($birth_date !== '') {
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $birth_date)) {
         $errors[] = 'birth_date_invalid';
@@ -72,11 +72,11 @@ if ($birth_date !== '') {
     }
 }
 
-// Gender enum or blank -> store NULL if blank
+   
 $allowedGender = ['male','female','other',''];
 if (!in_array($gender, $allowedGender, true)) $gender = '';
 
-// Validate position (optional). If invalid, set to 0 -> becomes NULL
+   
 if ($current_position_id > 0) {
     $pchk = $conn->prepare("SELECT position_id FROM positions WHERE position_id = ?");
     if ($pchk) {
@@ -92,7 +92,7 @@ if ($current_position_id > 0) {
     }
 }
 
-// Duplicate email check excluding this employee
+   
 if (!in_array('invalid_email', $errors, true)) {
     $dup = $conn->prepare("SELECT emp_id FROM employees WHERE email = ? AND emp_id <> ? LIMIT 1");
     if ($dup) {
@@ -111,7 +111,7 @@ if (!empty($errors)) {
     exit;
 }
 
-// Update (use NULLIF to store NULLs)
+   
 $sql = "UPDATE employees
         SET first_name = ?,
             last_name = ?,

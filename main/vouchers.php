@@ -3,7 +3,7 @@ session_start();
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 if (!$conn) { die('DB error'); }
 
-// Load active vouchers (schema: vouchers)
+   
 $vouchers = [];
 $st = $conn->prepare("
     SELECT voucher_code, percent_sale, min_purchase_amount, max_discount_amount, from_date, to_date, is_active
@@ -40,7 +40,7 @@ $voucher_count = count($vouchers);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
-/* Back line */
+   
         .back-line {
             display: flex;
             align-items: center;
@@ -58,7 +58,7 @@ $voucher_count = count($vouchers);
             width: 20px; height: 20px; opacity: .9;
         }
 
-         /* Grid */
+            
         .product-grid {
             display: grid;
             gap: 1.25rem;
@@ -67,7 +67,7 @@ $voucher_count = count($vouchers);
         @media (min-width: 768px) { .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         @media (min-width: 992px) { .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
-        /* Card */
+           
         .product-card {
             position: relative; 
             border: 1px solid transparent;
@@ -101,7 +101,7 @@ $voucher_count = count($vouchers);
 <body>
     <?php include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/secondary-header.php'); ?>
 
-    <!-- Go Back line -->
+       
     <div class="container mb-3">
         <a href="#" class="back-line rounded-2"
            onclick="history.back(); return false;">
@@ -118,11 +118,11 @@ $voucher_count = count($vouchers);
         </div>
     </div>
     
-    <!-- Vouchers grid -->
+       
     <div class="container pb-2">
         <div class="product-grid">
 
-            <!-- Voucher: SAVE10 -->
+               
             <?php foreach ($vouchers as $v): ?>
                 <div class="product-card">
                     <h6 class="mt-2 mb-1 fw-bold display-5"><?php echo $v['voucher_code']; ?></h6>
@@ -142,7 +142,7 @@ $voucher_count = count($vouchers);
         </div>
     </div>
 
-    <!-- Floating toast (use toast.js) -->
+       
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
       <button type="button" class="btn btn-primary d-none" id="liveToastBtn">Show live toast</button>
       <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
@@ -164,26 +164,26 @@ include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/footer.php');
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="toast.js"></script>
-    <!-- IMPORTANT: FOR TOAST NOTIFICATION // plus its complicated lol -->
+    <!-- IMPORTANT: FOR TOAST NOTIFICATION   
     <script>
       const toastBtn = document.getElementById('liveToastBtn');
       const toastEl = document.getElementById('liveToast');
       const toastBody = toastEl?.querySelector('.toast-body');
       const toastTitle = toastEl?.querySelector('.toast-header .me-auto');
       const toastTime = toastEl?.querySelector('.toast-header small');
-        // gets the card body. if clicked, function will run
+          
       async function copyVoucher(code) {
-        try { // clipboard API to copy text
+        try {   
           await navigator.clipboard.writeText(code);
         } catch (err) {
           const ta = document.createElement('textarea');
-          ta.value = code; //just in case it fails
+          ta.value = code;   
           document.body.appendChild(ta);
           ta.select();
           document.execCommand('copy');
           document.body.removeChild(ta); 
         }
-        // changes the toast content
+          
         if (toastBody) toastBody.textContent = `Copied voucher: ${code}`;
         if (toastTitle) toastTitle.textContent = 'Voucher Copied';
         if (toastTime) toastTime.textContent = 'Just now';

@@ -1,9 +1,9 @@
 <?php
-// filepath: c:\xampp_for_carriemart\htdocs\carriemart\admin\employees\index.php
+   
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// Inputs (GET)
+   
 $q           = isset($_GET['q']) ? trim($_GET['q']) : '';
 $status      = isset($_GET['status']) ? trim($_GET['status']) : '';
 $positionId  = isset($_GET['position_id']) ? (int)$_GET['position_id'] : 0;
@@ -12,7 +12,7 @@ $hireFrom    = isset($_GET['hire_from']) ? trim($_GET['hire_from']) : '';
 $hireTo      = isset($_GET['hire_to']) ? trim($_GET['hire_to']) : '';
 $sort        = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 
-// Fetch positions for filter dropdown
+   
 $positions = [];
 $ps = $conn->prepare("SELECT position_id, position_name FROM positions ORDER BY position_name ASC");
 if ($ps) {
@@ -22,7 +22,7 @@ if ($ps) {
     $ps->close();
 }
 
-// Build query
+   
 $sql = "SELECT e.emp_id, e.first_name, e.last_name, e.email, e.phone_number, e.employment_status,
                e.hire_date, e.created_at, e.gender, p.position_name
         FROM employees e
@@ -31,7 +31,7 @@ $sql = "SELECT e.emp_id, e.first_name, e.last_name, e.email, e.phone_number, e.e
 $types = '';
 $n = 0;
 
-// Search by name/email/phone/position
+   
 if ($q !== '') {
     $like = '%'.$q.'%';
     $sql .= " AND (CONCAT_WS(' ', e.first_name, e.last_name) LIKE ? OR e.email LIKE ? OR e.phone_number LIKE ? OR p.position_name LIKE ?)";
@@ -41,25 +41,25 @@ if ($q !== '') {
     $types .= 's'; $n++; ${"p$n"} = $like;
 }
 
-// Employment status filter
+   
 if ($status === 'active' || $status === 'inactive' || $status === 'terminated' || $status === 'on_leave') {
     $sql .= " AND e.employment_status = ?";
     $types .= 's'; $n++; ${"p$n"} = $status;
 }
 
-// Position filter
+   
 if ($positionId > 0) {
     $sql .= " AND e.current_position_id = ?";
     $types .= 'i'; $n++; ${"p$n"} = $positionId;
 }
 
-// Gender filter
+   
 if ($gender === 'male' || $gender === 'female' || $gender === 'other') {
     $sql .= " AND e.gender = ?";
     $types .= 's'; $n++; ${"p$n"} = $gender;
 }
 
-// Hire date range
+   
 if ($hireFrom !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $hireFrom)) {
     $sql .= " AND e.hire_date >= ?";
     $types .= 's'; $n++; ${"p$n"} = $hireFrom;
@@ -69,7 +69,7 @@ if ($hireTo !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $hireTo)) {
     $types .= 's'; $n++; ${"p$n"} = $hireTo;
 }
 
-// Sort
+   
 switch ($sort) {
     case 'hireDate':
         $sql .= " ORDER BY e.hire_date DESC, e.last_name ASC, e.first_name ASC";
@@ -86,7 +86,7 @@ switch ($sort) {
         break;
 }
 
-// Execute
+   
 $employees = [];
 $stmt = $conn->prepare($sql);
 if ($stmt) {
@@ -185,7 +185,7 @@ if ($stmt) {
                             Filters
                         </button>
 
-                        <!-- preserve filters on sort/search -->
+                           
                         <input type="hidden" name="status" value="<?php echo $status; ?>">
                         <input type="hidden" name="position_id" value="<?php echo $positionId; ?>">
                         <input type="hidden" name="gender" value="<?php echo $gender; ?>">
@@ -247,7 +247,7 @@ if ($stmt) {
             </div>
         </div>
 
-        <!-- Offcanvas: Filters (Employees) -->
+           
         <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Employees</h5>

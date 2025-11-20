@@ -34,7 +34,7 @@ $isEdit = ($id > 0) && $found;
 $formAction = $isEdit ? 'update.php' : 'create.php';
 $pageTitle = $isEdit ? 'Edit Account' : 'Add Account';
 
-// Add simple error messages (from create.php / update.php redirects)
+   
 $errors = [];
 if (isset($_GET['error'])) {
     $e = $_GET['error'];
@@ -115,7 +115,7 @@ if (isset($_GET['error'])) {
                     <?php endif; ?>
 
                     <form method="post" action="<?php echo $formAction; ?>" enctype="multipart/form-data">
-                        <!-- IDs & timestamps (read-only display) -->
+                           
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="form-label">User ID</label>
@@ -130,7 +130,7 @@ if (isset($_GET['error'])) {
 
                         <hr class="my-4">
 
-                        <!-- Name -->
+                           
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <label for="first_name" class="form-label">First name</label>
@@ -145,7 +145,7 @@ if (isset($_GET['error'])) {
                             </div>
                         </div>
 
-                        <!-- Username / Email -->
+                           
                         <div class="row g-3 mt-0">
                             <div class="col-12">
                                 <label for="username" class="form-label">Username</label>
@@ -165,7 +165,7 @@ if (isset($_GET['error'])) {
                             </div>
                         </div>
 
-                        <!-- Password -->
+                           
                         <div class="row g-3 mt-0">
                             <div class="col-12">
                                 <label for="password" class="form-label">Password</label>
@@ -177,7 +177,7 @@ if (isset($_GET['error'])) {
                             </div>
                         </div>
 
-                        <!-- Contact & Address -->
+                           
                         <div class="row g-3 mt-0">
                             <div class="col-12">
                                 <label for="address" class="form-label">Address</label>
@@ -194,7 +194,7 @@ if (isset($_GET['error'])) {
                             </div>
                         </div>
 
-                        <!-- Role & Status -->
+                           
                         <div class="row g-3 mt-0">
                             <div class="col-md-6">
                                 <label for="role" class="form-label">Role</label>
@@ -212,7 +212,7 @@ if (isset($_GET['error'])) {
                             </div>
                         </div>
 
-                        <!-- Profile picture -->
+                           
                         <div class="mb-4 mt-4">
                             <label class="form-label d-block">Profile picture</label>
                             <div class="d-flex align-items-center gap-3">
@@ -253,7 +253,7 @@ if (isset($_GET['error'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script>
-    // Simple preview for profile picture
+      
     const fileInput = document.getElementById('formFile');
     const avatarPreview = document.getElementById('avatarPreview');
     fileInput?.addEventListener('change', (e) => {

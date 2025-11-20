@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $errors = [];
 
-// Inputs
+   
 $supplier_name  = isset($_POST['supplier_name']) ? trim($_POST['supplier_name']) : '';
 $contact_person = isset($_POST['contact_person']) ? trim($_POST['contact_person']) : '';
 $contact_number = isset($_POST['contact_number']) ? trim($_POST['contact_number']) : '';
@@ -17,7 +17,7 @@ $email          = isset($_POST['email']) ? trim($_POST['email']) : '';
 $address        = isset($_POST['address']) ? trim($_POST['address']) : '';
 $is_active_raw  = isset($_POST['is_active']) ? trim($_POST['is_active']) : '1';
 
-// Validate
+   
 if ($supplier_name === '') $errors[] = 'name_required';
 if (!in_array($is_active_raw, ['0','1'], true)) $errors[] = 'status_invalid';
 $is_active = $is_active_raw === '1' ? 1 : 0;
@@ -28,7 +28,7 @@ if ($email !== '') {
     }
 }
 
-// Duplicate name check
+   
 $dup = $conn->prepare("SELECT supplier_id FROM suppliers WHERE supplier_name = ? LIMIT 1");
 if ($dup) {
     $dup->bind_param('s', $supplier_name);
@@ -40,13 +40,13 @@ if ($dup) {
     $errors[] = 'server';
 }
 
-// Bail on errors
+   
 if (!empty($errors)) {
     header('Location: supplier-form.php?error=' . implode(',', array_values(array_unique($errors))));
     exit;
 }
 
-// Insert
+   
 $conn->begin_transaction();
 try {
     $stmt = $conn->prepare("INSERT INTO suppliers (supplier_name, contact_person, contact_number, email, address, is_active) VALUES (?, ?, ?, ?, ?, ?)");

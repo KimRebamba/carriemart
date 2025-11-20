@@ -5,14 +5,14 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 
 if (!$conn) { die('DB error'); }
 
-// Require logged-in user
+   
 if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) {
     header('Location: /carriemart/main/products.php?error=login_required');
     exit;
 }
 $userId = (int)$_SESSION['user_id'];
 
-// Accept product id and qty from both products.php and product-details.php (POST or GET)
+   
 $pidRaw = '';
 $qtyRaw = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -32,7 +32,7 @@ if ($productId <= 0) {
     exit;
 }
 
-// Validate product availability
+   
 $stockLevel = 0;
 $isActive = 0;
 $chk = $conn->prepare("SELECT stock_level, is_active FROM products WHERE product_id = ?");
@@ -56,10 +56,10 @@ if ($stockLevel <= 0) {
     exit;
 }
 
-// Clamp requested qty to available stock
+   
 if ($qty > $stockLevel) $qty = (int)$stockLevel;
 
-// Ensure cart exists for user
+   
 $cartId = null;
 $sc = $conn->prepare("SELECT cart_id FROM cart WHERE user_id = ?");
 $sc->bind_param('i', $userId);
@@ -82,7 +82,7 @@ if ($cartId === null) {
     }
 }
 
-// Insert or update line, capping at stock level
+   
 $ins = $conn->prepare("
     INSERT INTO cart_product (cart_id, product_id, quantity)
     VALUES (?, ?, ?)
@@ -99,6 +99,6 @@ if ($ins) {
     $ins->close();
 }
 
-// Fallback
+   
 header('Location: /carriemart/main/products.php?error=server');
 exit;

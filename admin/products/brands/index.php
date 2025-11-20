@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// Inputs (GET)
+   
 $q           = isset($_GET['q']) ? trim($_GET['q']) : '';
 $sort        = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 $active      = isset($_GET['active']) ? trim($_GET['active']) : '';
@@ -17,7 +17,7 @@ $sql = "SELECT brand_id, brand_name, website, is_active, created_at
 $types = '';
 $params = [];
 
-// Free-text search (by ID, name, website)
+   
 if ($q !== '') {
     $like = '%'.$q.'%';
     $sql .= " AND (CAST(brand_id AS CHAR) LIKE ? OR brand_name LIKE ? OR website LIKE ?)";
@@ -25,28 +25,28 @@ if ($q !== '') {
     $params[] = $like; $params[] = $like; $params[] = $like;
 }
 
-// Name contains
+   
 if ($nameLike !== '') {
     $sql .= " AND brand_name LIKE ?";
     $types .= 's';
     $params[] = '%'.$nameLike.'%';
 }
 
-// Website contains
+   
 if ($siteLike !== '') {
     $sql .= " AND website LIKE ?";
     $types .= 's';
     $params[] = '%'.$siteLike.'%';
 }
 
-// Active filter
+   
 if ($active === '1') {
     $sql .= " AND is_active = 1";
 } elseif ($active === '0') {
     $sql .= " AND is_active = 0";
 }
 
-// Created date range (YYYY-MM-DD)
+   
 $validDate = function($d){ return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
 if ($createdFrom !== '' && $validDate($createdFrom)) {
     $sql .= " AND DATE(created_at) >= ?";
@@ -59,7 +59,7 @@ if ($createdTo !== '' && $validDate($createdTo)) {
     $params[] = $createdTo;
 }
 
-// Sorting
+   
 switch ($sort) {
     case 'oldest':
         $sql .= " ORDER BY created_at ASC, brand_id ASC";
@@ -79,7 +79,7 @@ switch ($sort) {
         break;
 }
 
-// Fetch brands
+   
 $brands = [];
 $stmt = $conn->prepare($sql);
 if ($stmt) {
@@ -174,7 +174,7 @@ function websiteLabel($url) {
                             <option value="nameZA" <?php if($sort==='nameZA') echo 'selected'; ?>>Name Z–A</option>
                             <option value="active" <?php if($sort==='active') echo 'selected'; ?>>Active first</option>
                         </select>
-                        <!-- preserve filters -->
+                           
                         <input type="hidden" name="active" value="<?php echo $active; ?>">
                         <input type="hidden" name="created_from" value="<?php echo $createdFrom; ?>">
                         <input type="hidden" name="created_to" value="<?php echo $createdTo; ?>">
@@ -235,7 +235,7 @@ function websiteLabel($url) {
             </div>
         </div>
 
-        <!-- Offcanvas: Filters (Brands) -->
+           
         <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Brands</h5>

@@ -1,7 +1,7 @@
-<!-- side panel -->
+   
 
-    <div class="d-flex"> <!-- DO NOT REMOVE - for flex items -->
-        <div class="flex-shrink-0 p-3 border" style="width:280px; min-height:100vh;"> <!-- side panel-->
+    <div class="d-flex">    
+        <div class="flex-shrink-0 p-3 border" style="width:280px; min-height:100vh;">    
             <a href="/carriemart/admin/index.php" class="d-flex align-items-start pb-3 mb-3 link-body-emphasis text-decoration-none border-bottom gap-2">
                 <img src="/carriemart/assets/Logo.svg" alt="logo icon" height="40">
                 <div class="d-flex flex-column lh-1">
@@ -11,7 +11,7 @@
             </a>
             <ul class="list-unstyled ps-0">
 
-                <!-- Home (link button) -->
+                   
                 <li class="mb-1">
                     <a class="btn btn-toggle d-flex w-100 align-items-center rounded border-0"
                        href="/carriemart/admin/index.php">
@@ -20,7 +20,7 @@
                     </a>
                 </li>
 
-                <!-- Accounts (link button) -->
+                   
                 <li class="mb-1">
                     <a class="btn btn-toggle d-flex w-100 align-items-center rounded border-0"
                        href="/carriemart/admin/accounts/index.php">
@@ -34,7 +34,7 @@
                     </a>
                 </li>
 
-                <!-- Employees (dropdown) -->
+                   
                 <li class="mb-1">
                     <button class="btn btn-toggle d-flex w-100 align-items-center rounded border-0 collapsed"
                         data-bs-toggle="collapse" data-bs-target="#employees-collapse" aria-expanded="false">
@@ -52,7 +52,7 @@
                     </div>
                 </li>
 
-                <!-- Orders (dropdown) -->
+                   
                 <li class="mb-1">
                     <button class="btn btn-toggle d-flex w-100 align-items-center rounded border-0 collapsed"
                         data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
@@ -71,7 +71,7 @@
                     </div>
                 </li>
 
-                <!-- Products (dropdown) -->
+                   
                 <li class="mb-1">
                     <button class="btn btn-toggle d-flex w-100 align-items-center rounded border-0 collapsed"
                         data-bs-toggle="collapse" data-bs-target="#product-collapse" aria-expanded="false">
@@ -94,7 +94,7 @@
                     </div>
                 </li>
 
-                <!-- Reports (dropdown) -->
+                   
                 <li class="mb-1">
                     <button class="btn btn-toggle d-flex w-100 align-items-center rounded border-0 collapsed"
                         data-bs-toggle="collapse" data-bs-target="#report-collapse" aria-expanded="false">

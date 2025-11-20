@@ -11,7 +11,7 @@ if ($id <= 0) {
 $conn->begin_transaction();
 
 try {
-    // Ensure salary exists
+      
     $sel = $conn->prepare("SELECT salary_id FROM salaries WHERE salary_id = ?");
     if (!$sel) throw new Exception('server');
     $sel->bind_param('i', $id);
@@ -23,7 +23,7 @@ try {
     }
     $sel->close();
 
-    // Delete salary
+      
     $del = $conn->prepare("DELETE FROM salaries WHERE salary_id = ?");
     if (!$del) throw new Exception('server');
     $del->bind_param('i', $id);

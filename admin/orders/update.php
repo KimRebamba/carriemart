@@ -99,8 +99,8 @@ function send_order_update_email(mysqli $conn, int $orderId): void {
     $lineRows = '';
     foreach ($orderData['lines'] as $line) {
         $lineRows .= sprintf(
-            '<tr><td>%s</td><td style="text-align:right;">%d</td><td style="text-align:right;">₱%s</td><td style="text-align:right;">₱%s</td></tr>',
-            htmlspecialchars($line['product_name'], ENT_QUOTES, 'UTF-8'),
+            '<tr><td>%s</td><td style="text-align:right;">%d</td><td style="text-align:right;">PHP%s</td><td style="text-align:right;">PHP%s</td></tr>',
+            $line['product_name'],
             $line['quantity'],
             number_format($line['unit_price'], 2),
             number_format($line['line_total'], 2)
@@ -120,15 +120,15 @@ function send_order_update_email(mysqli $conn, int $orderId): void {
             </thead>
             <tbody>%s</tbody>
          </table>
-         <p>Subtotal: ₱%s<br>
-            Discount (%d%%): ₱%s<br>
-            Delivery Fee: ₱%s<br>
-            <strong>Grand Total: ₱%s</strong>
+         <p>Subtotal: PHP%s<br>
+            Discount (%d%%): PHP%s<br>
+            Delivery Fee: PHP%s<br>
+            <strong>Grand Total: PHP%s</strong>
          </p>
          <p>Thank you for shopping with CarrieMart.</p>',
-        htmlspecialchars($customerName, ENT_QUOTES, 'UTF-8'),
+        $customerName,
         $orderData['order_id'],
-        htmlspecialchars($orderData['order_status'], ENT_QUOTES, 'UTF-8'),
+        $orderData['order_status'],
         $lineRows,
         number_format($orderData['subtotal'], 2),
         $orderData['percent_sale'],
@@ -170,7 +170,7 @@ $delivery_fee_raw= trim($_POST['delivery_fee'] ?? '');
 $delivery_recipient = trim($_POST['delivery_recipient'] ?? '');
 $delivery_address   = trim($_POST['delivery_address'] ?? '');
 $delivery_phone     = trim($_POST['delivery_phone'] ?? '');
-$posted_voucher     = trim($_POST['voucher_code'] ?? ''); // read-only on form
+$posted_voucher     = trim($_POST['voucher_code'] ?? '');   
 
 if ($order_id <= 0) {
     header('Location: index.php?error=invalid_id');
@@ -179,7 +179,7 @@ if ($order_id <= 0) {
 
 $errors = [];
 
-// Load existing order
+   
 $sel = $conn->prepare("SELECT voucher_code, completed_at FROM orders WHERE order_id = ?");
 if (!$sel) {
     header('Location: order-form.php?id='.$order_id.'&error=server');
@@ -195,24 +195,29 @@ if (!$sel->fetch()) {
 }
 $sel->close();
 
-// Validate payment_status enum
+   
 $allowedPay = ['pending','paid','refunded'];
 if (!in_array($payment_status, $allowedPay, true)) {
     $errors[] = 'payment_status_invalid';
 }
 
-// Validate order_status enum
+   
 $allowedOrder = ['pending','processing','shipped','completed','cancelled','requested_refund','returned'];
 if (!in_array($order_status, $allowedOrder, true)) {
     $errors[] = 'order_status_invalid';
 }
 
-// Voucher read-only check
+   
+if ($payment_status === 'refunded' && !in_array($order_status, ['requested_refund', 'returned'], true)) {
+    $errors[] = 'payment_status_invalid';
+}
+
+   
 if ($posted_voucher !== '' && $posted_voucher !== $existing_voucher) {
     $errors[] = 'voucher_invalid';
 }
 
-// Percent sale
+   
 $percent_sale_raw = ($percent_sale_raw === '' ? '0' : $percent_sale_raw);
 if (!ctype_digit($percent_sale_raw)) {
     $errors[] = 'percent_sale_invalid';
@@ -222,27 +227,27 @@ if (!ctype_digit($percent_sale_raw)) {
 }
 if (!isset($percent_sale)) $percent_sale = 0;
 
-// Delivery fee
-$fee_clean = str_replace(['₱',',',' '], '', $delivery_fee_raw);
+   
+$fee_clean = str_replace(['PHP',',',' '], '', $delivery_fee_raw);
 if ($fee_clean === '') $fee_clean = '0';
 if (!is_numeric($fee_clean) || (float)$fee_clean < 0) {
     $errors[] = 'delivery_fee_invalid';
 }
 $delivery_fee = (float)$fee_clean;
 
-// Recipient
+   
 if ($delivery_recipient === '') $errors[] = 'recipient_required';
 
-// Address
+   
 if ($delivery_address === '') $errors[] = 'address_required';
 
-// Phone
+   
 if ($delivery_phone === '') {
     $errors[] = 'phone_required';
 } else {
     $digits = preg_replace('/\D/','',$delivery_phone);
     if (!preg_match('/^09\d{9}$/', $digits)) $errors[] = 'phone_invalid';
-    $delivery_phone = $delivery_phone; // keep original formatting
+    $delivery_phone = $delivery_phone;   
 }
 
 if (!empty($errors)) {
@@ -250,12 +255,12 @@ if (!empty($errors)) {
     exit;
 }
 
-// completed_at logic
+   
 $completed_at_new = ($order_status === 'completed')
     ? ($existing_completed_at ? $existing_completed_at : date('Y-m-d H:i:s'))
     : null;
 
-// Update
+   
 $sql = "UPDATE orders
         SET payment_status = ?,
             order_status = ?,
@@ -273,19 +278,19 @@ if (!$stmt) {
     exit;
 }
 
-// Fixed bind_param - remove the confusing conditional logic
+   
 $stmt->bind_param(
-    'ssssssidsi',        // Type definition: 10 parameters
-    $payment_status,     // s - string
-    $order_status,       // s - string
-    $payment_option,     // s - string
-    $delivery_recipient, // s - string
-    $delivery_address,   // s - string
-    $delivery_phone,     // s - string
-    $percent_sale,       // i - integer
-    $delivery_fee,       // d - double
-    $completed_at_new,   // s - string (nullable)
-    $order_id            // i - integer
+    'ssssssidsi',          
+    $payment_status,       
+    $order_status,         
+    $payment_option,       
+    $delivery_recipient,   
+    $delivery_address,     
+    $delivery_phone,       
+    $percent_sale,         
+    $delivery_fee,         
+    $completed_at_new,     
+    $order_id              
 );
 
 if (!$stmt->execute()) {

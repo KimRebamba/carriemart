@@ -55,7 +55,7 @@ if ($dateTo !== '' && $validDate($dateTo)) {
     $params[] = $dateTo; $types .= 's';
 }
 if (!empty($dateFilterParts)) {
-    // Keep products with no orders outside range by OR o.order_id IS NULL
+      
     $where[] = "(" . implode(" AND ", $dateFilterParts) . " OR o.order_id IS NULL)";
 }
 
@@ -106,7 +106,7 @@ if ($stmt) {
     $stmt->close();
 }
 
-// For filter selects (optional simple lists)
+   
 $catList = [];
 $brandList = [];
 $catStmt = $conn->prepare("SELECT category_id, category_name FROM categories ORDER BY category_name ASC");
@@ -178,7 +178,7 @@ $showCount = count($items);
                             <option value="revAsc" <?php if($sort==='revAsc') echo 'selected'; ?>>Lowest revenue</option>
                             <option value="retDesc" <?php if($sort==='retDesc') echo 'selected'; ?>>Most returns</option>
                         </select>
-                        <!-- Preserve hidden filters -->
+                           
                         <input type="hidden" name="category" value="<?php echo $categoryId; ?>">
                         <input type="hidden" name="brand" value="<?php echo $brandId; ?>">
                         <input type="hidden" name="date_from" value="<?php echo $dateFrom; ?>">

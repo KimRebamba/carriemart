@@ -1,5 +1,5 @@
 <?php
-// filepath: c:\xampp_for_carriemart\htdocs\carriemart\admin\employees\create.phpS
+   
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
@@ -21,33 +21,33 @@ $current_position_id = isset($_POST['current_position_id']) && $_POST['current_p
 
 $errors = [];
 
-// Validate required text fields
+   
 if ($first_name === '') $errors[] = 'first_name_required';
 if ($last_name === '')  $errors[] = 'last_name_required';
 if ($address === '')    $errors[] = 'address_required';
 
-// Email
+   
 if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'invalid_email';
 
-// Phone
+   
 if ($phone_number === '') {
     $errors[] = 'phone_required';
 } else {
     $digitsPhone = preg_replace('/\D/', '', $phone_number);
-    // Expect 11 digits starting with 09 (e.g. 09XXXXXXXXX)
+      
     if (!preg_match('/^09\d{9}$/', $digitsPhone)) $errors[] = 'invalid_phone';
 }
 
-// Employment status
+   
 $allowedStatus = ['active','inactive','terminated','on_leave'];
 if (!in_array($employment_status, $allowedStatus, true)) $errors[] = 'employment_status_bad';
 
-// Hire date required
+   
 if ($hire_date === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $hire_date)) {
     $errors[] = 'hire_date_required';
 }
 
-// Birth date optional; if given validate
+   
 if ($birth_date !== '') {
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $birth_date)) {
         $errors[] = 'birth_date_invalid';
@@ -56,11 +56,11 @@ if ($birth_date !== '') {
     }
 }
 
-// Gender enum or blank
+   
 $allowedGender = ['male','female','other',''];
 if (!in_array($gender, $allowedGender, true)) $gender = '';
 
-// Position id validation (optional)
+   
 if ($current_position_id > 0) {
     $pchk = $conn->prepare("SELECT position_id FROM positions WHERE position_id = ?");
     if ($pchk) {
@@ -68,14 +68,14 @@ if ($current_position_id > 0) {
         $pchk->execute();
         $pchk->store_result();
         if ($pchk->num_rows === 0) {
-            // Invalid position -> set null
+              
             $current_position_id = 0;
         }
         $pchk->close();
     }
 }
 
-// Duplicate email check (only if email not empty and no prior email error)
+   
 if (!in_array('invalid_email', $errors, true) && $email !== '') {
     $dup = $conn->prepare("SELECT emp_id FROM employees WHERE email = ? LIMIT 1");
     if ($dup) {
@@ -94,12 +94,12 @@ if (!empty($errors)) {
     exit;
 }
 
-// Prepare values (NULL handling)
+   
 $birth_date_val = ($birth_date === '') ? null : $birth_date;
 $hire_date_val  = ($hire_date === '') ? null : $hire_date;
 $position_val   = ($current_position_id > 0) ? $current_position_id : null;
 
-// Insert
+   
 $stmt = $conn->prepare("INSERT INTO employees
     (first_name, last_name, email, phone_number, address, birth_date, gender, employment_status, hire_date, current_position_id)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");

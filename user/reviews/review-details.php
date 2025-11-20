@@ -3,7 +3,7 @@ session_start();
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 
-// Determine mode: add or edit
+   
 $mode = isset($_GET['mode']) ? $_GET['mode'] : 'add';
 $product_order_id = isset($_GET['product_order_id']) ? (int)$_GET['product_order_id'] : 0;
 
@@ -12,7 +12,7 @@ if (!$product_order_id) {
     exit;
 }
 
-// Get product order details
+   
 $sql = "SELECT 
     po.product_order_id,
     po.order_id,
@@ -38,14 +38,14 @@ if (!$product_order) {
     exit;
 }
 
-// Initialize review data
+   
 $review_title = '';
 $review_text = '';
 $rating = 3;
 $review_id = null;
 $created_at = date('Y-m-d H:i');
 
-// Check if review exists (regardless of mode)
+   
 $sql = "SELECT review_id, review_title, review_text, rating, created_at 
         FROM product_review 
         WHERE product_order_id = ? AND user_id = ?";
@@ -57,13 +57,13 @@ $existing_review = $result->fetch_assoc();
 $stmt->close();
 
 if ($existing_review) {
-    // Review exists - load it
+      
     $review_title = $existing_review['review_title'] !== null ? $existing_review['review_title'] : '';
     $review_text = $existing_review['review_text'] !== null ? $existing_review['review_text'] : '';
     $rating = $existing_review['rating'];
     $review_id = $existing_review['review_id'];
     $created_at = date('Y-m-d H:i', strtotime($existing_review['created_at']));
-    $mode = 'edit'; // Force edit mode if review exists
+    $mode = 'edit';   
 }
 
 $total_price = $product_order['unit_price'] * $product_order['quantity'];
@@ -110,7 +110,7 @@ $total_price = $product_order['unit_price'] * $product_order['quantity'];
           </ul>
         </div>
 
-        <!-- Main: Review Information -->
+           
         <div class="col-md-7 col-lg-8 my-5">
           <h4 class="mb-3"><?php echo $review_id ? 'Edit Review' : 'Add Review'; ?></h4>
           <form method="POST" action="<?php echo $review_id ? 'update.php' : 'create.php'; ?>">

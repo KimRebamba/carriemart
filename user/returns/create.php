@@ -4,7 +4,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    // GET request - show form
+      
     if (!$conn) { die('DB error'); }
     if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) {
         header('Location: /carriemart/main/products.php?error=login_required');
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         exit;
     }
     
-    // Verify order belongs to user and is completed
+      
     $chk = $conn->prepare("SELECT order_id, order_status FROM orders WHERE order_id = ? AND user_id = ?");
     if (!$chk) {
         header('Location: /carriemart/user/orders/orders.php?error=server');
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         exit;
     }
     
-    // Check if return already exists
+      
     $chkRet = $conn->prepare("SELECT order_return_id FROM order_return WHERE order_id = ?");
     if ($chkRet) {
         $chkRet->bind_param('i', $order_id);
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         $chkRet->close();
     }
     
-    // Get order products and calculate total
+      
     $products = [];
     $total = 0.0;
     $ps = $conn->prepare("
@@ -194,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// POST request - process form
+   
 if (!$conn) { die('DB error'); }
 if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) {
     header('Location: /carriemart/main/products.php?error=login_required');
@@ -215,7 +215,7 @@ if (!in_array($cond, ['new','opened','damaged','other'])) {
     $cond = 'other';
 }
 
-// Verify order belongs to user and is completed
+   
 $chk = $conn->prepare("SELECT order_id, order_status FROM orders WHERE order_id = ? AND user_id = ?");
 if (!$chk) {
     header('Location: /carriemart/user/orders/orders.php?error=server');
@@ -236,7 +236,7 @@ if ($ostatus !== 'completed') {
     exit;
 }
 
-// Check if return already exists
+   
 $chkRet = $conn->prepare("SELECT order_return_id FROM order_return WHERE order_id = ?");
 if ($chkRet) {
     $chkRet->bind_param('i', $order_id);
@@ -250,7 +250,7 @@ if ($chkRet) {
     $chkRet->close();
 }
 
-// Calculate refund amount (total of order)
+   
 $refundAmount = 0.0;
 $calc = $conn->prepare("SELECT SUM(quantity * unit_price) FROM product_order WHERE order_id = ?");
 if ($calc) {
@@ -263,7 +263,7 @@ if ($calc) {
     $calc->close();
 }
 
-// Insert return
+   
 $reason_clean = $reason !== '' ? $reason : null;
 $ins = $conn->prepare("INSERT INTO order_return (order_id, reason, cond, return_status, refund_amount) VALUES (?, ?, ?, 'requested', ?)");
 if (!$ins) {
@@ -278,7 +278,7 @@ if (!$ins->execute()) {
 }
 $ins->close();
 
-// Update order status to 'requested_refund'
+   
 $updOrder = $conn->prepare("UPDATE orders SET order_status = 'requested_refund' WHERE order_id = ?");
 if ($updOrder) {
     $updOrder->bind_param('i', $order_id);

@@ -6,7 +6,7 @@ $salary = [];
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $found = false;
 
-// Load employees for dropdown
+   
 $employees = [];
 $es = $conn->prepare("SELECT emp_id, first_name, last_name FROM employees ORDER BY first_name, last_name");
 if ($es) {
@@ -18,7 +18,7 @@ if ($es) {
     $es->close();
 }
 
-// If editing existing salary
+   
 if ($id > 0) {
     $stmt = $conn->prepare("SELECT salary_id, emp_id, pay_date, from_date, to_date, rate_used, status, created_at
                             FROM salaries WHERE salary_id = ?");
@@ -51,7 +51,7 @@ $isEdit = ($id > 0 && $found);
 $formAction = $isEdit ? 'update.php' : 'create.php';
 $pageTitle = $isEdit ? 'Edit Salary' : 'Add Salary';
 
-// Error codes -> messages (like register.php style)
+   
 $errors = [];
 if (isset($_GET['error'])) {
     $codes = explode(',', $_GET['error']);
@@ -74,7 +74,7 @@ if (isset($_GET['status'])) {
     if ($_GET['status'] === 'updated') $successMsg = 'Salary record updated.';
 }
 
-// Preserve posted values if redirected with errors (for create mode)
+   
 $getVal = function($key, $fallback='') use ($salary, $isEdit) {
     if ($isEdit && isset($salary[$key])) return $salary[$key];
     return isset($_POST[$key]) ? $_POST[$key] : $fallback;

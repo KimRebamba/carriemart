@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// Metrics initialization
+   
 $totalSalesAmount = 0.00;
 $totalOrdersPaid  = 0;
 $totalItemsSold   = 0;
@@ -10,7 +10,7 @@ $totalRefunds     = 0.00;
 $returnCount      = 0;
 $netRevenue       = 0.00;
 
-// 1. Total sales amount (paid orders only) & items sold
+   
 $qsales = "
     SELECT 
         COALESCE(SUM(po.unit_price * po.quantity),0) AS sales_amount,
@@ -28,7 +28,7 @@ if ($rs && $row = $rs->fetch_assoc()) {
 }
 if ($rs) $rs->close();
 
-// 2. Total discounts (percent_sale per order). We approximate discount by applying percent_sale to each order's line item sum.
+   
 $discountTotal = 0.00;
 $qdisc = "
     SELECT o.order_id, o.percent_sale, COALESCE(SUM(po.unit_price * po.quantity),0) AS order_total
@@ -49,7 +49,7 @@ if ($rd) {
     $rd->close();
 }
 
-// 3. Refunds / returns (approved or processed)
+   
 $qrefund = "
     SELECT 
         COALESCE(SUM(refund_amount),0) AS refunds_sum,
@@ -64,10 +64,10 @@ if ($rrf && $rrow = $rrf->fetch_assoc()) {
 }
 if ($rrf) $rrf->close();
 
-// 4. Net revenue
+   
 $netRevenue = $totalSalesAmount - $discountTotal - $totalRefunds;
 
-// 5. Best-selling items (top 5 by qty among paid orders)
+   
 $bestItems = [];
 $qbest = "
     SELECT 
@@ -96,7 +96,7 @@ if ($rb) {
     $rb->close();
 }
 
-// 6. Worst-selling items (bottom 5 by qty > 0)
+   
 $worstItems = [];
 $qworst = "
     SELECT 
@@ -126,7 +126,7 @@ if ($rw) {
     $rw->close();
 }
 
-// Simple formatting helpers
+   
 $fmtAmount = function($v){ return '₱' . number_format((float)$v, 2, '.', ','); };
 $fmtQty    = function($v){ return (int)$v; };
 ?>
@@ -158,7 +158,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-panel.php');
 ?>
 
 
-        <div class="flex-grow-1 p-3"> <!-- other column -->
+        <div class="flex-grow-1 p-3">    
             <div class="container-fluid">
                 <h3 class="mb-4 d-flex align-items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-graph-up mt-1" viewBox="0 0 16 16">

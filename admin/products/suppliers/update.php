@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $errors = [];
 
-// Supplier ID
+   
 $id_raw = isset($_POST['supplier_id']) ? trim($_POST['supplier_id']) : '';
 $supplier_id = ctype_digit($id_raw) ? (int)$id_raw : 0;
 if ($supplier_id <= 0) {
@@ -17,7 +17,7 @@ if ($supplier_id <= 0) {
     exit;
 }
 
-// Ensure supplier exists + get current data
+   
 $exist = $conn->prepare("SELECT supplier_id FROM suppliers WHERE supplier_id = ?");
 if (!$exist) {
     header('Location: supplier-form.php?id='.$supplier_id.'&error=server');
@@ -33,7 +33,7 @@ if ($exist->num_rows === 0) {
 }
 $exist->close();
 
-// Inputs
+   
 $supplier_name  = isset($_POST['supplier_name']) ? trim($_POST['supplier_name']) : '';
 $contact_person = isset($_POST['contact_person']) ? trim($_POST['contact_person']) : '';
 $contact_number = isset($_POST['contact_number']) ? trim($_POST['contact_number']) : '';
@@ -41,7 +41,7 @@ $email          = isset($_POST['email']) ? trim($_POST['email']) : '';
 $address        = isset($_POST['address']) ? trim($_POST['address']) : '';
 $is_active_raw  = isset($_POST['is_active']) ? trim($_POST['is_active']) : '1';
 
-// Validation
+   
 if ($supplier_name === '') $errors[] = 'name_required';
 if (!in_array($is_active_raw, ['0','1'], true)) $errors[] = 'status_invalid';
 $is_active = ($is_active_raw === '1') ? 1 : 0;
@@ -52,7 +52,7 @@ if ($email !== '') {
     }
 }
 
-// Duplicate name excluding self
+   
 $dup = $conn->prepare("SELECT supplier_id FROM suppliers WHERE supplier_name = ? AND supplier_id <> ? LIMIT 1");
 if ($dup) {
     $dup->bind_param('si', $supplier_name, $supplier_id);
@@ -64,13 +64,13 @@ if ($dup) {
     $errors[] = 'server';
 }
 
-// Redirect on errors
+   
 if (!empty($errors)) {
     header('Location: supplier-form.php?id='.$supplier_id.'&error=' . implode(',', array_values(array_unique($errors))));
     exit;
 }
 
-// Update
+   
 $conn->begin_transaction();
 try {
     $stmt = $conn->prepare("UPDATE suppliers SET supplier_name = ?, contact_person = ?, contact_number = ?, email = ?, address = ?, is_active = ? WHERE supplier_id = ?");

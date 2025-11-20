@@ -18,7 +18,7 @@ if ($order_return_id <= 0) {
     exit;
 }
 
-// Load return data
+   
 $returnData = [];
 $stmt = $conn->prepare("
     SELECT ord_ret.order_return_id, ord_ret.order_id, ord_ret.reason, ord_ret.cond, ord_ret.return_status, 
@@ -52,7 +52,7 @@ $returnData = [
     'created_at' => $created
 ];
 
-// Get order products
+   
 $products = [];
 $ps = $conn->prepare("
     SELECT po.product_order_id, po.product_id, po.quantity, po.unit_price, p.product_name,

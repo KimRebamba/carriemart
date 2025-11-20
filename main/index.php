@@ -121,35 +121,35 @@ session_start();
     <?php include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/secondary-header.php'); ?>
 
     
-    <!-- products grid -->
+       
     <section class="mt-3 mt-lg-4 pt-0 pb-4">
         <div class="container px-4">
             <div class="tiles-grid">
-                <a href="./products.php" class="tile tile--lg" style="background-image:url('../assets/products.jpg');">
+                <a href="./products.php" class="tile tile--lg" style="background-image:url('/carriemart/assets/products-pic.jpg');">
                     <div class="caption">
                         <div class="title">Products</div>
-                        <div class="desc">Browse and manage product listings.</div>
+                        <div class="desc">Shop for in-store products and listings.</div>
                     </div>
                 </a>
-                <a href="./vouchers.php" class="tile tile--vouchers" style="background-image:url('../assets/vouchers.jpg');">
+                <a href="./vouchers.php" class="tile tile--vouchers" style="background-image:url('/carriemart/assets/voucher-pic.png');">
                     <div class="caption">
                         <div class="title">Vouchers</div>
                         <div class="desc">Create and track discount vouchers.</div>
                     </div>
                 </a>
-                <a href="./categories.php" class="tile tile--categories" style="background-image:url('../assets/categories.jpg');">
+                <a href="./categories.php" class="tile tile--categories" style="background-image:url('/carriemart/assets/category-pic.jpg');">
                     <div class="caption">
                         <div class="title">Categories</div>
                         <div class="desc">Organize products by category.</div>
                     </div>
                 </a>
-                <a href="./brands.php" class="tile tile--brands" style="background-image:url('../assets/brands.jpg');">
+                <a href="./brands.php" class="tile tile--brands" style="background-image:url('/carriemart/assets/brand-pic.jpg');">
                     <div class="caption">
                         <div class="title">Brands</div>
                         <div class="desc">Manage brand profiles and assets.</div>
                     </div>
                 </a>
-                <a href="/carriemart/user/cart/cart.php" class="tile tile--cart" style="background-image:url('../assets/cart.jpg');">
+                <a href="/carriemart/user/cart/cart.php" class="tile tile--cart" style="background-image:url('/carriemart/assets/cart-pic.jpg');">
                     <div class="caption">
                         <div class="title">CarrieCart</div>
                         <div class="desc">View and recover active carts.</div>

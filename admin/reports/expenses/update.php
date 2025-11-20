@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $errors = [];
 
-// ID
+   
 $id_raw = isset($_POST['exp_id']) ? trim($_POST['exp_id']) : '';
 $exp_id = ctype_digit($id_raw) ? (int)$id_raw : 0;
 if ($exp_id <= 0) {
@@ -17,7 +17,7 @@ if ($exp_id <= 0) {
     exit;
 }
 
-// Ensure exists
+   
 $exist = $conn->prepare("SELECT exp_id FROM expenses WHERE exp_id = ?");
 if (!$exist) {
     header('Location: expense-form.php?id='.$exp_id.'&error=server');
@@ -33,7 +33,7 @@ if ($exist->num_rows === 0) {
 }
 $exist->close();
 
-// Inputs
+   
 $expense_type = isset($_POST['expense_type']) ? trim($_POST['expense_type']) : '';
 $description  = isset($_POST['description']) ? trim($_POST['description']) : '';
 $amount_raw   = isset($_POST['amount']) ? trim($_POST['amount']) : '';
@@ -71,7 +71,7 @@ if (!empty($errors)) {
     exit;
 }
 
-// Normalize
+   
 $descParam = ($description !== '' ? $description : null);
 $dueParam  = ($due_date !== '' ? $due_date : null);
 $paidParam = ($paid_date !== '' ? $paid_date : null);

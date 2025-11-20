@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// Accept id from GET or POST
+   
 $id_raw = isset($_GET['id']) ? trim($_GET['id']) : (isset($_POST['id']) ? trim($_POST['id']) : '');
 $category_id = ctype_digit($id_raw) ? (int)$id_raw : 0;
 
@@ -11,7 +11,7 @@ if ($category_id <= 0) {
     exit;
 }
 
-// Fetch existing (and photo path)
+   
 $photo_url = null;
 $exist = $conn->prepare("SELECT category_id, photo_url FROM categories WHERE category_id = ?");
 if (!$exist) {
@@ -28,9 +28,9 @@ if (!$exist->fetch()) {
 }
 $exist->close();
 
-// Optional: products referencing this category will have category_id SET NULL (schema ON DELETE SET NULL)
+   
 
-// Begin transaction
+   
 $conn->begin_transaction();
 
 try {
@@ -45,7 +45,7 @@ try {
 
     $conn->commit();
 
-    // Delete photo file if exists
+      
     if ($photo_url) {
         $fs = $_SERVER['DOCUMENT_ROOT'] . $photo_url;
         if (is_file($fs)) @unlink($fs);

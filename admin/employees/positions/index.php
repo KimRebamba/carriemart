@@ -2,11 +2,11 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// Inputs (GET)
+   
 $q    = isset($_GET['q']) ? trim($_GET['q']) : '';
 $sort = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 
-// Build query
+   
 $sql = "SELECT position_id, position_name, monthly_rate, created_at FROM positions WHERE 1";
 $types = '';
 $n = 0;

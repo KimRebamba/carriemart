@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// Accept ID from GET or POST
+   
 $id_raw = isset($_GET['id']) ? trim($_GET['id']) : (isset($_POST['id']) ? trim($_POST['id']) : '');
 $exp_id = ctype_digit($id_raw) ? (int)$id_raw : 0;
 
@@ -11,7 +11,7 @@ if ($exp_id <= 0) {
     exit;
 }
 
-// Ensure expense exists
+   
 $exist = $conn->prepare("SELECT exp_id FROM expenses WHERE exp_id = ?");
 if (!$exist) {
     header('Location: index.php?error=server');
@@ -27,7 +27,7 @@ if ($exist->num_rows === 0) {
 }
 $exist->close();
 
-// Transaction (simple)
+   
 $conn->begin_transaction();
 try {
     $del = $conn->prepare("DELETE FROM expenses WHERE exp_id = ?");

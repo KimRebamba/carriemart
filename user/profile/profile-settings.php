@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) 
 
 $userId = (int)$_SESSION['user_id'];
 
-// Load user data
+   
 $userData = [];
 $stmt = $conn->prepare("SELECT user_id, username, email, address, phone_number, first_name, last_name, profile_photo_url, is_active FROM accounts WHERE user_id = ?");
 if ($stmt) {
@@ -47,7 +47,7 @@ $address = $userData['address'] ? $userData['address'] : '';
 $phone = $userData['phone_number'] ? $userData['phone_number'] : '';
 $profilePhoto = $userData['profile_photo_url'] ? $userData['profile_photo_url'] : '/carriemart/assets/person-circle.svg';
 
-// Check for errors/success from update.php
+   
 $errors = [];
 if (isset($_GET['error'])) {
     foreach (explode(',', $_GET['error']) as $e) {
@@ -157,7 +157,7 @@ if (isset($_GET['status']) && $_GET['status'] === 'updated') {
 
                             <div class="col-12">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" value="<?php echo $email; ?>">
+                                <input type="text" class="form-control" id="email" name="email" placeholder="you@example.com" value="<?php echo $email; ?>">
                             </div>
 
                             <div class="col-12">
@@ -171,7 +171,7 @@ if (isset($_GET['status']) && $_GET['status'] === 'updated') {
                             </div>
                         </div>
 
-                        <!-- Profile picture -->
+                           
                         <div class="mb-4 mt-4">
                             <label class="form-label d-block">Profile picture</label>
                             <div class="d-flex align-items-center gap-3">
@@ -227,7 +227,7 @@ if (isset($_GET['status']) && $_GET['status'] === 'updated') {
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
     <script>
-    // Simple preview for profile picture
+      
     const fileInput = document.getElementById('formFile');
     const avatarPreview = document.getElementById('avatarPreview');
     fileInput?.addEventListener('change', (e) => {

@@ -6,7 +6,7 @@ $emp = [];
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $found = false;
 
-// Load positions (for select)
+   
 $positions = [];
 $ps = $conn->prepare("SELECT position_id, position_name FROM positions ORDER BY position_name ASC");
 if ($ps) {
@@ -50,7 +50,7 @@ $isEdit = ($id > 0 && $found);
 $formAction = $isEdit ? 'update.php' : 'create.php';
 $pageTitle = $isEdit ? 'Edit Employee' : 'Add Employee';
 
-// Collect error codes (single or comma-separated)
+   
 $errors = [];
 if (isset($_GET['error'])) {
     $codes = explode(',', $_GET['error']);

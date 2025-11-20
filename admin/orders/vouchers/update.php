@@ -21,7 +21,7 @@ if ($voucher_id <= 0) {
     exit;
 }
 
-// Ensure existing voucher
+   
 $ex = $conn->prepare("SELECT voucher_id FROM vouchers WHERE voucher_id = ?");
 if (!$ex) {
     header('Location: voucher-form.php?id='.$voucher_id.'&error=server');
@@ -39,7 +39,7 @@ $ex->close();
 
 $errors = [];
 
-// Code required + pattern + uniqueness
+   
 if ($voucher_code === '') {
     $errors[] = 'code_required';
 } else {
@@ -59,7 +59,7 @@ if ($voucher_code === '') {
     }
 }
 
-// Percent sale (optional)
+   
 $percent_sale = null;
 if ($percent_sale_raw !== '') {
     if (!ctype_digit($percent_sale_raw)) {
@@ -70,7 +70,7 @@ if ($percent_sale_raw !== '') {
     }
 }
 
-// Min purchase (required)
+   
 $min_clean = str_replace(['₱',',',' '],'',$min_purchase_raw);
 if ($min_clean === '') $min_clean = '0';
 if (!is_numeric($min_clean) || (float)$min_clean < 0) {
@@ -78,7 +78,7 @@ if (!is_numeric($min_clean) || (float)$min_clean < 0) {
 }
 $min_purchase_amount = (float)$min_clean;
 
-// Max discount (optional)
+   
 $max_discount_amount = null;
 if ($max_discount_raw !== '') {
     $max_clean = str_replace(['₱',',',' '],'',$max_discount_raw);
@@ -89,13 +89,13 @@ if ($max_discount_raw !== '') {
     }
 }
 
-// Status
+   
 if (!in_array($is_active_raw, ['0','1'], true)) {
     $errors[] = 'status_invalid';
 }
 $is_active = ($is_active_raw === '1') ? 1 : 0;
 
-// Dates
+   
 $validDate = function($d){ return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
 if ($from_date !== '' && !$validDate($from_date)) $errors[] = 'date_range_invalid';
 if ($to_date !== '' && !$validDate($to_date)) $errors[] = 'date_range_invalid';
@@ -108,10 +108,10 @@ if (!empty($errors)) {
     exit;
 }
 
-$percent_val = $percent_sale; // may be null
+$percent_val = $percent_sale;   
 $from_val    = ($from_date !== '' ? $from_date : null);
 $to_val      = ($to_date !== '' ? $to_date : null);
-$max_val     = $max_discount_amount; // may be null
+$max_val     = $max_discount_amount;   
 
 $stmt = $conn->prepare("UPDATE vouchers
     SET voucher_code = ?,

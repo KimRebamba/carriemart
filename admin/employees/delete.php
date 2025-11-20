@@ -1,5 +1,5 @@
 <?php
-// filepath: c:\xampp_for_carriemart\htdocs\carriemart\admin\employees\delete.php
+   
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
@@ -12,7 +12,7 @@ if ($id <= 0) {
 $conn->begin_transaction();
 
 try {
-    // Ensure employee exists
+      
     $sel = $conn->prepare("SELECT emp_id FROM employees WHERE emp_id = ?");
     if (!$sel) throw new Exception('prep_select');
     $sel->bind_param('i', $id);
@@ -24,7 +24,7 @@ try {
     }
     $sel->close();
 
-    // (Optional) Count salaries before delete (will cascade)
+      
     $sc = 0;
     $countSal = $conn->prepare("SELECT COUNT(*) FROM salaries WHERE emp_id = ?");
     if ($countSal) {
@@ -35,7 +35,7 @@ try {
         $countSal->close();
     }
 
-    // Delete employee (salaries cascade automatically)
+      
     $del = $conn->prepare("DELETE FROM employees WHERE emp_id = ?");
     if (!$del) throw new Exception('prep_delete');
     $del->bind_param('i', $id);
@@ -47,7 +47,7 @@ try {
 
     $conn->commit();
 
-    // Redirect with status and optional cascade info
+      
     header('Location: index.php?status=deleted&id=' . $id . '&salaries_removed=' . $sc);
     exit;
 

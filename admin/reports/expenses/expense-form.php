@@ -6,12 +6,12 @@ if (!$conn) {
     die('Database connection failed.');
 }
 
-// Read id (edit vs create)
+   
 $id_raw   = isset($_GET['id']) ? trim($_GET['id']) : '';
 $exp_id   = ctype_digit($id_raw) ? (int)$id_raw : 0;
 $isEdit   = $exp_id > 0;
 
-// Default expense record
+   
 $expense = [
     'exp_id'        => '',
     'expense_type'  => 'other',
@@ -23,7 +23,7 @@ $expense = [
     'created_at'    => ''
 ];
 
-// Load existing when editing
+   
 if ($isEdit) {
     $stmt = $conn->prepare("SELECT exp_id, expense_type, description, amount, status, due_date, paid_date, created_at FROM expenses WHERE exp_id = ?");
     if (!$stmt) {
@@ -50,10 +50,10 @@ if ($isEdit) {
     $stmt->close();
 }
 
-// Determine form action
+   
 $formAction = $isEdit ? 'update.php' : 'create.php';
 
-// Collect error codes from redirect (create/update pages will send ?error=code1,code2)
+   
 $errors = [];
 if (isset($_GET['error'])) {
     $codes = explode(',', $_GET['error']);
@@ -73,7 +73,7 @@ if (isset($_GET['error'])) {
     }
 }
 
-// Success messages (?status=created|updated)
+   
 $success = false;
 $successText = '';
 if (isset($_GET['status'])) {
@@ -86,10 +86,10 @@ if (isset($_GET['status'])) {
     }
 }
 
-// Helper for select
+   
 $sel = function($a, $b){ return (string)$a === (string)$b ? 'selected' : ''; };
 
-// Allowed types list (ENUM)
+   
 $expenseTypes = ['inventory_purchase','shipping','maintenance','rent','utilities','other'];
 $statuses     = ['pending','paid'];
 ?>

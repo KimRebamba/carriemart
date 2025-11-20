@@ -9,13 +9,13 @@ if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) 
 }
 $userId = (int)$_SESSION['user_id'];
 
-// Only POST allowed
+   
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: /carriemart/user/orders/orders.php?error=invalid_method');
     exit;
 }
 
-// Validate input
+   
 $orderId = isset($_POST['order_id']) ? trim($_POST['order_id']) : '';
 $delivery_recipient = isset($_POST['delivery_recipient']) ? trim($_POST['delivery_recipient']) : '';
 $delivery_address   = isset($_POST['delivery_address']) ? trim($_POST['delivery_address']) : '';
@@ -38,7 +38,7 @@ if ($delivery_phone === '') {
         $errors[] = 'Phone must match format 09XX-XXXX-XXX.';
     }
 }
-// Map old values to new standardized values
+   
 $payment_option_map = [
     'cash_on_delivery' => 'COD',
     'credit_card' => 'Credit Card',
@@ -47,19 +47,19 @@ $payment_option_map = [
 if (isset($payment_option_map[$payment_option])) {
     $payment_option = $payment_option_map[$payment_option];
 }
-// Validate against allowed values
+   
 if (!in_array($payment_option, ['COD', 'Credit Card', 'Bank Transfer', 'e-Wallet'])) {
     $errors[] = 'Select a valid payment option.';
 }
 
-// If errors, redirect back to order-form.php with error messages
+   
 if (!empty($errors)) {
     $qs = http_build_query(['id' => $orderId, 'error' => implode('|', $errors)]);
     header('Location: /carriemart/user/orders/order-form.php?' . $qs);
     exit;
 }
 
-// Check ownership and status
+   
 $st = $conn->prepare("SELECT order_status FROM orders WHERE order_id = ? AND user_id = ? LIMIT 1");
 $st->bind_param('ii', $orderId, $userId);
 $st->execute();
@@ -71,13 +71,13 @@ if (!$st->fetch()) {
 }
 $st->close();
 
-// Only allow update if pending or processing
+   
 if (!in_array($status, ['pending', 'processing'])) {
     header('Location: /carriemart/user/orders/orders.php?error=cannot_update');
     exit;
 }
 
-// Validate voucher_code exists or set to NULL
+   
 if ($voucher_code !== '') {
     $vst = $conn->prepare("SELECT voucher_code FROM vouchers WHERE voucher_code = ? AND is_active = 1 LIMIT 1");
     $vst->bind_param('s', $voucher_code);
@@ -91,7 +91,7 @@ if ($voucher_code !== '') {
     $voucher_code = null;
 }
 
-// Update delivery details and payment option
+   
 $upd = $conn->prepare("
     UPDATE orders
     SET delivery_recipient = ?, delivery_address = ?, delivery_phone = ?, payment_option = ?, voucher_code = ?

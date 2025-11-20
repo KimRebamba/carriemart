@@ -3,7 +3,7 @@ session_start();
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 if (!$conn) { die('DB error'); }
 
-// Fetch active brands
+   
 $brands = [];
 $st = $conn->prepare("
     SELECT brand_id, brand_name, logo_url, website, description
@@ -38,7 +38,7 @@ $brand_count = count($brands);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
-/* Back line */
+   
         .back-line {
             display: flex;
             align-items: center;
@@ -56,7 +56,7 @@ $brand_count = count($brands);
             width: 20px; height: 20px; opacity: .9;
         }
 
-         /* Grid */
+            
         .product-grid {
             display: grid;
             gap: 1.25rem;
@@ -65,7 +65,7 @@ $brand_count = count($brands);
         @media (min-width: 768px) { .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         @media (min-width: 992px) { .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
-        /* Card */
+           
         .product-card {
             position: relative; 
             border: 1px solid transparent;
@@ -95,7 +95,7 @@ $brand_count = count($brands);
 <body>
     <?php include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/secondary-header.php'); ?>
 
-    <!-- Go Back line -->
+       
     <div class="container mb-3">
         <a href="#" class="back-line rounded-2"
            onclick="history.back(); return false;">
@@ -112,7 +112,7 @@ $brand_count = count($brands);
         </div>
     </div>
     
-    <!-- Brands grid -->
+       
     <div class="container pb-2">
         <div class="product-grid">
             <?php foreach ($brands as $b): ?>

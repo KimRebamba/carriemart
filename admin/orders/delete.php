@@ -11,7 +11,7 @@ if ($id <= 0) {
 $conn->begin_transaction();
 
 try {
-    // Ensure order exists
+      
     $sel = $conn->prepare("SELECT order_id FROM orders WHERE order_id = ?");
     if (!$sel) throw new Exception('server');
     $sel->bind_param('i', $id);
@@ -23,7 +23,7 @@ try {
     }
     $sel->close();
 
-    // Count related product_order lines (will be auto-deleted via CASCADE)
+      
     $lineCount = 0;
     $cnt = $conn->prepare("SELECT COUNT(*) FROM product_order WHERE order_id = ?");
     if ($cnt) {
@@ -34,7 +34,7 @@ try {
         $cnt->close();
     }
 
-    // Delete order (cascades to product_order and order_return)
+      
     $del = $conn->prepare("DELETE FROM orders WHERE order_id = ?");
     if (!$del) throw new Exception('server');
     $del->bind_param('i', $id);

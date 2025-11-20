@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// Inputs (GET)
+   
 $q          = isset($_GET['q']) ? trim($_GET['q']) : '';
 $sort       = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 $active     = isset($_GET['active']) ? trim($_GET['active']) : '';
@@ -17,7 +17,7 @@ $sql = "SELECT voucher_id, voucher_code, percent_sale, min_purchase_amount, max_
 $types = '';
 $params = [];
 
-// Search by code
+   
 if ($q !== '') {
     $like = "%$q%";
     $sql .= " AND voucher_code LIKE ?";
@@ -25,21 +25,21 @@ if ($q !== '') {
     $params[] = $like;
 }
 
-// Active filter
+   
 if ($active === 'active') {
     $sql .= " AND is_active = 1";
 } elseif ($active === 'inactive') {
     $sql .= " AND is_active = 0";
 }
 
-// Percent minimum
+   
 if ($percentMin !== '' && ctype_digit($percentMin)) {
     $sql .= " AND (percent_sale IS NOT NULL AND percent_sale >= ?)";
     $types .= 'i';
     $params[] = (int)$percentMin;
 }
 
-// Date range (from/to inside voucher validity window)
+   
 $validDate = function($d){ return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
 if ($dateFrom !== '' && $validDate($dateFrom)) {
     $sql .= " AND (from_date IS NULL OR from_date <= ?)";
@@ -52,7 +52,7 @@ if ($dateTo !== '' && $validDate($dateTo)) {
     $params[] = $dateTo;
 }
 
-// Sorting
+   
 switch ($sort) {
     case 'oldest':
         $sql .= " ORDER BY created_at ASC, voucher_id ASC";
@@ -72,7 +72,7 @@ switch ($sort) {
         break;
 }
 
-// Fetch
+   
 $vouchers = [];
 $stmt = $conn->prepare($sql);
 if ($stmt) {

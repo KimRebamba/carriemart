@@ -53,12 +53,12 @@ if ($stmt) {
     exit;
 }
 
-// Errors (from update.php redirects)
+   
 $errors = [];
 if (isset($_GET['error'])) {
     foreach (explode(',', $_GET['error']) as $e) {
         $e = trim($e);
-        if ($e === 'payment_status_invalid') $errors[] = 'Payment status invalid.';
+        if ($e === 'payment_status_invalid') $errors[] = 'Payment status invalid. Refunded can only be set when order status is "requested_refund" or "returned".';
         if ($e === 'order_status_invalid')   $errors[] = 'Order status invalid.';
         if ($e === 'percent_sale_invalid')   $errors[] = 'Percent sale invalid (0–100).';
         if ($e === 'delivery_fee_invalid')   $errors[] = 'Delivery fee invalid.';
@@ -140,7 +140,7 @@ $fullName = trim(($order['first_name'] ?? '') . ' ' . ($order['last_name'] ?? ''
                     <div class="row g-3 mt-0">
                         <div class="col-md-6">
                             <label class="form-label">Payment status</label>
-                            <select name="payment_status" class="form-select">
+                            <select name="payment_status" id="payment_status" class="form-select">
                                 <option value="pending"  <?php echo ($order['payment_status']==='pending'?'selected':''); ?>>pending</option>
                                 <option value="paid"     <?php echo ($order['payment_status']==='paid'?'selected':''); ?>>paid</option>
                                 <option value="refunded" <?php echo ($order['payment_status']==='refunded'?'selected':''); ?>>refunded</option>
@@ -148,7 +148,7 @@ $fullName = trim(($order['first_name'] ?? '') . ' ' . ($order['last_name'] ?? ''
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Order status</label>
-                            <select name="order_status" class="form-select">
+                            <select name="order_status" id="order_status" class="form-select">
                                 <option value="pending"          <?php echo ($order['order_status']==='pending'?'selected':''); ?>>pending</option>
                                 <option value="processing"       <?php echo ($order['order_status']==='processing'?'selected':''); ?>>processing</option>
                                 <option value="shipped"          <?php echo ($order['order_status']==='shipped'?'selected':''); ?>>shipped</option>

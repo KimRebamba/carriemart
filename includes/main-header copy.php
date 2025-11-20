@@ -1,6 +1,6 @@
 <?php
 
-// Default pic if no user is logged in
+   
 $profilePic = './assets/default.jfif';
 $isLoggedIn = false;
 
@@ -38,11 +38,11 @@ if (!empty($_SESSION['user_id'])) {
                 <ul class="dropdown-menu text-small">                
     <?php if ($isLoggedIn): ?>
         <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
-            <!-- Admin menu -->
+               
             <li><a class="dropdown-item" href="/carriemart/admin/index.php">Admin Panel</a></li>
         
         <?php else: ?>
-            <!-- Customer menu -->
+               
             <li><a class="dropdown-item" href="/carriemart/user/profile/profile.php">Profile</a></li>
             <li><a class="dropdown-item" href="/carriemart/user/cart/cart.php">CarrieCart</a></li>
             <li><a class="dropdown-item" href="/carriemart/user/orders/orders.php">Orders</a></li>

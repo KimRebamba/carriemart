@@ -11,7 +11,7 @@ if ($id <= 0) {
 $conn->begin_transaction();
 
 try {
-    // Verify review exists
+      
     $sel = $conn->prepare("SELECT review_id, product_order_id, user_id FROM product_review WHERE review_id = ?");
     if (!$sel) throw new Exception('server');
     $sel->bind_param('i', $id);
@@ -23,7 +23,7 @@ try {
     }
     $sel->close();
 
-    // Delete review
+      
     $del = $conn->prepare("DELETE FROM product_review WHERE review_id = ?");
     if (!$del) throw new Exception('server');
     $del->bind_param('i', $id);

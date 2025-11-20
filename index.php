@@ -22,7 +22,7 @@ session_start();
         width: 100%;
         max-width: 670px;
         aspect-ratio: 670 / 427;
-        /* because its items won't stay fixed size for some reason */
+           
         border-radius: 1rem;
         overflow: hidden;
 
@@ -30,7 +30,7 @@ session_start();
 
     @media (min-width: 1400px) {
 
-        /* for return xxl */
+           
         .hero-carousel {
             width: 640px;
         }
@@ -41,10 +41,9 @@ session_start();
         width: 100%;
         height: 100%;
         object-fit: cover;
-        /* fills 640×427 - idk its the size of that pexel pic */
     }
 
-    /*to center search and avatar*/
+       
     .search-form {
         flex: 0 1 420px;
     }
@@ -53,7 +52,7 @@ session_start();
         flex-shrink: 0;
     }
 
-    /* make search and avatar share line on <lg */
+       
     @media (max-width: 991.98px) {
         .search-form {
             flex-basis: 70%;
@@ -79,10 +78,10 @@ session_start();
         height: 70%;
         object-fit: contain;
         filter: brightness(0) invert(1);
-        /* turn black SVGs white */
+           
     }
 
-    /* marketing */
+       
     .marketing-card {
         position: relative;
         background: url('./assets/sample5.jpg') center/cover no-repeat;
@@ -102,7 +101,7 @@ session_start();
 
     .marketing-card .content {
         position: relative;
-        /* above overlay */
+           
         color: #fff;
         width: 100%;
         padding: 1.5rem;
@@ -140,7 +139,7 @@ session_start();
 
 
 
-    /* center marketing content vertically on ≥ sm */
+       
     @media (min-width: 576px) {
         .marketing-section {
             display: flex;
@@ -153,7 +152,7 @@ session_start();
         }
     }
 
-    /* two promo cards */
+       
     .promo-cards-section .promo-card {
         position: relative;
         background: center/cover no-repeat;
@@ -251,7 +250,7 @@ session_start();
         }
     }
 
-    /* partnerships logos */
+       
     .brand-logo {
         max-height: 120px;
         width: auto;
@@ -285,7 +284,7 @@ if (!empty($_SESSION['warning'])) {
     unset($_SESSION['warning']); 
 }
 ?>
-    <!-- hero -->
+       
     <div class="container col-xxl-8 px-4 pt-3 pb-0 pt-lg-4 pb-lg-0">
         <div class="row hero-row g-4 g-lg-5">
             <div class="col-lg-6">
@@ -311,7 +310,7 @@ if (!empty($_SESSION['warning'])) {
                 </div>
             </div>
 
-            <!-- carousel column second -->
+               
             <div class="col-12 col-lg-6 d-flex">
                 <div class="hero-carousel mx-auto mx-lg-0">
                     <div id="carouselExampleIndicators" class="carousel slide">
@@ -325,13 +324,13 @@ if (!empty($_SESSION['warning'])) {
                         </div>
                         <div class="carousel-inner">
                             <div class="carousel-item active">
-                                <img src="./assets/keyboard.jpg" alt="...">
+                                <img src="/carriemart/assets/home-keyboard.jpg" alt="...">
                             </div>
                             <div class="carousel-item">
-                                <img src="./assets/piano.jpg" alt="...">
+                                <img src="/carriemart/assets/home-guitar.jpg" alt="...">
                             </div>
                             <div class="carousel-item">
-                                <img src="./assets/mic.jpg" alt="...">
+                                <img src="/carriemart/assets/home-mic.jfif" alt="...">
                             </div>
                         </div>
                         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
@@ -350,7 +349,7 @@ if (!empty($_SESSION['warning'])) {
         </div>
     </div>
 
-    <!-- two-up promo cards -->
+       
     <section class="promo-cards-section text-center mt-3 mt-lg-5">
         <div class="container col-xxl-8 px-4">
             <div class="row g-4">
@@ -374,7 +373,7 @@ if (!empty($_SESSION['warning'])) {
         </div>
     </section>
 
-    <!-- marketing -->
+       
     <section class="marketing-section text-center mt-3 mt-lg-5">
         <div class="container col-xxl-8 px-4">
             <div class="marketing-card">
@@ -387,7 +386,7 @@ if (!empty($_SESSION['warning'])) {
         </div>
     </section>
 
-    <!-- partnerships -->
+       
     <section class="mt-4 mt-lg-4 pt-0 mb-0">
         <div class="container col-xxl-8 px-4">
             <h2 class="pb-3 border-bottom display-0 mb-1" style="text-align:center;">Trusted by musicians and major brands across the Philippines</h2>
@@ -404,12 +403,12 @@ if (!empty($_SESSION['warning'])) {
                 <div class="col-6 col-sm-4 col-md-3 pt-3 pb-4 d-flex justify-content-center">
                     <img src="./assets/fender.png" alt="Partner 1" class="brand-logo">
                 </div>
-                <!-- add more logos, db-->
+                   
             </div>
         </div>
     </section>
 
-    <!-- features -->
+       
     <div class="container px-4 pt-2 pb-1 pt-lg-2 pb-lg-0">
         <div class="row row-cols-1 row-cols-md-2 align-items-md-center g-4 g-lg-5 pt-4">
 
@@ -462,7 +461,7 @@ if (!empty($_SESSION['warning'])) {
         </div>
     </div>
 
-    <!-- about post -->
+       
     <section class="about-section mt-3 mt-lg-4 pt-0 pb-4">
         <div class="container col-xxl-8 px-4">
             <div class="about-card">

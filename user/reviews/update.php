@@ -3,6 +3,7 @@ session_start();
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 
+   
 function mask_bad_words(?string $text): ?string {
     if ($text === null || $text === '') {
         return $text;
@@ -41,7 +42,7 @@ if ($rating < 1 || $rating > 5) {
     exit;
 }
 
-// Verify review belongs to user
+   
 $chk = $conn->prepare("SELECT review_id FROM product_review WHERE review_id = ? AND user_id = ?");
 if (!$chk) {
     header('Location: /carriemart/user/orders/orders.php?error=server');
@@ -57,11 +58,11 @@ if ($chk->num_rows === 0) {
 }
 $chk->close();
 
-// Mask bad words before saving
+   
 $review_title = mask_bad_words($review_title);
 $review_text = mask_bad_words($review_text);
 
-// Update review
+   
 $review_title_clean = $review_title !== '' ? $review_title : null;
 $review_text_clean = $review_text !== '' ? $review_text : null;
 

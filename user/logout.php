@@ -1,8 +1,8 @@
 <?php
 session_start();
-session_unset(); // remove all session variables
-session_destroy(); // destroy the session
-header("Location: /carriemart/index.php"); // redirect to homepage or login page
+session_unset();   
+session_destroy();   
+header("Location: /carriemart/index.php");   
 exit;
 
 ?>

@@ -21,7 +21,7 @@ $is_active   = isset($_POST['is_active']) ? 1 : 0;
 $currentPhotoUrl = isset($_POST['profile_photo_url_current']) ? trim($_POST['profile_photo_url_current']) : '';
 $newPhotoUrl = $currentPhotoUrl;
 
-// Basic validations that map to account-form.php warnings
+   
 if ($user_id <= 0) {
     header('Location: account-form.php?error=server');
     exit;
@@ -67,7 +67,7 @@ if ($role !== 'admin' && $role !== 'customer') {
     $role = 'customer';
 }
 
-// Unique username/email check (exclude this user)
+   
 $dup = $conn->prepare("SELECT user_id FROM accounts WHERE (username = ? OR email = ?) AND user_id <> ?");
 if ($dup) {
     $dup->bind_param('ssi', $username, $email, $user_id);
@@ -84,11 +84,11 @@ if ($dup) {
     exit;
 }
 
-// Optional profile photo upload
+   
 if (!empty($_FILES['profile_photo']['name']) && is_uploaded_file($_FILES['profile_photo']['tmp_name'])) {
     $file = $_FILES['profile_photo'];
     $allowedTypes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
-    $maxSize = 5 * 1024 * 1024; // 5MB
+    $maxSize = 5 * 1024 * 1024;   
 
     if ($file['error'] === UPLOAD_ERR_OK && $file['size'] <= $maxSize && isset($allowedTypes[$file['type']])) {
         $ext = $allowedTypes[$file['type']];
@@ -105,7 +105,7 @@ if (!empty($_FILES['profile_photo']['name']) && is_uploaded_file($_FILES['profil
     }
 }
 
-// Build update query (password optional)
+   
 if ($password !== '') {
     $hashed = password_hash($password, PASSWORD_DEFAULT);
     $sql = "UPDATE accounts

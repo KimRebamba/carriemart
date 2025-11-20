@@ -16,7 +16,7 @@ if ($position_id <= 0) {
     exit;
 }
 
-// Ensure position exists
+   
 $chk = $conn->prepare("SELECT position_id FROM positions WHERE position_id = ?");
 if (!$chk) {
     header('Location: position-form.php?id='.$position_id.'&error=server');
@@ -34,10 +34,10 @@ $chk->close;
 
 $errors = [];
 
-// Name
+   
 if ($position_name === '') $errors[] = 'name_required';
 
-// Rate
+   
 if ($monthly_rate_raw === '') $errors[] = 'rate_required';
 $rate_clean = str_replace([',','₱',' '], '', $monthly_rate_raw);
 if ($monthly_rate_raw !== '' && (!is_numeric($rate_clean) || (float)$rate_clean < 0)) {
@@ -45,7 +45,7 @@ if ($monthly_rate_raw !== '' && (!is_numeric($rate_clean) || (float)$rate_clean 
 }
 $monthly_rate = ($monthly_rate_raw === '' ? 0.00 : (float)$rate_clean);
 
-// Duplicate (exclude self)
+   
 if (!in_array('name_required', $errors, true)) {
     $dup = $conn->prepare("SELECT position_id FROM positions WHERE position_name = ? AND position_id <> ? LIMIT 1");
     if ($dup) {
@@ -64,7 +64,7 @@ if (!empty($errors)) {
     exit;
 }
 
-// Update
+   
 $stmt = $conn->prepare("UPDATE positions SET position_name = ?, monthly_rate = ? WHERE position_id = ?");
 if (!$stmt) {
     header('Location: position-form.php?id='.$position_id.'&error=server');

@@ -23,7 +23,7 @@ if ($order_return_id <= 0) {
     exit;
 }
 
-// Verify return belongs to user and get order_id
+   
 $chk = $conn->prepare("
     SELECT ord_ret.order_return_id, ord_ret.order_id, ord_ret.return_status
     FROM order_return ord_ret
@@ -44,7 +44,7 @@ if (!$chk->fetch()) {
 }
 $chk->close();
 
-// Handle cancel action
+   
 if ($action === 'cancel') {
     if ($rstat !== 'requested') {
         header('Location: /carriemart/user/returns/returns.php?error=cannot_cancel');
@@ -64,7 +64,7 @@ if ($action === 'cancel') {
     }
     $del->close();
     
-    // Update order status back to 'completed' when return is cancelled
+      
     $updOrder = $conn->prepare("UPDATE orders SET order_status = 'completed' WHERE order_id = ?");
     if ($updOrder) {
         $updOrder->bind_param('i', $order_id);
@@ -76,7 +76,7 @@ if ($action === 'cancel') {
     exit;
 }
 
-// Handle update action
+   
 if ($rstat !== 'requested') {
     header('Location: /carriemart/user/returns/return-details.php?mode=view&order_return_id=' . $order_return_id . '&error=cannot_edit');
     exit;

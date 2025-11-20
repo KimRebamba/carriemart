@@ -4,7 +4,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
 if (!$conn) { die('DB error'); }
 
-// Accept both legacy and new param names from brands/categories pages
+   
 $q            = isset($_GET['q']) ? trim($_GET['q']) : '';
 $categoryId   = isset($_GET['category_id']) ? trim($_GET['category_id']) : (isset($_GET['category']) ? trim($_GET['category']) : '');
 $brandId      = isset($_GET['brand_id']) ? trim($_GET['brand_id']) : (isset($_GET['brand']) ? trim($_GET['brand']) : '');
@@ -143,7 +143,7 @@ if (!$stmt) {
     $stmt->close();
 }
 
-// Category list
+   
 $categories = [];
 $catStmt = $conn->prepare("SELECT category_id, category_name FROM categories WHERE is_active=1 ORDER BY category_name ASC");
 if ($catStmt) {
@@ -155,7 +155,7 @@ if ($catStmt) {
     error_log('Failed to prepare categories query: ' . $conn->error);
     $categories = [];
 }
-// Brand list
+   
 $brands = [];
 $brandStmt = $conn->prepare("SELECT brand_id, brand_name FROM brands WHERE is_active=1 ORDER BY brand_name ASC");
 if ($brandStmt) {
@@ -180,7 +180,7 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="icon" href="/carriemart/assets/Logo.svg" type="image/svg+xml">
     <style>
-        /* Back line */
+           
         .back-line {
             display: flex;
             align-items: center;
@@ -198,7 +198,7 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
             width: 20px; height: 20px; opacity: .9;
         }
 
-        /* Grid */
+           
         .product-grid {
             display: grid;
             gap: 1.25rem;
@@ -207,7 +207,7 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
         @media (min-width: 768px) { .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         @media (min-width: 992px) { .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
-        /* Card */
+           
         .product-card {
             position: relative; 
             border: 1px solid transparent;
@@ -215,7 +215,7 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
             background: #fff;
             padding: 1rem;
             transition: border-color .2s ease, transform .2s ease, background-color .2s ease;
-            cursor: pointer; /* click!! */
+            cursor: pointer;    
         }
         .product-card:hover {
             border-color: rgba(0,0,0,.15);
@@ -233,10 +233,10 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
         .brand-link:hover{
             text-decoration: underline;
         }
-        /* Prevent pointer not clicking to specific details - annoying */
+           
         .product-card button,
         .product-card a.brand-link { position: relative; z-index: 2; }
-        .product-card .stretched-link { z-index: 1; } /* IMPORTANT - BOOTSTRAP HIDDEN LINK */
+        .product-card .stretched-link { z-index: 1; }    
 
         .product-img {
             width: 100%;
@@ -264,7 +264,7 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
 <body>
     <?php include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/secondary-header.php'); ?>
 
-    <!-- Go Back line -->
+       
     <div class="container mb-3">
         <a href="#" class="back-line rounded-2"
            onclick="history.back(); return false;">
@@ -275,7 +275,7 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
         </a>
     </div>
 
-    <!-- Filters toolbar -->
+       
     <div class="container mb-3">
         <div class="d-flex align-items-center justify-content-start">
             <div class="d-flex align-items-center gap-2">
@@ -309,7 +309,7 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
         </div>
     </div>
 
-    <!-- Offcanvas: Filters -->
+       
     <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filters</h5>
@@ -360,7 +360,7 @@ function fmtPrice($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
         </div>
     </div>
 
-    <!-- Product grid -->
+       
     <div class="container pb-5">
         <div class="product-grid">
             <?php if (empty($products)): ?>

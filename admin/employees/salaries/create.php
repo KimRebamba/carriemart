@@ -16,7 +16,7 @@ $status     = trim($_POST['status'] ?? 'pending');
 
 $errors = [];
 
-// Employee required
+   
 if ($emp_id <= 0) {
     $errors[] = 'emp_required';
 } else {
@@ -32,12 +32,12 @@ if ($emp_id <= 0) {
     }
 }
 
-// Pay date required
+   
 if ($pay_date === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $pay_date)) {
     $errors[] = 'pay_date_required';
 }
 
-// Rate required + numeric >= 0
+   
 if ($rate_raw === '') {
     $errors[] = 'rate_required';
 }
@@ -47,14 +47,14 @@ if ($rate_raw !== '' && (!is_numeric($rate_clean) || (float)$rate_clean < 0)) {
 }
 $rate_used = ($rate_raw === '' ? 0.00 : (float)$rate_clean);
 
-// Status enum
+   
 $allowedStatus = ['pending','paid','cancelled'];
 if (!in_array($status, $allowedStatus, true)) {
     $errors[] = 'status_invalid';
     $status = 'pending';
 }
 
-// Period validation (optional; if any provided both must be valid and in order)
+   
 $periodProvided = ($from_date !== '' || $to_date !== '');
 if ($periodProvided) {
     $validFmt = function($d){ return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
@@ -63,13 +63,13 @@ if ($periodProvided) {
     }
 }
 
-// Abort on errors
+   
 if (!empty($errors)) {
     header('Location: salary-form.php?error=' . implode(',', $errors));
     exit;
 }
 
-// Prepare nullable dates
+   
 $from_val = ($periodProvided && !in_array('period_invalid', $errors, true)) ? $from_date : null;
 $to_val   = ($periodProvided && !in_array('period_invalid', $errors, true)) ? $to_date   : null;
 

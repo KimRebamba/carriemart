@@ -14,7 +14,7 @@ if ($voucher === '') {
     exit;
 }
 
-// Get cart subtotal
+   
 $cartId = null;
 $sc = $conn->prepare("SELECT cart_id FROM cart WHERE user_id = ?");
 $sc->bind_param('i', $userId);
@@ -42,7 +42,7 @@ while ($cs->fetch()) {
 }
 $cs->close();
 
-// Validate voucher
+   
 $v = $conn->prepare("SELECT percent_sale, min_purchase_amount, max_discount_amount, from_date, to_date, is_active FROM vouchers WHERE voucher_code = ? LIMIT 1");
 $v->bind_param('s', $voucher);
 $v->execute();

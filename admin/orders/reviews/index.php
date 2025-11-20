@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// Inputs (GET)
+   
 $q          = isset($_GET['q']) ? trim($_GET['q']) : '';
 $sort       = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 $verified   = isset($_GET['verified']) ? trim($_GET['verified']) : '';
@@ -17,7 +17,7 @@ $sql = "SELECT r.review_id, r.product_order_id, r.user_id, r.rating,
 $types = '';
 $params = [];
 
-// Search (review_id / product_order_id / user_id / title)
+   
 if ($q !== '') {
     $like = '%'.$q.'%';
     $sql .= " AND (CAST(r.review_id AS CHAR) LIKE ?
@@ -28,14 +28,14 @@ if ($q !== '') {
     $params[] = $like; $params[] = $like; $params[] = $like; $params[] = $like;
 }
 
-// Verified filter
+   
 if ($verified === '1') {
     $sql .= " AND r.is_verified = 1";
 } elseif ($verified === '0') {
     $sql .= " AND r.is_verified = 0";
 }
 
-// Min rating filter
+   
 if ($minRating !== '' && ctype_digit($minRating)) {
     $mr = (int)$minRating;
     if ($mr >= 1 && $mr <= 5) {
@@ -45,7 +45,7 @@ if ($minRating !== '' && ctype_digit($minRating)) {
     }
 }
 
-// Date range (created_at date portion)
+   
 $validDate = function($d){ return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
 if ($dateFrom !== '' && $validDate($dateFrom)) {
     $sql .= " AND DATE(r.created_at) >= ?";
@@ -58,7 +58,7 @@ if ($dateTo !== '' && $validDate($dateTo)) {
     $params[] = $dateTo;
 }
 
-// Sorting
+   
 switch ($sort) {
     case 'oldest':
         $sql .= " ORDER BY r.created_at ASC, r.review_id ASC";
@@ -78,7 +78,7 @@ switch ($sort) {
         break;
 }
 
-// Fetch reviews
+   
 $reviews = [];
 $stmt = $conn->prepare($sql);
 if ($stmt) {
@@ -99,7 +99,7 @@ if ($stmt) {
     $stmt->close();
 }
 
-// Messages
+   
 $errorMsg = '';
 if (isset($_GET['error'])) {
     $code = trim($_GET['error']);
@@ -178,7 +178,7 @@ if (isset($_GET['status'])) {
                             <option value="ratingLow"  <?php if($sort==='ratingLow') echo 'selected'; ?>>Rating: Low→High</option>
                             <option value="verified"   <?php if($sort==='verified') echo 'selected'; ?>>Verified first</option>
                         </select>
-                        <!-- preserve filters -->
+                           
                         <input type="hidden" name="verified" value="<?php echo $verified; ?>">
                         <input type="hidden" name="min_rating" value="<?php echo $minRating; ?>">
                         <input type="hidden" name="date_from" value="<?php echo $dateFrom; ?>">
@@ -234,7 +234,7 @@ if (isset($_GET['status'])) {
             </div>
         </div>
 
-        <!-- Offcanvas: Filters (Reviews) -->
+           
         <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Reviews</h5>

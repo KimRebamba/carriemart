@@ -9,7 +9,7 @@ if ($id <= 0) {
     exit;
 }
 
-// Load review (edit-only)
+   
 $stmt = $conn->prepare("SELECT review_id, product_order_id, user_id, rating, review_title, review_text, is_verified, created_at
                         FROM product_review WHERE review_id = ?");
 if ($stmt) {
@@ -38,7 +38,7 @@ if ($stmt) {
     exit;
 }
 
-// Errors (query string from update.php redirect)
+   
 $errors = [];
 if (isset($_GET['error'])) {
     foreach (explode(',', $_GET['error']) as $e) {

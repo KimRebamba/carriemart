@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// Inputs (GET)
+   
 $q            = isset($_GET['q']) ? trim($_GET['q']) : '';
 $sort         = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 $active       = isset($_GET['active']) ? trim($_GET['active']) : '';
@@ -22,7 +22,7 @@ $sql = "SELECT p.product_id, p.product_name, b.brand_name, c.category_name,
 $types = '';
 $params = [];
 
-// Search: by id, name, model
+   
 if ($q !== '') {
     $like = '%'.$q.'%';
     $sql .= " AND (CAST(p.product_id AS CHAR) LIKE ? OR p.product_name LIKE ? OR p.model LIKE ?)";
@@ -30,14 +30,14 @@ if ($q !== '') {
     $params[] = $like; $params[] = $like; $params[] = $like;
 }
 
-// Active filter
+   
 if ($active === '1') {
     $sql .= " AND p.is_active = 1";
 } elseif ($active === '0') {
     $sql .= " AND p.is_active = 0";
 }
 
-// Condition filter
+   
 $allowedCond = ['new','used','refurbished'];
 if ($condFilter !== '' && in_array($condFilter, $allowedCond, true)) {
     $sql .= " AND p.product_condition = ?";
@@ -45,14 +45,14 @@ if ($condFilter !== '' && in_array($condFilter, $allowedCond, true)) {
     $params[] = $condFilter;
 }
 
-// Stock minimum
+   
 if ($stockMinRaw !== '' && ctype_digit($stockMinRaw)) {
     $sql .= " AND p.stock_level >= ?";
     $types .= 'i';
     $params[] = (int)$stockMinRaw;
 }
 
-// Price range
+   
 $cleanMoney = function($v) {
     $v = str_replace(['₱',',',' '],'',$v);
     if ($v === '') return null;
@@ -72,7 +72,7 @@ if ($priceMax !== null) {
     $params[] = $priceMax;
 }
 
-// Created date range
+   
 $validDate = function($d){ return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
 if ($createdFrom !== '' && $validDate($createdFrom)) {
     $sql .= " AND DATE(p.created_at) >= ?";
@@ -85,7 +85,7 @@ if ($createdTo !== '' && $validDate($createdTo)) {
     $params[] = $createdTo;
 }
 
-// Sorting
+   
 switch ($sort) {
     case 'oldest':
         $sql .= " ORDER BY p.created_at ASC, p.product_id ASC";
@@ -108,7 +108,7 @@ switch ($sort) {
         break;
 }
 
-// Fetch
+   
 $products = [];
 $stmt = $conn->prepare($sql);
 if ($stmt) {
@@ -202,7 +202,7 @@ function condClass($c) {
                             <option value="stockHigh" <?php if($sort==='stockHigh') echo 'selected'; ?>>Stock: High→Low</option>
                             <option value="active" <?php if($sort==='active') echo 'selected'; ?>>Active first</option>
                         </select>
-                        <!-- preserve filters -->
+                           
                         <input type="hidden" name="active" value="<?php echo $active; ?>">
                         <input type="hidden" name="condition" value="<?php echo $condFilter; ?>">
                         <input type="hidden" name="stock_min" value="<?php echo $stockMinRaw; ?>">
@@ -269,7 +269,7 @@ function condClass($c) {
             </div>
         </div>
 
-        <!-- Offcanvas: Filters (Products) -->
+           
         <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Products</h5>

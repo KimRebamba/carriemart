@@ -6,7 +6,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 
 if (!$conn) { die('DB error'); }
 
-// Resolve user id (session first, then ?id=)
+   
 $userId = 0;
 if (isset($_SESSION['user_id']) && ctype_digit((string)$_SESSION['user_id'])) {
     $userId = (int)$_SESSION['user_id'];
@@ -19,7 +19,7 @@ if ($userId <= 0) {
     exit;
 }
 
-// Ensure a cart exists for this user
+   
 $cartId = null;
 $st = $conn->prepare("SELECT cart_id FROM cart WHERE user_id = ?");
 $st->bind_param('i', $userId);
@@ -38,18 +38,18 @@ if ($cartId === null) {
     if ($cartId === null) { die('Unable to initialize cart'); }
 }
 
-// Handle actions: update quantity, remove, bulk
+   
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = isset($_POST['action']) ? trim($_POST['action']) : '';
 
-    // Update quantity by +/- 1
+      
     if ($action === 'bump') {
         $pid_raw = isset($_POST['product_id']) ? trim($_POST['product_id']) : '';
         $op = isset($_POST['op']) ? trim($_POST['op']) : '';
         $pid = ctype_digit($pid_raw) ? (int)$pid_raw : 0;
 
         if ($pid > 0 && ($op === 'inc' || $op === 'dec')) {
-            // Get current qty and stock
+              
             $q = $conn->prepare("
                 SELECT cp.quantity, p.stock_level
                 FROM cart_product cp
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Direct set quantity
+      
     if ($action === 'set_qty') {
         $pid_raw = isset($_POST['product_id']) ? trim($_POST['product_id']) : '';
         $qty_raw = isset($_POST['quantity']) ? trim($_POST['quantity']) : '';
@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Remove single item
+      
     if ($action === 'remove') {
         $pid_raw = isset($_POST['product_id']) ? trim($_POST['product_id']) : '';
         $pid = ctype_digit($pid_raw) ? (int)$pid_raw : 0;
@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Bulk actions (sel[] ids)
+      
     if ($action === 'bulk') {
         $bulk_action = isset($_POST['bulk_action']) ? trim($_POST['bulk_action']) : '';
         $sel = isset($_POST['sel']) && is_array($_POST['sel']) ? $_POST['sel'] : [];
@@ -130,14 +130,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!empty($ids)) {
             if ($bulk_action === 'delete') {
-                // Delete selected
-                // Build IN clause
+                  
+                  
                 $placeholders = implode(',', array_fill(0, count($ids), '?'));
                 $types = str_repeat('i', count($ids) + 1);
                 $sql = "DELETE FROM cart_product WHERE cart_id = ? AND product_id IN ($placeholders)";
                 $stmt = $conn->prepare($sql);
                 $bind = array_merge([$types, $cartId], $ids);
-                // dynamic bind_param
+                  
                 $refs = [];
                 foreach ($bind as $k => $v) { $refs[$k] = &$bind[$k]; }
                 call_user_func_array([$stmt, 'bind_param'], $refs);
@@ -146,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: cart.php?status=deleted');
                 exit;
             } elseif ($bulk_action === 'checkout') {
-                // Go to checkout with only selected product ids
+                  
                 $qs = http_build_query(['ids' => $ids]);
                 header('Location: /carriemart/user/cart/checkout-form.php?' . $qs);
                 exit;
@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch cart items
+   
 $items = [];
 $total = 0.0;
 
@@ -206,10 +206,10 @@ if (!$st) {
     $st->close();
     }
 
-// Add missing peso() helper used in the template
+   
 function peso($v){ return '₱' . number_format((float)$v, 2, '.', ','); }
 
-// Map and collect error/success messages (same pattern used in register.php warnings)
+   
 function cm_map_error($code) {
     if (strpos($code, 'stock_') === 0) return 'Insufficient stock for product #' . substr($code, 6) . '.';
     if (strpos($code, 'not_found_') === 0) return 'Product not found #' . substr($code, 10) . '.';
@@ -258,12 +258,12 @@ if (isset($_GET['status']) && $_GET['status'] !== '') {
     <title>CarrieMart: Cart</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-/* Back line */
+   
 .back-line { display:flex; align-items:center; gap:.5rem; padding:.5rem .75rem; border-bottom:1px solid var(--bs-border-color); color:var(--bs-body-color); text-decoration:none; }
 .back-line:hover { background-color: rgba(var(--bs-primary-rgb), .06); text-decoration: none; }
 .back-line .icon { width: 20px; height: 20px; opacity: .9; }
 
-/* Cart layout */
+   
 .cart-list { display: grid; grid-template-columns: 1fr; gap: 1rem; }
 .cart-card { border: 1px solid transparent; transition: border-color .15s ease; background: #fff; }
 .cart-card:hover { border-color: rgba(0,0,0,.15); }
@@ -291,7 +291,7 @@ if (isset($_GET['status']) && $_GET['status'] !== '') {
 <body>
 <?php include($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/third-header.php'); ?>
 
-<!-- Go Back line -->
+   
 <div class="container mb-3">
     <a href="#" class="back-line rounded-2" onclick="history.back(); return false;">
         <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
@@ -435,12 +435,12 @@ include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/footer.php');
                 return;
             }
             
-            // Create a form dynamically to ensure checkboxes are included
+              
             var form = document.createElement('form');
             form.method = 'POST';
             form.style.display = 'none';
             
-            // Add all checked checkboxes
+              
             checkboxes.forEach(function(cb){
                 var input = document.createElement('input');
                 input.type = 'hidden';
@@ -449,7 +449,7 @@ include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/footer.php');
                 form.appendChild(input);
             });
             
-            // Set action based on bulkAction
+              
             if (bulkAction === 'delete') {
                 form.action = '/carriemart/user/cart/delete.php';
             } else if (bulkAction === 'checkout') {

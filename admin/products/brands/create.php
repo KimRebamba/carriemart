@@ -9,32 +9,32 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $errors = [];
 
-// Gather inputs
+   
 $brand_name   = isset($_POST['brand_name']) ? trim($_POST['brand_name']) : '';
 $website      = isset($_POST['website']) ? trim($_POST['website']) : '';
 $description  = isset($_POST['description']) ? trim($_POST['description']) : '';
 $is_active_raw= isset($_POST['is_active']) ? trim($_POST['is_active']) : '1';
 
-// Validate required name
+   
 if ($brand_name === '') {
     $errors[] = 'name_required';
 }
 
-// Validate status
+   
 if (!in_array($is_active_raw, ['0','1'], true)) {
     $errors[] = 'status_invalid';
 }
 $is_active = ($is_active_raw === '1') ? 1 : 0;
 
-// Validate website (optional, allow without scheme; only length check)
+   
 if ($website !== '' && strlen($website) > 255) {
     $errors[] = 'website_invalid';
 }
 
-// Validate and stage logo upload (optional)
+   
 $logo_url = null;
 $uploadedFsPath = null;
-$maxSize    = 5 * 1024 * 1024; // 5MB
+$maxSize    = 5 * 1024 * 1024;   
 $allowedMime= ['image/jpeg','image/png','image/gif'];
 
 if (isset($_FILES['logo_file']) && is_array($_FILES['logo_file'])) {
@@ -58,7 +58,7 @@ if (isset($_FILES['logo_file']) && is_array($_FILES['logo_file'])) {
     }
 }
 
-// Duplicate check by brand_name
+   
 $dup = $conn->prepare("SELECT brand_id FROM brands WHERE brand_name = ? LIMIT 1");
 if ($dup) {
     $dup->bind_param('s', $brand_name);
@@ -70,13 +70,13 @@ if ($dup) {
     $errors[] = 'server';
 }
 
-// Stop if validation failed
+   
 if (!empty($errors)) {
     header('Location: brand-form.php?error=' . implode(',', array_values(array_unique($errors))));
     exit;
 }
 
-// If a logo was provided and validated, move it now (before DB as we need the path)
+   
 if (isset($_FILES['logo_file']) && is_array($_FILES['logo_file']) && $_FILES['logo_file']['error'] === UPLOAD_ERR_OK) {
     $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/carriemart/uploads/brand_logos';
     if (!is_dir($uploadDir)) {
@@ -87,7 +87,7 @@ if (isset($_FILES['logo_file']) && is_array($_FILES['logo_file']) && $_FILES['lo
     }
     $ext = strtolower(pathinfo($_FILES['logo_file']['name'], PATHINFO_EXTENSION));
     if ($ext === '') {
-        // derive from MIME
+          
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->file($_FILES['logo_file']['tmp_name']);
         if ($mime === 'image/jpeg') $ext = 'jpg';
@@ -107,7 +107,7 @@ if (isset($_FILES['logo_file']) && is_array($_FILES['logo_file']) && $_FILES['lo
     $logo_url = $destUrl;
 }
 
-// Insert brand
+   
 $conn->begin_transaction();
 try {
     $stmt = $conn->prepare("INSERT INTO brands (brand_name, logo_url, website, description, is_active) VALUES (?, ?, ?, ?, ?)");
@@ -119,7 +119,7 @@ try {
 
     $stmt->bind_param('ssssi', $brand_name, $logoParam, $websiteParam, $descParam, $is_active);
     if (!$stmt->execute()) {
-        // Handle unique constraint fallback
+          
         if ($conn->errno === 1062) {
             $stmt->close();
             if ($uploadedFsPath && is_file($uploadedFsPath)) @unlink($uploadedFsPath);

@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// GET inputs
+   
 $q           = isset($_GET['q']) ? trim($_GET['q']) : '';
 $sort        = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 $active      = isset($_GET['active']) ? trim($_GET['active']) : '';
@@ -16,7 +16,7 @@ $sql = "SELECT category_id, category_name, description, is_active, created_at
 $types = '';
 $params = [];
 
-// Free text search (id + name)
+   
 if ($q !== '') {
     $like = '%'.$q.'%';
     $sql .= " AND (CAST(category_id AS CHAR) LIKE ? OR category_name LIKE ?)";
@@ -25,21 +25,21 @@ if ($q !== '') {
     $params[] = $like;
 }
 
-// Name contains
+   
 if ($nameLike !== '') {
     $sql .= " AND category_name LIKE ?";
     $types .= 's';
     $params[] = '%'.$nameLike.'%';
 }
 
-// Active filter
+   
 if ($active === '1') {
     $sql .= " AND is_active = 1";
 } elseif ($active === '0') {
     $sql .= " AND is_active = 0";
 }
 
-// Date range
+   
 $validDate = function($d){ return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
 if ($createdFrom !== '' && $validDate($createdFrom)) {
     $sql .= " AND DATE(created_at) >= ?";
@@ -52,7 +52,7 @@ if ($createdTo !== '' && $validDate($createdTo)) {
     $params[] = $createdTo;
 }
 
-// Sorting
+   
 switch ($sort) {
     case 'oldest':
         $sql .= " ORDER BY created_at ASC, category_id ASC";
@@ -152,7 +152,7 @@ function badgeClassCat($isActive) { return $isActive ? 'cat-active' : 'cat-inact
                             <option value="nameZA" <?php if($sort==='nameZA') echo 'selected'; ?>>Name Z–A</option>
                             <option value="active" <?php if($sort==='active') echo 'selected'; ?>>Active first</option>
                         </select>
-                        <!-- Preserve filter hidden fields -->
+                           
                         <input type="hidden" name="active" value="<?php echo $active; ?>">
                         <input type="hidden" name="created_from" value="<?php echo $createdFrom; ?>">
                         <input type="hidden" name="created_to" value="<?php echo $createdTo; ?>">
@@ -205,7 +205,7 @@ function badgeClassCat($isActive) { return $isActive ? 'cat-active' : 'cat-inact
             </div>
         </div>
 
-        <!-- Offcanvas: Filters (Categories) -->
+           
         <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Categories</h5>

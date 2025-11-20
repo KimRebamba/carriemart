@@ -4,7 +4,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/user-auth.php');
 if (!$conn) { die('DB error'); }
 
-// If someone lands here via GET with codes from cart.php, forward them to checkout-form with same codes
+   
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $params = [];
     if (isset($_GET['error']) && $_GET['error'] !== '') $params['error'] = $_GET['error'];
@@ -20,26 +20,26 @@ if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) 
 
 $userId = (int)$_SESSION['user_id'];
 
-// Incoming fields
+   
 $itemsRaw = isset($_POST['items']) && is_array($_POST['items']) ? $_POST['items'] : [];
 $delivery_recipient = isset($_POST['delivery_recipient']) ? trim($_POST['delivery_recipient']) : '';
 $delivery_address   = isset($_POST['delivery_address']) ? trim($_POST['delivery_address']) : '';
 $delivery_phone     = isset($_POST['delivery_phone']) ? trim($_POST['delivery_phone']) : '';
 $payment_option_raw = isset($_POST['payment_option']) ? trim($_POST['payment_option']) : 'COD';
-// Map old values to new standardized values
+   
 $payment_option_map = [
     'cash_on_delivery' => 'COD',
     'credit_card' => 'Credit Card',
     'gcash' => 'e-Wallet'
 ];
 $payment_option = isset($payment_option_map[$payment_option_raw]) ? $payment_option_map[$payment_option_raw] : $payment_option_raw;
-// Validate against allowed values
+   
 if (!in_array($payment_option, ['COD', 'Credit Card', 'Bank Transfer', 'e-Wallet'])) {
     $payment_option = 'COD';
 }
 $voucher_code_raw   = isset($_POST['voucher']) ? trim($_POST['voucher']) : '';
 
-// Normalize items (product_id => qty)
+   
 $items = [];
 foreach ($itemsRaw as $pid => $qty) {
     if (ctype_digit((string)$pid)) {
@@ -52,7 +52,7 @@ if (empty($items)) {
     exit;
 }
 
-// Ensure cart exists for this user (for cleanup)
+   
 $cartId = null;
 $sc = $conn->prepare("SELECT cart_id FROM cart WHERE user_id = ?");
 if (!$sc) {
@@ -70,7 +70,7 @@ if ($cartId === null) {
     exit;
 }
 
-// Fetch product snapshots and lock rows for stock check
+   
 $pids = array_keys($items);
 $placeholders = implode(',', array_fill(0, count($pids), '?'));
 $types = str_repeat('i', count($pids));
@@ -85,7 +85,7 @@ FOR UPDATE
 $conn->begin_transaction();
 
 try {
-    // Prepare dynamic statement
+      
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         throw new Exception('Failed to prepare product query: ' . $conn->error);
@@ -110,7 +110,7 @@ try {
     }
     $stmt->close();
 
-    // Validate each item
+      
     $errors = [];
     $subtotal = 0.00;
     foreach ($items as $pid => $qty) {
@@ -126,7 +126,7 @@ try {
         exit;
     }
 
-    // Voucher (optional)
+      
     $voucher_code = null;
     $percent_sale = 0;
     $discount = 0.00;
@@ -165,10 +165,10 @@ try {
         }
     }
 
-    // Get current timestamp for date_ordered
+      
     $currentTimestamp = date('Y-m-d H:i:s');
 
-    // Insert order - NOW INCLUDING date_ordered and created_at
+      
     $ord = $conn->prepare("
         INSERT INTO orders
             (user_id, voucher_code, date_ordered, payment_status, order_status, payment_option,
@@ -195,7 +195,7 @@ try {
     $orderId = $ord->insert_id;
     $ord->close();
 
-    // Insert lines and update stock - NOW INCLUDING created_at
+      
     $line = $conn->prepare("INSERT INTO product_order (order_id, product_id, quantity, unit_price, created_at) VALUES (?, ?, ?, ?, ?)");
     if (!$line) { throw new Exception('prep_line'); }
 
@@ -213,7 +213,7 @@ try {
     $line->close();
     $updStock->close();
 
-    // Clean purchased items from cart
+      
     $ph = implode(',', array_fill(0, count($pids), '?'));
     $del = $conn->prepare("DELETE cp FROM cart_product cp JOIN cart c ON c.cart_id = cp.cart_id WHERE c.user_id = ? AND cp.product_id IN ($ph)");
     if ($del) {
@@ -229,7 +229,7 @@ try {
 
     $conn->commit();
 
-    // Fetch order meta to include in email
+      
     $date_ordered = '';
     $payment_status = 'pending';
     $order_status = 'pending';
@@ -246,7 +246,7 @@ try {
         $oi->close();
     }
 
-    // Build receipt data for email (simple formatting, no implode, no number_format)
+      
     $userEmail = null; $fullName = '';
     $acc = $conn->prepare("SELECT email, first_name, last_name FROM accounts WHERE user_id = ? LIMIT 1");
     if ($acc) {
@@ -257,7 +257,7 @@ try {
         $acc->close();
     }
 
-    // Calculate costs
+      
     $subtotal = 0.0;
     foreach ($items as $pid => $qty) {
         $subtotal = $subtotal + ($snap[$pid]['price'] * $qty);
@@ -266,7 +266,7 @@ try {
     $final_delivery = $db_delivery_fee;
     $grand_total = $subtotal - $final_discount + $final_delivery;
 
-    // Items text and html (simple)
+      
     $itemsText = "";
     $itemsHtml = "";
     foreach ($items as $pid => $qty) {
@@ -279,7 +279,7 @@ try {
 
     $subject  = "CarrieMart Order #" . $orderId;
 
-    // Keep text simple
+      
     $textBody = ""
         . "Order ID: #" . $orderId . "\n"
         . "Date Ordered: " . $date_ordered . "\n"
@@ -298,7 +298,7 @@ try {
         . "Discount: " . $final_discount . "\n"
         . "Total: " . $grand_total . "\n";
 
-    // Simple HTML
+      
     $htmlBody = ""
         . "<h4>Order #" . $orderId . "</h4>"
         . "<p>Date Ordered: " . $date_ordered . "</p>"
@@ -318,7 +318,7 @@ try {
         . "Discount: " . $final_discount . "<br>"
         . "<strong>Total: " . $grand_total . "</strong></p>";
 
-    // PHPMailer via Mailtrap SMTP
+      
     if ($userEmail) {
         require_once $_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/PHPMailer/src/Exception.php';
         require_once $_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/PHPMailer/src/PHPMailer.php';
@@ -329,8 +329,8 @@ try {
             $mail->isSMTP();
             $mail->Host       = 'sandbox.smtp.mailtrap.io';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'd06f8760800fa0';
-            $mail->Password   = 'c6053775ed89ea';
+            $mail->Username   = 'da9dbc54de8e7e';
+            $mail->Password   = 'd1cfc747ddfe4b';
             $mail->Port       = 2525;
             $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
 
@@ -348,7 +348,7 @@ try {
         }
     }
 
-    // On success, redirect back to cart with a success status and order id
+      
     header('Location: /carriemart/user/cart/cart.php?status=order_placed&order_id=' . $orderId);
     exit;
 

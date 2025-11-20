@@ -20,7 +20,7 @@ if ($salary_id <= 0) {
     exit;
 }
 
-// Ensure salary exists
+   
 $chk = $conn->prepare("SELECT salary_id FROM salaries WHERE salary_id = ?");
 if (!$chk) {
     header('Location: salary-form.php?id=' . $salary_id . '&error=server');
@@ -38,7 +38,7 @@ $chk->close();
 
 $errors = [];
 
-// Employee required and must exist
+   
 if ($emp_id <= 0) {
     $errors[] = 'emp_required';
 } else {
@@ -54,12 +54,12 @@ if ($emp_id <= 0) {
     }
 }
 
-// Pay date required (YYYY-MM-DD)
+   
 if ($pay_date === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $pay_date)) {
     $errors[] = 'pay_date_required';
 }
 
-// Rate required + numeric >= 0
+   
 if ($rate_raw === '') {
     $errors[] = 'rate_required';
 }
@@ -69,14 +69,14 @@ if ($rate_raw !== '' && (!is_numeric($rate_clean) || (float)$rate_clean < 0)) {
 }
 $rate_used = ($rate_raw === '' ? 0.00 : (float)$rate_clean);
 
-// Status enum
+   
 $allowedStatus = ['pending','paid','cancelled'];
 if (!in_array($status, $allowedStatus, true)) {
     $errors[] = 'status_invalid';
     $status = 'pending';
 }
 
-// Period validation (optional)
+   
 $periodProvided = ($from_date !== '' || $to_date !== '');
 if ($periodProvided) {
     $validFmt = function($d){ return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
@@ -90,11 +90,11 @@ if (!empty($errors)) {
     exit;
 }
 
-// Prepare nullable dates
+   
 $from_val = ($periodProvided ? $from_date : null);
 $to_val   = ($periodProvided ? $to_date   : null);
 
-// Update salary
+   
 $stmt = $conn->prepare("UPDATE salaries
                         SET emp_id = ?, pay_date = ?, rate_used = ?, status = ?, from_date = ?, to_date = ?
                         WHERE salary_id = ?");

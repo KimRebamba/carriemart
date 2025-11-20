@@ -16,7 +16,7 @@ if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) 
 
 $userId = (int)$_SESSION['user_id'];
 
-// Get form data
+   
 $first_name = isset($_POST['first_name']) ? trim($_POST['first_name']) : '';
 $last_name = isset($_POST['last_name']) ? trim($_POST['last_name']) : '';
 $username = isset($_POST['username']) ? trim($_POST['username']) : '';
@@ -29,7 +29,7 @@ $clearCart = isset($_POST['clear_cart']) && $_POST['clear_cart'] === '1';
 
 $errors = [];
 
-// Validate required fields
+   
 if ($username === '') {
     $errors[] = 'invalid_data';
 }
@@ -37,7 +37,7 @@ if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $errors[] = 'invalid_data';
 }
 
-// Check username uniqueness (if changed)
+   
 $chkUser = $conn->prepare("SELECT user_id FROM accounts WHERE username = ? AND user_id != ?");
 if (!$chkUser) {
     error_log('Failed to prepare username check query: ' . $conn->error);
@@ -52,7 +52,7 @@ if (!$chkUser) {
     $chkUser->close();
 }
 
-// Check email uniqueness (if changed)
+   
 $chkEmail = $conn->prepare("SELECT user_id FROM accounts WHERE email = ? AND user_id != ?");
 if (!$chkEmail) {
     error_log('Failed to prepare email check query: ' . $conn->error);
@@ -72,12 +72,12 @@ if (!empty($errors)) {
     exit;
 }
 
-// Handle profile photo upload
+   
 $newPhotoUrl = null;
 if (!empty($_FILES['profile_photo']['name']) && is_uploaded_file($_FILES['profile_photo']['tmp_name'])) {
     $file = $_FILES['profile_photo'];
     $allowedTypes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
-    $maxSize = 5 * 1024 * 1024; // 5MB
+    $maxSize = 5 * 1024 * 1024;   
 
     if ($file['error'] === UPLOAD_ERR_OK && $file['size'] <= $maxSize && isset($allowedTypes[$file['type']])) {
         $ext = $allowedTypes[$file['type']];
@@ -97,7 +97,7 @@ if (!empty($_FILES['profile_photo']['name']) && is_uploaded_file($_FILES['profil
     }
 }
 
-// Get current photo URL if not uploading new one
+   
 if ($newPhotoUrl === null) {
     $getPhoto = $conn->prepare("SELECT profile_photo_url FROM accounts WHERE user_id = ?");
     if ($getPhoto) {
@@ -110,18 +110,18 @@ if ($newPhotoUrl === null) {
     }
 }
 
-// Handle NULL values for optional fields
+   
 $address_clean = $address !== '' ? $address : null;
 $phone_clean = $phone_number !== '' ? $phone_number : null;
 $first_name_clean = $first_name !== '' ? $first_name : null;
 $last_name_clean = $last_name !== '' ? $last_name : null;
 
-// Determine is_active value
+   
 $is_active = $deactivate ? 0 : 1;
 
-// Build update query
+   
 if ($password !== '') {
-    // Update with password
+      
     $hashed = password_hash($password, PASSWORD_DEFAULT);
     $sql = "UPDATE accounts SET username=?, email=?, address=?, phone_number=?, first_name=?, last_name=?, profile_photo_url=?, is_active=?, password=? WHERE user_id=?";
     $stmt = $conn->prepare($sql);
@@ -138,7 +138,7 @@ if ($password !== '') {
         exit;
     }
 } else {
-    // Update without password
+      
     $sql = "UPDATE accounts SET username=?, email=?, address=?, phone_number=?, first_name=?, last_name=?, profile_photo_url=?, is_active=? WHERE user_id=?";
     $stmt = $conn->prepare($sql);
     if ($stmt) {
@@ -155,9 +155,9 @@ if ($password !== '') {
     }
 }
 
-// Handle clear cart if requested
+   
 if ($clearCart) {
-    // Get user's cart_id
+      
     $getCart = $conn->prepare("SELECT cart_id FROM cart WHERE user_id = ?");
     if ($getCart) {
         $getCart->bind_param('i', $userId);
@@ -165,7 +165,7 @@ if ($clearCart) {
         $getCart->bind_result($cart_id);
         if ($getCart->fetch()) {
             $getCart->close();
-            // Delete all cart products
+              
             $delCart = $conn->prepare("DELETE FROM cart_product WHERE cart_id = ?");
             if ($delCart) {
                 $delCart->bind_param('i', $cart_id);
@@ -178,17 +178,17 @@ if ($clearCart) {
     }
 }
 
-// Update session if username changed
+   
 if (isset($_SESSION['username']) && $_SESSION['username'] !== $username) {
     $_SESSION['username'] = $username;
 }
 
-// Update session if profile photo changed
+   
 if ($newPhotoUrl !== null) {
     $_SESSION['profile_pic'] = $newPhotoUrl;
 }
 
-// If account was deactivated, logout
+   
 if ($deactivate) {
     session_destroy();
     header('Location: /carriemart/main/products.php?status=account_deactivated');

@@ -1,10 +1,10 @@
 <?php
-// Redirect search requests to products.php, carrying the keyword and optional filters.
-// No DB work needed.
+   
+   
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Accept common parameter names for keyword
+   
 $q = '';
 if ($method === 'POST') {
     if (isset($_POST['q'])) $q = trim($_POST['q']);
@@ -16,7 +16,7 @@ if ($method === 'POST') {
     elseif (isset($_GET['s'])) $q = trim($_GET['s']);
 }
 
-// Optional filters passthrough (if present in the request)
+   
 $params = [];
 if ($q !== '') $params['q'] = $q;
 
@@ -33,7 +33,7 @@ $target = '/carriemart/main/products.php';
 $query  = !empty($params) ? ('?' . http_build_query($params)) : '';
 
 if ($method === 'POST') {
-    header('Location: ' . $target . $query, true, 303); // See Other to avoid form resubmission
+    header('Location: ' . $target . $query, true, 303);   
 } else {
     header('Location: ' . $target . $query, true, 302);
 }

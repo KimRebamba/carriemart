@@ -117,7 +117,7 @@ $percentSaleDisplay = (string)(int)$order['percent_sale'];
                     <h4 class="mb-3">View Order</h4>
 
                     <form>
-                        <!-- Order IDs & timestamps (read-only display) -->
+                           
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="form-label">Order ID</label>
@@ -133,7 +133,7 @@ $percentSaleDisplay = (string)(int)$order['percent_sale'];
 
                         <hr class="my-4">
 
-                        <!-- Account (read-only) & voucher -->
+                           
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label">User ID</label>
@@ -152,7 +152,7 @@ $percentSaleDisplay = (string)(int)$order['percent_sale'];
                             </div>
                         </div>
 
-                        <!-- Status & payment -->
+                           
                         <div class="row g-3 mt-0">
                             <div class="col-md-6">
                                 <label class="form-label">Payment status</label>
@@ -166,7 +166,7 @@ $percentSaleDisplay = (string)(int)$order['percent_sale'];
                             </div>
                         </div>
 
-                        <!-- Payment option & fee -->
+                           
                         <div class="row g-3 mt-0">
                             <div class="col-md-6">
                                 <label class="form-label">Payment option</label>
@@ -185,7 +185,7 @@ $percentSaleDisplay = (string)(int)$order['percent_sale'];
                             </div>
                         </div>
 
-                        <!-- Delivery details -->
+                           
                         <div class="row g-3 mt-0">
                             <div class="col-md-6">
                                 <label class="form-label">Recipient name</label>
@@ -204,7 +204,7 @@ $percentSaleDisplay = (string)(int)$order['percent_sale'];
                             </div>
                         </div>
 
-                        <!-- Completion (read-only) -->
+                           
                         <div class="row g-3 mt-0">
                             <div class="col-md-6">
                                 <label class="form-label">Completed at</label>

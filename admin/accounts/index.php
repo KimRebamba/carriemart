@@ -14,9 +14,9 @@ $sort          = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 
 $sql = "SELECT user_id, username, first_name, last_name, email, role, is_active, profile_photo_url, created_at FROM accounts WHERE 1";
 $types = '';
-$n = 0; // number of bound params
+$n = 0;   
 
-// Search
+   
 if ($search !== '') {
     $like = '%' . $search . '%';
     $sql .= " AND (username LIKE ? OR email LIKE ? OR CONCAT_WS(' ', first_name, last_name) LIKE ?)";
@@ -49,11 +49,8 @@ if ($emailContains !== '') {
     $sql .= " AND email LIKE ?";
     $types .= 's'; $n++; ${"p$n"} = '%' . $emailContains . '%';
 }
-
-//p$n -> p1 <<<< concat p . n - variable variable idk
-//each filter option selected, n++. I cant think of an easier way rn
-
-switch ($sort) { //sort === type of option in sort by
+   
+switch ($sort) {
     case 'nameAZ':
         $sql .= " ORDER BY first_name, last_name, username";
         break;
@@ -238,7 +235,7 @@ if ($stmt) {
             </div>
         </div>
 
-        <!-- Offcanvas: Filters -->
+           
         <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Users</h5>

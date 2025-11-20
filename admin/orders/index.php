@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// Inputs (GET)
+   
 $q              = isset($_GET['q']) ? trim($_GET['q']) : '';
 $sort           = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 $paymentStatus  = isset($_GET['payment_status']) ? trim($_GET['payment_status']) : '';
@@ -11,7 +11,7 @@ $paymentOption  = isset($_GET['payment_option']) ? trim($_GET['payment_option'])
 $dateFrom       = isset($_GET['date_from']) ? trim($_GET['date_from']) : '';
 $dateTo         = isset($_GET['date_to']) ? trim($_GET['date_to']) : '';
 
-// Build query
+   
 $sql = "SELECT o.order_id, o.user_id, o.voucher_code, o.payment_status, o.order_status,
                o.payment_option, o.date_ordered, o.delivery_fee, o.percent_sale,
                a.username, a.first_name, a.last_name, a.email,
@@ -23,7 +23,7 @@ $sql = "SELECT o.order_id, o.user_id, o.voucher_code, o.payment_status, o.order_
 $types = '';
 $params = [];
 
-// Search (order ID, user ID, voucher, username, email, full name)
+   
 if ($q !== '') {
     $like = '%'.$q.'%';
     $sql .= " AND (CAST(o.order_id AS CHAR) LIKE ?
@@ -37,7 +37,7 @@ if ($q !== '') {
     array_push($params, $like, $like, $like, $like, $like, $like);
 }
 
-// Filters
+   
 if (in_array($paymentStatus, ['pending','paid','refunded'], true)) {
     $sql .= " AND o.payment_status = ?";
     $types .= 's';
@@ -53,7 +53,7 @@ if ($paymentOption !== '') {
     $types .= 's';
     $params[] = $paymentOption;
 }
-// Date range on date_ordered (YYYY-MM-DD)
+   
 if ($dateFrom !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateFrom)) {
     $sql .= " AND DATE(o.date_ordered) >= ?";
     $types .= 's';
@@ -65,10 +65,10 @@ if ($dateTo !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateTo)) {
     $params[] = $dateTo;
 }
 
-// Add GROUP BY after WHERE clause
+   
 $sql .= " GROUP BY o.order_id";
 
-// Sorting
+   
 switch ($sort) {
     case 'oldest':
         $sql .= " ORDER BY o.date_ordered ASC, o.order_id ASC";
@@ -85,7 +85,7 @@ switch ($sort) {
         break;
 }
 
-// Fetch
+   
 $orders = [];
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
@@ -133,11 +133,11 @@ if (!$stmt) {
         .table thead th { white-space:nowrap; }
         .actions-cell .btn { padding:.25rem .55rem; }
         .status-badge { font-size:.65rem; letter-spacing:.5px; font-weight:600; padding:.35rem .55rem; border-radius:.35rem; text-transform:uppercase; }
-        /* Payment */
+           
         .pay-pending { background:#fff3cd; color:#664d03; border:1px solid #ffecb5; }
         .pay-paid { background:#d1e7dd; color:#0f5132; border:1px solid #badbcc; }
         .pay-refunded { background:#cfe2ff; color:#084298; border:1px solid #b6d4fe; }
-        /* Order */
+           
         .ord-pending { background:#f8f9fa; color:#495057; border:1px solid #dee2e6; }
         .ord-processing { background:#e2e3ff; color:#343a40; border:1px solid #d1d5ff; }
         .ord-shipped { background:#d7ecff; color:#084298; border:1px solid #c2e0ff; }
@@ -192,7 +192,7 @@ if (!$stmt) {
                             <option value="orderStatus"   <?php if($sort==='orderStatus') echo 'selected'; ?>>Order Status</option>
                         </select>
 
-                        <!-- preserve filters on sort/search -->
+                           
                         <input type="hidden" name="payment_status" value="<?php echo $paymentStatus; ?>">
                         <input type="hidden" name="order_status" value="<?php echo $orderStatus; ?>">
                         <input type="hidden" name="payment_option" value="<?php echo $paymentOption; ?>">
@@ -260,7 +260,7 @@ if (!$stmt) {
             </div>
         </div>
 
-        <!-- Offcanvas: Filters (Orders) -->
+           
         <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Orders</h5>

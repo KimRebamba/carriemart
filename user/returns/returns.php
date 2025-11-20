@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) 
 }
 $userId = (int)$_SESSION['user_id'];
 
-// Filters
+   
 $returnStatus = isset($_GET['return_status']) ? trim($_GET['return_status']) : '';
 $orderSearch = isset($_GET['order_search']) ? trim($_GET['order_search']) : '';
 $dateFrom = isset($_GET['date_from']) ? trim($_GET['date_from']) : '';
@@ -109,7 +109,7 @@ if ($stmt) {
     $stmt->close();
 }
 
-// For each return, fetch order products
+   
 foreach ($user_returns as $key => $ret) {
     $products = [];
     $ps = $conn->prepare("
@@ -237,7 +237,7 @@ function statusBadge($status) {
     </a>
 </div>
 
-<!-- Filters toolbar -->
+   
 <div class="container mb-3">
     <div class="d-flex align-items-center justify-content-start">
         <div class="d-flex align-items-center gap-2">
@@ -268,7 +268,7 @@ function statusBadge($status) {
     </div>
 </div>
 
-<!-- Offcanvas: Filters -->
+   
 <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Returns</h5>

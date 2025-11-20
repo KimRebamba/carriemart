@@ -6,11 +6,11 @@ if (!$conn) {
     die('Database connection failed.');
 }
 
-// Inputs
+   
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $isEdit = $id > 0;
 
-// Load selectable lists
+   
 $brands = [];
 $categories = [];
 $suppliers = [];
@@ -21,21 +21,9 @@ $loadList = function($sql, $bindTypes = '', $bindValues = []) use ($conn) {
     if ($stmt) {
         if ($bindTypes !== '') $stmt->bind_param($bindTypes, ...$bindValues);
         $stmt->execute();
-        $meta = $stmt->result_metadata();
-        if ($meta) {
-            $fields = [];
-            $row = [];
-            $params = [];
-            while ($field = $meta->fetch_field()) {
-                $fields[] = $field->name;
-                $row[$field->name] = null;
-                $params[] = &$row[$field->name];
-            }
-            call_user_func_array([$stmt, 'bind_result'], $params);
-            while ($stmt->fetch()) {
-                $rows[] = $row;
-            }
-            $meta->close();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $rows[] = $row;
         }
         $stmt->close();
     }
@@ -46,7 +34,7 @@ $brands = $loadList("SELECT brand_id, brand_name FROM brands WHERE is_active = 1
 $categories = $loadList("SELECT category_id, category_name FROM categories WHERE is_active = 1 ORDER BY category_name");
 $suppliers = $loadList("SELECT supplier_id, supplier_name FROM suppliers WHERE is_active = 1 ORDER BY supplier_name");
 
-// Load product for edit
+   
 $product = [
     'product_id' => '',
     'product_name' => '',
@@ -87,7 +75,7 @@ if ($isEdit) {
     }
     $stmt->close();
 
-    // Load existing photos
+      
     $photosStmt = $conn->prepare("SELECT product_photo_id, photo_url, is_primary, sort_order FROM product_photos WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC, product_photo_id ASC");
     if ($photosStmt) {
         $photosStmt->bind_param('i', $product['product_id']);
@@ -105,10 +93,10 @@ if ($isEdit) {
     }
 }
 
-// Determine action
+   
 $formAction = $isEdit ? 'update.php' : 'create.php';
 
-// Map error codes to messages (from create.php/update.php)
+   
 $errors = [];
 if (isset($_GET['error'])) {
     foreach (explode(',', $_GET['error']) as $e) {
@@ -145,9 +133,9 @@ if (isset($_GET['status'])) {
     }
 }
 
-// Simple helper to output selected/checked
+   
 $sel = function($a, $b) { return (string)$a === (string)$b ? 'selected' : ''; };
-$chk = function($a) { return (string)$a === '1' ? 'selected' : ''; }; // note: using select for is_active
+$chk = function($a) { return (string)$a === '1' ? 'selected' : ''; };   
 
 ?>
 <!DOCTYPE html>
@@ -219,7 +207,7 @@ $chk = function($a) { return (string)$a === '1' ? 'selected' : ''; }; // note: u
                     <?php endif; ?>
 
                     <form method="post" enctype="multipart/form-data" action="<?php echo $formAction; ?>">
-                        <!-- Product IDs & timestamps (read-only) -->
+                           
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="form-label">Product ID</label>
@@ -236,7 +224,7 @@ $chk = function($a) { return (string)$a === '1' ? 'selected' : ''; }; // note: u
 
                         <hr class="my-4">
 
-                        <!-- Core product fields -->
+                           
                         <div class="row g-3">
                             <div class="col-md-8">
                                 <label for="product_name" class="form-label">Product name</label>
@@ -325,7 +313,7 @@ $chk = function($a) { return (string)$a === '1' ? 'selected' : ''; }; // note: u
                                 <textarea id="specifications" name="specifications" class="form-control" rows="4"><?php echo $product['specifications']; ?></textarea>
                             </div>
 
-                            <!-- Product photos: upload multiple -->
+                               
                             <div class="col-12">
                                 <label class="form-label d-block">Product photos</label>
                                 <div class="mb-2">
@@ -335,7 +323,7 @@ $chk = function($a) { return (string)$a === '1' ? 'selected' : ''; }; // note: u
                                 <div id="photosNewPreview" class="d-flex flex-wrap gap-2"></div>
                             </div>
 
-                           <!-- Existing photos (if editing) -->
+                              
 <?php if (!empty($product_photos)): ?>
 <div class="col-12">
     <label class="form-label d-block mb-3">Existing photos</label>
@@ -404,7 +392,7 @@ $chk = function($a) { return (string)$a === '1' ? 'selected' : ''; }; // note: u
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script>
-    // Preview newly selected product photos
+      
     const photosInput = document.getElementById('photos_new');
     const photosPreview = document.getElementById('photosNewPreview');
     photosInput?.addEventListener('change', (e) => {

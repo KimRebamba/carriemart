@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) 
 
 $userId = (int)$_SESSION['user_id'];
 
-// Load user data
+   
 $userData = [];
 $stmt = $conn->prepare("SELECT user_id, username, email, address, phone_number, first_name, last_name, profile_photo_url, is_active, created_at FROM accounts WHERE user_id = ?");
 if ($stmt) {
@@ -149,7 +149,7 @@ $profilePhoto = $userData['profile_photo_url'] ? $userData['profile_photo_url'] 
                                 <?php echo $isDeactivated ? 'Deactivated' : 'Active'; ?>
                             </div>
                         </div>
-                        <!-- Profile picture -->
+                           
                     <div class="mb-0">
                         <label class="form-label d-block">Profile picture</label>
                         <div class="d-flex align-items-center gap-3">

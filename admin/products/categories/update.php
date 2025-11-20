@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $errors = [];
 
-// Inputs
+   
 $category_id_raw   = isset($_POST['category_id']) ? trim($_POST['category_id']) : '';
 $category_id       = ctype_digit($category_id_raw) ? (int)$category_id_raw : 0;
 
@@ -18,7 +18,7 @@ if ($category_id <= 0) {
     exit;
 }
 
-// Ensure category exists + get current photo
+   
 $db_photo_url = null;
 $exist = $conn->prepare("SELECT category_id, photo_url FROM categories WHERE category_id = ?");
 if (!$exist) {
@@ -40,18 +40,18 @@ $description        = isset($_POST['description']) ? trim($_POST['description'])
 $is_active_raw      = isset($_POST['is_active']) ? trim($_POST['is_active']) : '1';
 $current_photo_form = isset($_POST['photo_url_current']) ? trim($_POST['photo_url_current']) : '';
 
-// Validate name
+   
 if ($category_name === '') {
     $errors[] = 'name_required';
 }
 
-// Validate status
+   
 if (!in_array($is_active_raw, ['0','1'], true)) {
     $errors[] = 'status_invalid';
 }
 $is_active = $is_active_raw === '1' ? 1 : 0;
 
-// File validation
+   
 $maxSize     = 5 * 1024 * 1024;
 $allowedMime = ['image/jpeg','image/png','image/gif'];
 $newPhotoOk  = false;
@@ -83,7 +83,7 @@ if (isset($_FILES['photo_file']) && is_array($_FILES['photo_file'])) {
     }
 }
 
-// Duplicate name (exclude self)
+   
 $dup = $conn->prepare("SELECT category_id FROM categories WHERE category_name = ? AND category_id <> ? LIMIT 1");
 if ($dup) {
     $dup->bind_param('si', $category_name, $category_id);
@@ -95,13 +95,13 @@ if ($dup) {
     $errors[] = 'server';
 }
 
-// Short-circuit on errors
+   
 if (!empty($errors)) {
     header('Location: category-form.php?id='.$category_id.'&error=' . implode(',', array_values(array_unique($errors))));
     exit;
 }
 
-// Move new photo if provided
+   
 $newPhotoFs  = null;
 $newPhotoUrl = null;
 if ($newPhotoOk) {
@@ -132,11 +132,11 @@ if ($newPhotoOk) {
     $newPhotoUrl = $destUrl;
 }
 
-// Decide final photo_url
+   
 $finalPhotoUrl = $newPhotoUrl !== null ? $newPhotoUrl : ($current_photo_form !== '' ? $current_photo_form : ($db_photo_url !== null ? $db_photo_url : null));
 $descParam     = ($description !== '' ? $description : null);
 
-// Update record
+   
 $conn->begin_transaction();
 try {
     $stmt = $conn->prepare("UPDATE categories SET category_name = ?, description = ?, photo_url = ?, is_active = ? WHERE category_id = ?");
@@ -151,7 +151,7 @@ try {
 
     $conn->commit();
 
-    // Delete old photo file if replaced
+      
     if ($newPhotoFs && $db_photo_url && $db_photo_url !== $finalPhotoUrl) {
         $oldFs = $_SERVER['DOCUMENT_ROOT'] . $db_photo_url;
         if (is_file($oldFs)) @unlink($oldFs);

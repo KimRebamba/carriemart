@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// GET inputs
+   
 $q            = isset($_GET['q']) ? trim($_GET['q']) : '';
 $sort         = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 $typeFilter   = isset($_GET['type']) ? trim($_GET['type']) : '';
@@ -22,7 +22,7 @@ $sql = "SELECT exp_id, expense_type, description, amount, status, due_date, paid
 $types = '';
 $params = [];
 
-// Search (exp_id, type, description)
+   
 if ($q !== '') {
     $like = '%'.$q.'%';
     $sql .= " AND (CAST(exp_id AS CHAR) LIKE ? OR expense_type LIKE ? OR description LIKE ?)";
@@ -30,21 +30,21 @@ if ($q !== '') {
     $params[] = $like; $params[] = $like; $params[] = $like;
 }
 
-// Expense type filter
+   
 if ($typeFilter !== '' && in_array($typeFilter, ['inventory_purchase','shipping','maintenance','rent','utilities','other'], true)) {
     $sql .= " AND expense_type = ?";
     $types .= 's';
     $params[] = $typeFilter;
 }
 
-// Status filter
+   
 if ($statusFilter !== '' && in_array($statusFilter, ['pending','paid'], true)) {
     $sql .= " AND status = ?";
     $types .= 's';
     $params[] = $statusFilter;
 }
 
-// Due date range
+   
 if ($dueFrom !== '' && $validDate($dueFrom)) {
     $sql .= " AND due_date >= ?";
     $types .= 's';
@@ -56,7 +56,7 @@ if ($dueTo !== '' && $validDate($dueTo)) {
     $params[] = $dueTo;
 }
 
-// Amount range
+   
 if ($isNumber($amountMin)) {
     $sql .= " AND amount >= ?";
     $types .= 'd';
@@ -68,14 +68,14 @@ if ($isNumber($amountMax)) {
     $params[] = (float)$amountMax;
 }
 
-// Description contains (separate from global search)
+   
 if ($descContains !== '') {
     $sql .= " AND description LIKE ?";
     $types .= 's';
     $params[] = '%'.$descContains.'%';
 }
 
-// Sorting
+   
 switch ($sort) {
     case 'oldest':
         $sql .= " ORDER BY created_at ASC, exp_id ASC";
@@ -87,11 +87,11 @@ switch ($sort) {
         $sql .= " ORDER BY amount ASC, created_at ASC";
         break;
     case 'dueSoon':
-        // Put earliest due dates first; NULLs last
+          
         $sql .= " ORDER BY (due_date IS NULL) ASC, due_date ASC, created_at DESC";
         break;
     case 'statusPaid':
-        // Paid first then pending
+          
         $sql .= " ORDER BY (status='paid') DESC, created_at DESC";
         break;
     case 'newest':
@@ -192,7 +192,7 @@ function expBadgeClass($status) {
                             <option value="dueSoon" <?php if($sort==='dueSoon') echo 'selected'; ?>>Due soon</option>
                             <option value="statusPaid" <?php if($sort==='statusPaid') echo 'selected'; ?>>Paid first</option>
                         </select>
-                        <!-- Preserve applied filters -->
+                           
                         <input type="hidden" name="type" value="<?php echo $typeFilter; ?>">
                         <input type="hidden" name="status" value="<?php echo $statusFilter; ?>">
                         <input type="hidden" name="due_from" value="<?php echo $dueFrom; ?>">
@@ -253,7 +253,7 @@ function expBadgeClass($status) {
             </div>
         </div>
 
-        <!-- Offcanvas: Filters (Expenses) -->
+           
         <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Expenses</h5>

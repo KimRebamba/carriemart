@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/admin-auth.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
-// GET inputs
+   
 $q           = isset($_GET['q']) ? trim($_GET['q']) : '';
 $sort        = isset($_GET['sort']) ? trim($_GET['sort']) : '';
 $active      = isset($_GET['active']) ? trim($_GET['active']) : '';
@@ -13,12 +13,12 @@ $contactLike = isset($_GET['contact']) ? trim($_GET['contact']) : '';
 $emailLike   = isset($_GET['email']) ? trim($_GET['email']) : '';
 $addressLike = isset($_GET['address']) ? trim($_GET['address']) : '';
 
-// Build query
+   
 $sql   = "SELECT supplier_id, supplier_name, contact_person, contact_number, email, address, is_active, created_at FROM suppliers WHERE 1";
 $types = '';
 $params= [];
 
-// Free text search (id, name, contact person, number, email)
+   
 if ($q !== '') {
     $like = '%'.$q.'%';
     $sql .= " AND (
@@ -32,7 +32,7 @@ if ($q !== '') {
     $params[] = $like; $params[] = $like; $params[] = $like; $params[] = $like; $params[] = $like;
 }
 
-// Individual filters
+   
 if ($nameLike !== '') {
     $sql .= " AND supplier_name LIKE ?";
     $types .= 's';
@@ -54,14 +54,14 @@ if ($addressLike !== '') {
     $params[] = '%'.$addressLike.'%';
 }
 
-// Active status
+   
 if ($active === '1') {
     $sql .= " AND is_active = 1";
 } elseif ($active === '0') {
     $sql .= " AND is_active = 0";
 }
 
-// Date range (simple YYYY-MM-DD check)
+   
 $validDate = function($d){ return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
 if ($createdFrom !== '' && $validDate($createdFrom)) {
     $sql .= " AND DATE(created_at) >= ?";
@@ -74,7 +74,7 @@ if ($createdTo !== '' && $validDate($createdTo)) {
     $params[] = $createdTo;
 }
 
-// Sorting
+   
 switch ($sort) {
     case 'oldest':
         $sql .= " ORDER BY created_at ASC, supplier_id ASC";
@@ -179,7 +179,7 @@ function supBadgeClass($isActive) {
                             <option value="nameZA" <?php if($sort==='nameZA') echo 'selected'; ?>>Name Z–A</option>
                             <option value="active" <?php if($sort==='active') echo 'selected'; ?>>Active first</option>
                         </select>
-                        <!-- Preserve filters -->
+                           
                         <input type="hidden" name="active" value="<?php echo $active; ?>">
                         <input type="hidden" name="created_from" value="<?php echo $createdFrom; ?>">
                         <input type="hidden" name="created_to" value="<?php echo $createdTo; ?>">
@@ -239,7 +239,7 @@ function supBadgeClass($isActive) {
             </div>
         </div>
 
-        <!-- Offcanvas Filters -->
+           
         <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel" data-bs-scroll="true">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filter Suppliers</h5>

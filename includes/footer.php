@@ -1,5 +1,5 @@
 
-    <!--footer-->
+       
     <hr>
      <footer class="container py-lg-5 py-md-4 py-3">
         <div class="row">
@@ -12,7 +12,7 @@
                     JM Carutcho</small>
             </div>
             <div class="col-6 col-md">
-                <!-- empty div for spacing lol */ -->
+                   
             </div>
             <div class="col-6 col-md">
                 <h5>Shortcuts</h5>

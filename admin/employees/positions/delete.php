@@ -11,7 +11,7 @@ if ($id <= 0) {
 $conn->begin_transaction();
 
 try {
-    // Ensure position exists
+      
     $sel = $conn->prepare("SELECT position_id FROM positions WHERE position_id = ?");
     if (!$sel) throw new Exception('server');
     $sel->bind_param('i', $id);
@@ -23,7 +23,7 @@ try {
     }
     $sel->close();
 
-    // Count employees referencing (will be auto-set NULL on delete)
+      
     $empCount = 0;
     $cnt = $conn->prepare("SELECT COUNT(*) FROM employees WHERE current_position_id = ?");
     if ($cnt) {
@@ -34,7 +34,7 @@ try {
         $cnt->close();
     }
 
-    // Delete position
+      
     $del = $conn->prepare("DELETE FROM positions WHERE position_id = ?");
     if (!$del) throw new Exception('server');
     $del->bind_param('i', $id);

@@ -15,7 +15,7 @@ if ($review_id <= 0) {
     exit;
 }
 
-// Check review exists
+   
 $chk = $conn->prepare("SELECT review_id FROM product_review WHERE review_id = ?");
 if (!$chk) {
     header('Location: review-form.php?id=' . $review_id . '&error=server');
@@ -33,7 +33,7 @@ $chk->close();
 
 $errors = [];
 
-// Validate is_verified (only field allowed to change)
+   
 if (!in_array($is_verified, ['0','1'], true)) {
     $errors[] = 'verify_invalid';
 }

@@ -93,7 +93,7 @@ $brand = [
                     <h4 class="mb-3">View Brand</h4>
 
                     <form>
-                         <!-- Brand IDs & timestamps (read-only) -->
+                            
                          <div class="row g-3">
                              <div class="col-md-4">
                                  <label class="form-label">Brand ID</label>
@@ -111,7 +111,7 @@ $brand = [
  
                          <hr class="my-4">
  
-                         <!-- Core brand fields -->
+                            
                          <div class="row g-3">
                              <div class="col-12">
                                 <label class="form-label">Brand name</label>
@@ -125,7 +125,7 @@ $brand = [
                                 <label class="form-label">Description</label>
                                 <textarea class="form-control" rows="4" disabled><?= ($brand['description'] ?? '') ?></textarea>
                              </div>
-                             <!-- Brand logo (placed below description) -->
+                                
                              <div class="col-12">
                                 <label class="form-label d-block">Brand logo</label>
                                 <img class="avatar-lg border"

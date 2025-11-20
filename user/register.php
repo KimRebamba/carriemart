@@ -1,7 +1,5 @@
 <?php
-//PDO was not used because I don't.. understand it HAHAHA
-//if something goes wrong with it, eeerr yeah, nope. No PDO.
-
+   
 require_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/config.php');
 
 if (!$conn) {
@@ -21,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $address    = trim($_POST['address'] ?? '');
     $phone      = trim($_POST['phone_number'] ?? '');
 
-    // error messages to show user
+      
     if (empty($first_name)) {
         $errors[] = 'First name is required.';
     }
@@ -40,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
    if (empty($phone)) {
         $errors[] = 'Phone number is required.';
     } else {
-        // Regex: 09XX-XXXX-XXX
+          
         if (!preg_match('/^09\d{2}\d{4}\d{3}$/', $phone)) {
             $errors[] = 'Phone must match format 09XX-XXXX-XXX.';
         }
@@ -49,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Password must be at least 8 characters.';
     }
 
-    //works
     if (empty($errors)) {
         $stmt = $conn->prepare("SELECT COUNT(*) FROM accounts WHERE username = ?");
         if (!$stmt) {
@@ -68,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-     //works
     if (empty($errors)) {
         $stmt = $conn->prepare("SELECT COUNT(*) FROM accounts WHERE email = ?");
         if (!$stmt) {
@@ -105,7 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!is_dir($upload_dir)) {
                     mkdir($upload_dir, 0775, true);
                 }
-                //if two pics have the same name, fck em
                 $filename = 'pp_' . uniqid() . '.' . $ext;
                 $destination = $upload_dir . '/' . $filename;
 
@@ -242,7 +237,7 @@ mysqli_close($conn);
                                 <input class="form-control" type="file" id="formFile" name="profile_photo" accept="image/*">
                             </div>
 
-                            <?php if (!empty($errors)): ?> <!-- display ERRORS -->
+                            <?php if (!empty($errors)): ?>    
                         <div class="alert alert-danger mb-0" role="alert">
                             <?php foreach ($errors as $error): ?>
                                 <div>- <?php echo $error; ?></div>

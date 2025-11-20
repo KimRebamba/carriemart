@@ -11,7 +11,7 @@ if ($id <= 0) {
 $conn->begin_transaction();
 
 try {
-    // Ensure voucher exists + get code
+      
     $sel = $conn->prepare("SELECT voucher_code FROM vouchers WHERE voucher_id = ?");
     if (!$sel) throw new Exception('server');
     $sel->bind_param('i', $id);
@@ -23,7 +23,7 @@ try {
     }
     $sel->close();
 
-    // Count related orders (will be set NULL on delete)
+      
     $ordersAffected = 0;
     $cnt = $conn->prepare("SELECT COUNT(*) FROM orders WHERE voucher_code = ?");
     if ($cnt) {
@@ -34,7 +34,7 @@ try {
         $cnt->close();
     }
 
-    // Delete voucher
+      
     $del = $conn->prepare("DELETE FROM vouchers WHERE voucher_id = ?");
     if (!$del) throw new Exception('server');
     $del->bind_param('i', $id);

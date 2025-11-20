@@ -17,7 +17,7 @@ $is_active_raw      = trim($_POST['is_active'] ?? '1');
 
 $errors = [];
 
-// Code required + basic pattern
+   
 if ($voucher_code === '') {
     $errors[] = 'code_required';
 } else {
@@ -37,7 +37,7 @@ if ($voucher_code === '') {
     }
 }
 
-// Percent sale (optional; if provided must be 0–100 integer)
+   
 $percent_sale = null;
 if ($percent_sale_raw !== '') {
     if (!ctype_digit($percent_sale_raw)) {
@@ -48,7 +48,7 @@ if ($percent_sale_raw !== '') {
     }
 }
 
-// Min purchase amount (required numeric >=0)
+   
 $min_clean = str_replace(['₱',',',' '],'',$min_purchase_raw);
 if ($min_clean === '') $min_clean = '0';
 if (!is_numeric($min_clean) || (float)$min_clean < 0) {
@@ -56,7 +56,7 @@ if (!is_numeric($min_clean) || (float)$min_clean < 0) {
 }
 $min_purchase_amount = (float)$min_clean;
 
-// Max discount amount (optional numeric >=0)
+   
 $max_discount_amount = null;
 if ($max_discount_raw !== '') {
     $max_clean = str_replace(['₱',',',' '],'',$max_discount_raw);
@@ -67,13 +67,13 @@ if ($max_discount_raw !== '') {
     }
 }
 
-// Active status
+   
 if (!in_array($is_active_raw, ['0','1'], true)) {
     $errors[] = 'status_invalid';
 }
 $is_active = ($is_active_raw === '1') ? 1 : 0;
 
-// Date range validation (only if both provided)
+   
 $validDate = function($d){ return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
 if ($from_date !== '' && !$validDate($from_date)) $errors[] = 'date_range_invalid';
 if ($to_date !== '' && !$validDate($to_date)) $errors[] = 'date_range_invalid';
@@ -81,17 +81,17 @@ if (!in_array('date_range_invalid',$errors,true) && $from_date !== '' && $to_dat
     $errors[] = 'date_range_invalid';
 }
 
-// Abort on errors
+   
 if (!empty($errors)) {
     header('Location: voucher-form.php?error=' . implode(',', $errors));
     exit;
 }
 
-// Prepare nullable fields
-$percent_val = $percent_sale; // may be null
+   
+$percent_val = $percent_sale;   
 $from_val    = ($from_date !== '' ? $from_date : null);
 $to_val      = ($to_date !== '' ? $to_date : null);
-$max_val     = $max_discount_amount; // may be null
+$max_val     = $max_discount_amount;   
 
 $stmt = $conn->prepare("INSERT INTO vouchers
     (voucher_code, percent_sale, min_purchase_amount, max_discount_amount, from_date, to_date, is_active)
@@ -101,7 +101,7 @@ if (!$stmt) {
     exit;
 }
 
-// Bind (i for int, d for decimal, s for string; nulls handled via set_null with appropriate type)
+   
 $stmt->bind_param(
     'siddssi',
     $voucher_code,

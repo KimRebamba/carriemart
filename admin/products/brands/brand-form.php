@@ -6,11 +6,11 @@ if (!$conn) {
     die('Database connection failed.');
 }
 
-// Inputs
+   
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $isEdit = $id > 0;
 
-// Load brand for edit or set defaults
+   
 $brand = [
     'brand_id' => '',
     'brand_name' => '',
@@ -38,10 +38,10 @@ if ($isEdit) {
     $stmt->close();
 }
 
-// Determine action target
+   
 $formAction = $isEdit ? 'update.php' : 'create.php';
 
-// Map error codes from create/update
+   
 $errors = [];
 if (isset($_GET['error'])) {
     $codes = explode(',', $_GET['error']);
@@ -60,7 +60,7 @@ if (isset($_GET['error'])) {
     }
 }
 
-// Success message
+   
 $success = false;
 $successText = '';
 if (isset($_GET['status'])) {
@@ -73,10 +73,10 @@ if (isset($_GET['status'])) {
     }
 }
 
-// Helpers for selected attributes (no HTML5 validation)
+   
 $sel = function($a, $b) { return ((string)$a === (string)$b) ? 'selected' : ''; };
 
-// Pick a preview image
+   
 $logoPreview = ($brand['logo_url'] !== '') ? $brand['logo_url'] : '/carriemart/assets/person-circle.svg';
 ?>
 <!DOCTYPE html>
@@ -148,7 +148,7 @@ $logoPreview = ($brand['logo_url'] !== '') ? $brand['logo_url'] : '/carriemart/a
                     <?php endif; ?>
 
                     <form method="post" enctype="multipart/form-data" action="<?php echo $formAction; ?>">
-                        <!-- Brand IDs & timestamps (read-only) -->
+                           
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label">Brand ID</label>
@@ -172,7 +172,7 @@ $logoPreview = ($brand['logo_url'] !== '') ? $brand['logo_url'] : '/carriemart/a
 
                         <hr class="my-4">
 
-                        <!-- Core brand fields -->
+                           
                         <div class="row g-3">
                             <div class="col-12">
                                 <label for="brand_name" class="form-label">Brand name</label>
@@ -189,7 +189,7 @@ $logoPreview = ($brand['logo_url'] !== '') ? $brand['logo_url'] : '/carriemart/a
                                 <label for="description" class="form-label">Description</label>
                                 <textarea id="description" name="description" class="form-control" rows="4"><?php echo $brand['description']; ?></textarea>
                             </div>
-                            <!-- Brand logo (placed below description) -->
+                               
                             <div class="col-12">
                                 <label class="form-label d-block">Brand logo</label>
                                 <div class="d-flex align-items-center gap-3">
@@ -230,7 +230,7 @@ $logoPreview = ($brand['logo_url'] !== '') ? $brand['logo_url'] : '/carriemart/a
     </div>
 
     <script>
-    // Simple preview for brand logo
+      
     const fileInput = document.getElementById('formFile');
     const avatarPreview = document.getElementById('avatarPreview');
     fileInput?.addEventListener('change', (e) => {

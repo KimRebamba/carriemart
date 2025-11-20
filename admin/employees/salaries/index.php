@@ -14,7 +14,7 @@ $sql = "SELECT s.salary_id, s.emp_id, e.first_name, e.last_name,
 $types = '';
 $params = [];
 
-// Search (salary ID, emp ID, employee name)
+   
 if ($q !== '') {
     $like = "%$q%";
     $sql .= " AND (CAST(s.salary_id AS CHAR) LIKE ? OR CAST(s.emp_id AS CHAR) LIKE ? OR CONCAT_WS(' ', e.first_name, e.last_name) LIKE ?)";
@@ -24,14 +24,14 @@ if ($q !== '') {
     $params[] = $like;
 }
 
-// Status filter
+   
 if (in_array($status, ['pending','paid','cancelled'], true)) {
     $sql .= " AND s.status = ?";
     $types .= 's';
     $params[] = $status;
 }
 
-// Sorting
+   
 switch ($sort) {
     case 'oldest':
         $sql .= " ORDER BY s.pay_date ASC, s.salary_id ASC";

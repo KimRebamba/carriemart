@@ -9,8 +9,8 @@ if (!$conn) {
     die('Database connection failed: ' . mysqli_connect_error());
 }
 
-define("MAILTRAP_TOKEN", "30beefe8149ce6b472b64c2e7f67c275");
+define("MAILTRAP_TOKEN", "a11ee90df35ec69c6923d2a2fba5f55e");
 define("MAILTRAP_HOST", "sandbox.smtp.mailtrap.io");
 define("MAILTRAP_PORT", 2525);
-define("MAILTRAP_USERNAME", "d06f8760800fa0");
-define("MAILTRAP_PASSWORD", "c6053775ed89ea");
+define("MAILTRAP_USERNAME", "da9dbc54de8e7e");
+define("MAILTRAP_PASSWORD", "d1cfc747ddfe4b");

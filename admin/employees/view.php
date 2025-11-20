@@ -8,7 +8,7 @@ if ($id <= 0) {
     exit;
 }
 
-// Load employee
+   
 $emp = [];
 $stmt = $conn->prepare("SELECT e.emp_id, e.first_name, e.last_name, e.email, e.phone_number, e.address,
                                e.birth_date, e.gender, e.employment_status, e.hire_date,
@@ -43,7 +43,7 @@ if ($stmt->fetch()) {
     exit;
 }
 
-// Load all positions for read-only select
+   
 $positions = [];
 $ps = $conn->prepare("SELECT position_id, position_name FROM positions ORDER BY position_name ASC");
 if ($ps) {
@@ -109,7 +109,7 @@ if ($ps) {
                     <h4 class="mb-3">View Employee</h4>
 
                     <form>
-                        <!-- IDs & timestamps (read-only display) -->
+                           
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="form-label">Employee ID</label>
@@ -123,7 +123,7 @@ if ($ps) {
 
                         <hr class="my-4">
 
-                        <!-- Basic info (read-only) -->
+                           
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <label class="form-label">First name</label>
@@ -149,7 +149,7 @@ if ($ps) {
 
                         <hr class="my-4">
 
-                        <!-- Core employee fields (read-only) -->
+                           
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="birth_date" class="form-label">Birth date</label>

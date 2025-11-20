@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $errors = [];
 
-// Inputs
+   
 $expense_type = isset($_POST['expense_type']) ? trim($_POST['expense_type']) : '';
 $description  = isset($_POST['description']) ? trim($_POST['description']) : '';
 $amount_raw   = isset($_POST['amount']) ? trim($_POST['amount']) : '';
@@ -57,7 +57,7 @@ if ($paid_date !== '') {
     }
 }
 
-// Date ordering check (only if both valid and non-empty)
+   
 if ($due_date !== '' && $paid_date !== '' && $dueValid && $paidValid) {
     if (strtotime($paid_date) < strtotime($due_date)) {
         $errors[] = 'date_order';
@@ -69,7 +69,7 @@ if (!empty($errors)) {
     exit;
 }
 
-// Normalize optional fields
+   
 $descParam = ($description !== '' ? $description : null);
 $dueParam  = ($due_date !== '' ? $due_date : null);
 $paidParam = ($paid_date !== '' ? $paid_date : null);

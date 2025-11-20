@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id']) || !ctype_digit((string)$_SESSION['user_id'])) 
 }
 $userId = (int)$_SESSION['user_id'];
 
-// Ensure cart
+   
 $cartId = null;
 $sc = $conn->prepare("SELECT cart_id FROM cart WHERE user_id = ?");
 $sc->bind_param('i', $userId);
@@ -23,14 +23,14 @@ if ($cartId === null) {
     exit;
 }
 
-// Collect selected product ids (POST preferred)
+   
 $ids = [];
 if (isset($_POST['sel']) && is_array($_POST['sel'])) {
     foreach ($_POST['sel'] as $raw) {
         if (ctype_digit((string)$raw)) $ids[] = (int)$raw;
     }
 } elseif (isset($_GET['ids'])) {
-    // ids=1,2,3 variant
+      
     $parts = explode(',', trim($_GET['ids']));
     foreach ($parts as $raw) {
         if (ctype_digit($raw)) $ids[] = (int)$raw;
@@ -42,7 +42,7 @@ if (empty($ids)) {
     exit;
 }
 
-// Dynamic delete
+   
 $placeholders = implode(',', array_fill(0, count($ids), '?'));
 $sql = "DELETE FROM cart_product WHERE cart_id = ? AND product_id IN ($placeholders)";
 $stmt = $conn->prepare($sql);

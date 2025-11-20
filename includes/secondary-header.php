@@ -1,5 +1,5 @@
 <?php
-// Default pic if no user is logged in
+   
 $profilePic = '/carriemart/assets/default.png';
 $isLoggedIn = false;
 
@@ -17,7 +17,7 @@ if (!empty($_SESSION['user_id'])) {
             <a href="/carriemart/index.php" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
                 <img src="/carriemart/assets/Logo.svg" alt="Carriemart logo" width="40" height="40" class="me-2">
             </a>
-            <!-- Updated form action to point to search.php -->
+               
             <form method="get" action="/carriemart/main/search.php" class="d-flex mb-0 me-2 me-lg-3 flex-grow-1" style="max-width:540px;">
                 <input type="text" class="form-control w-100" name="q" value="<?php echo isset($q) ? ($q) : ''; ?>" placeholder="Search products" >
                 <?php if (isset($categoryId) && $categoryId !== ''): ?>
@@ -48,11 +48,11 @@ if (!empty($_SESSION['user_id'])) {
                 <ul class="dropdown-menu text-small">                
                     <?php if ($isLoggedIn): ?>
                         <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
-                            <!-- Admin menu -->
+                               
                             <li><a class="dropdown-item" href="/carriemart/admin/index.php">Admin Panel</a></li>
                         
                         <?php else: ?>
-                            <!-- Customer menu -->
+                               
                             <li><a class="dropdown-item" href="/carriemart/user/profile/profile.php">Profile</a></li>
                             <li><a class="dropdown-item" href="/carriemart/user/cart/cart.php">CarrieCart</a></li>
                             <li><a class="dropdown-item" href="/carriemart/user/orders/orders.php">Orders</a></li>
