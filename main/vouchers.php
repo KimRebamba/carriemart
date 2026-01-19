@@ -163,7 +163,7 @@ include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/footer.php');
 ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="toast.js"></script>
+    <!-- <script src="toast.js"></script> -->
     <!-- IMPORTANT: FOR TOAST NOTIFICATION   
     <script>
       const toastBtn = document.getElementById('liveToastBtn');
@@ -189,6 +189,6 @@ include_once($_SERVER['DOCUMENT_ROOT'] . '/carriemart/includes/footer.php');
         if (toastTime) toastTime.textContent = 'Just now';
         if (toastBtn) toastBtn.click();
       }
-    </script>
+    </script> -->
 </body>
 </html>
