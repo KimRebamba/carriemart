@@ -11,6 +11,11 @@ A PHP/MySQL e‑commerce web application built for selling musical instruments a
 	<img src="assets/about.png" alt="CarrieMart About" width="420" />
 </p>
 
+<p>
+	<img src="https://img.shields.io/badge/PHP-8.2-blue?style=for-the-badge&logo=php" />
+    ![MySQL](https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white)
+</p>
+
 ---
 
 ## Demo
