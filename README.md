@@ -1,18 +1,15 @@
 <p align="center">
-	<img src="assets/Logo.svg" alt="CarrieMart Logo" width="120" />
+	<img src="assets/Logo.svg" alt="CarrieMart Logo" width="80" />
 </p>
+
+
+<h2 align="center">CarrieMart</h2>
+
+A PHP/MySQL e‑commerce web application built for selling musical instruments and related gear. It includes customer side-pages, shopping cart and checkout, as well as an admin side-pages for managing products, brands, categories, orders, employees, vouchers, and reports.
 
 <p align="center">
 	<img src="assets/about.png" alt="CarrieMart About" width="420" />
 </p>
-
-<h2 align="center">CarrieMart</h2>
-
-<p align="center">
-	A PHP/MySQL e‑commerce web app for musical instruments and pro audio gear.
-</p>
-
-CarrieMart is a PHP/MySQL e‑commerce web application built for selling musical instruments and related gear. It includes customer side-pages, shopping cart and checkout, as well as an admin side-pages for managing products, brands, categories, orders, employees, vouchers, and reports.
 
 ---
 
