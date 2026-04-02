@@ -1,6 +1,8 @@
-<h1> 🛒CarrieMart</h1>
+<h1 align="center"> 🛒CarrieMart</h1>
 
+<p align="center">
 A PHP/MySQL e‑commerce web application built for selling musical instruments and related gear. It includes customer side-pages, shopping cart and checkout, as well as an admin side-pages for managing products, brands, categories, orders, employees, vouchers, and reports.
+</p>
 
 <p align="center">
 	<img src="assets/about.png" alt="CarrieMart About" width="420" />
