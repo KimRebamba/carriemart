@@ -1,6 +1,6 @@
 ## CarrieMart
 
-CarrieMart is a PHP/MySQL e‑commerce web application built for selling musical instruments and related gear. It includes a full customer storefront, shopping cart and checkout, as well as an admin back office for managing products, brands, categories, orders, employees, vouchers, and reports.
+CarrieMart is a PHP/MySQL e‑commerce web application built for selling musical instruments and related gear. It includes customer side-pages, shopping cart and checkout, as well as an admin side-pages for managing products, brands, categories, orders, employees, vouchers, and reports.
 
 ---
 
@@ -34,7 +34,7 @@ Admin dashboard & management
 
 ## Features
 
-- Customer storefront with product browsing, filtering, and search
+- Customer side for product browsing, filtering, and search
 - Product detail pages with images, pricing, and ratings
 - Shopping cart, checkout flow, vouchers, and order history
 - Product reviews and returns management
@@ -51,22 +51,13 @@ Key folders in this repository:
 
 - root index: entry point and router ([index.php](index.php))
 - customer UI: main storefront pages ([main/](main))
-- customer area: login, register, profile, cart, orders, returns, reviews ([user/](user))
+- customer side: login, register, profile, cart, orders, returns, reviews ([user/](user))
 - admin panel: management pages for accounts, employees, products, orders, reports ([admin/](admin))
 - shared includes: DB config, headers, authentication helpers, mailer ([includes/](includes))
 - assets: static images, icons, and branding ([assets/](assets))
 - uploads: uploaded product, brand, category, and profile images ([uploads/](uploads))
 - sql: database schema and seeding scripts ([sql/](sql))
 - demo: animated GIFs used in this README ([demo/](demo))
-
----
-
-## Tech Stack
-
-- PHP 8+ (procedural style with mysqli prepared statements)
-- MySQL / MariaDB (InnoDB, utf8mb4)
-- Bootstrap 5 for styling and layout
-- PHPMailer for transactional email (configured with Mailtrap in development)
 
 ---
 
@@ -105,21 +96,9 @@ There is also a `order_transaction_details` view for simplified reporting across
 
 ---
 
-## Authentication & Roles
-
-- Customers can register, sign in, manage their profile, view orders, create returns, and leave reviews.
-- Admin users (role `admin` in `accounts`) can access the admin panel to manage catalog data, accounts, and reports.
-- Simple middleware files in [includes/](includes) (`admin-auth.php`, `user-auth.php`, `inactive-auth.php`) protect the relevant routes.
-
----
-
 ## Email
 
-Email sending is implemented via PHPMailer in [send-email.php](send-email.php) and configured using Mailtrap credentials defined in [includes/config.php](includes/config.php). This is intended for development and testing, not production delivery.
+Email sending is implemented via PHPMailer in [send-email.php](send-email.php) and configured using Mailtrap credentials defined in [includes/config.php](includes/config.php). This is intended for development and testing. I left the credentials blank for anyone wanting to try those themselves.
 
 ---
 
-## Notes
-
-- This project is intended as a learning and demo e‑commerce system rather than a production‑ready platform.
-- Be sure to remove development helpers (like `sql/seed_demo_data.php`) and change Mailtrap credentials before deploying publicly.
