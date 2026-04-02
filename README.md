@@ -12,7 +12,7 @@ A PHP/MySQL e‑commerce web application built for selling musical instruments a
 	<img src="https://img.shields.io/badge/PHP-8.2-777BB4?style=for-the-badge&logo=php&logoColor=white" />
 	<img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
 	<img src="https://img.shields.io/badge/Bootstrap-5-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white" />
-	<img src="https://img.shields.io/badge/Status-In%20Development-orange?style=for-the-badge" />
+	<img src="https://img.shields.io/badge/Status-Done-brightgreen?style=for-the-badge" />
 </p>
 
 ---
